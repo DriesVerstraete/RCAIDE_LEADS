@@ -26,6 +26,6 @@ RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 
-
-from .compute_structural_performance import compute_structural_performance
-from .compute_thermal_performance    import compute_thermal_performance
+from .append_liquid_hydrogen_fuel_tank_conditions import append_liquid_hydrogen_fuel_tank_conditions
+from .compute_structural_performance              import compute_structural_performance
+from .compute_thermal_performance                 import compute_thermal_performance
