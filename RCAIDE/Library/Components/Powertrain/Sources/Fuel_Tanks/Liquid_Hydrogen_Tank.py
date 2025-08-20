@@ -9,6 +9,8 @@
 # RCAIDE imports
 from .Non_Integral_Tank  import Non_Integral_Tank 
 from RCAIDE.Framework.Core import Units
+
+from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Non_Integral_Tank.compute_non_integral_tank_volume               import *
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.append_liquid_hydrogen_fuel_tank_conditions import append_liquid_hydrogen_fuel_tank_conditions
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_structural_performance              import compute_structural_performance
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_thermal_performance                 import compute_thermal_performance
@@ -159,3 +161,7 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
                 compute_structural_performance(self)
                 compute_thermal_performance(self)
         return
+    def compute_tank_properties(self, state, fuel_line):
+        
+        ## add methods from tank
+        return 
