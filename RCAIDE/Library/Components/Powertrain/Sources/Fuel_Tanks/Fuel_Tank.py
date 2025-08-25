@@ -99,5 +99,5 @@ class Fuel_Tank(Component):
         fuel_line : Component
             Connected fuel line component
         """
-        compute_fuel_tank_properties(self,state, fuel_line)  
+        #compute_fuel_tank_properties(self,state, fuel_line)  
         return

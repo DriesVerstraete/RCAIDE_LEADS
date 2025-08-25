@@ -109,3 +109,5 @@ def energy(segment):
                     conditions.fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].mass[:,0]   = fuel_tank_initials.mass[-1,0]
                 elif  vehicle.networks[network.tag].fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].fuel != None:
                     conditions.fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].mass[:,0]   = vehicle.networks[network.tag].fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].fuel.mass_properties.mass
+
+                    ### Add fuel_tank,append_segment_conditions for it to caryy forward
