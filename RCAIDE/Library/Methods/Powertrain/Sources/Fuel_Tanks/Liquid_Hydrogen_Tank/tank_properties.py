@@ -1,7 +1,9 @@
 import numpy as np
 from scipy.integrate import solve_ivp
+from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 from CoolProp.CoolProp import PropsSI
+from RCAIDE.Framework.Core import Units
 
 #from .tank_surface_area_calculator import compute_wetted_area
 
@@ -9,7 +11,24 @@ from CoolProp.CoolProp import PropsSI
 GRAV_CONST = 9.81
 cv_g = 14300.0      # J/kg-K (gas)
 cp_l = 9700.0       # J/kg-K (liquid)
-P = 2e5             # Pa, assume fixed for now
+
+
+# ==================== Wetted Area Computer ====================
+#****** l is the length of the cylinder
+def equation(h, r, l, v):
+    return l*(r**2 * np.arccos((r - h)/r) - (r - h)*np.sqrt(2*r*h - h**2)) + np.pi*(2*r-h)**2 * (r-(2*r-h)/3) - v
+
+def solve_h_fsolve(r, t, v, h_guess=0.5):
+    h_solution, = fsolve(equation, h_guess, args=(r, t, v))
+    return h_solution
+
+def compute_wetted_area(r,l,v):
+    h_sol = solve_h_fsolve(r, l, v, h_guess=0.2)
+    total_area = 2*np.pi*r*l + 4*np.pi*r**2
+    area_liquid = np.pi*r*(h_sol) + 2*l*r*np.arccos((r-h_sol)/r)
+    area_ullage = total_area-area_liquid
+    return area_liquid, area_ullage
+    
 
 
 # ==================== Heat transfer between Hydrogen and environment ====================
@@ -84,42 +103,82 @@ def Q_gas_to_int(T_g, T_int, A_int, L_int, rho_g, cp_g, mu_g, k_g,
 
 
 # ==================== Tank ODEs ====================
-def tank_odes(t, y,m_dot_g_out,m_dot_l_out): # Still need to bring in radius length of the tank 
+def tank_odes(t, y,m_dot_g_out,m_dot_l_out,results): # Still need to bring in radius length of the tank 
     m_g, m_l, T_g, T_l, V_g, V_l = y
-    
+   
+
+    # #Temperature of the interface assumes saturated hydrogen with same pressure as the ullage
+    P = PropsSI("P", "T", T_g, "D", m_g / V_g, "Hydrogen")
+
+
     # --- Interface saturation temperature ---
-    T_int = PropsSI("T", "P", P, "Q", 0, "Hydrogen")  # [K]
+    T_int = PropsSI("T", "P", P, "Q", 1, "Hydrogen")  # [K]
+    print(T_int)
 
     rho_l = PropsSI("D", "T", T_l, "Q", 0, "Hydrogen") # kg/m^3
     
     # --- Geometry placeholders ---
-    A_int = 10.0   # m2
-    L_int = 10   # m
+    A_int = 16.06
+    L_int = 1.542
+
+    # Liquid properties
     k_liq = PropsSI("L", "T", T_l, "Q", 0, "Hydrogen")   # thermal conductivity [W/m-K]
     mu_liq = PropsSI("V", "T", T_l, "Q", 0, "Hydrogen")  # viscosity [Pa·s]
     cp_liq = PropsSI("C", "T", T_l, "Q", 0, "Hydrogen")  # Cp [J/kg-K]
+    rho_l  = PropsSI("D", "T", T_l, "Q", 0, "Hydrogen")  # density [kg/m³]
 
-    # A_wet_liquid,A_wet_ullage = compute_wetted_area(r,l,V_g) # This should be volume of liquid 
+    # Gas (ullage vapor) properties
+    k_g   = PropsSI("L", "T", T_g, "Q", 1, "Hydrogen")   # thermal conductivity [W/m-K]
+    mu_g  = PropsSI("V", "T", T_g, "Q", 1, "Hydrogen")   # viscosity [Pa·s]
+    cp_g  = PropsSI("C", "T", T_g, "Q", 1, "Hydrogen")   # Cp [J/kg-K]
+    rho_g = PropsSI("D", "T", T_g, "Q", 1, "Hydrogen")   # density [kg/m³]
 
     # --- Heat fluxes interface exchange ---
-    Q_l_i = Q_liq_to_int(T_l, T_int, A_int, k_liq, L_int, 1.0, 0.25, cp_liq, mu_liq)
-    Q_g_i = Q_gas_to_int(T_g, T_int, A_int, k_liq, L_int, 1.0, 0.25, cp_liq, mu_liq)
-
+    Q_l_i = Q_liq_to_int(
+        T_l, T_int, A_int, L_int,
+        rho_l, cp_liq, mu_liq, k_liq
+    )
+    
+    Q_g_i = Q_gas_to_int(
+        T_g, T_int, A_int, L_int,
+        rho_g, cp_g, mu_g, k_g
+    )
     # # --- Heat fluxes environment exchange ---
     # Q_e_g = Q_env_to_hydrogen(A_wet_ullage, T_h, T_g, N_layers=30)
     # Q_e_l = Q_env_to_hydrogen(A_wet_liquid, T_h, T_l, N_layers=30)
 
     Q_e_g = 20
-    Q_e_l = 100
-    
+    Q_e_l = 25 
     # --- Enthalpies ---
     h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
     h_l = PropsSI("H", "T", T_int, "Q", 0, "Hydrogen")  # J/kg
     u_g = PropsSI("U", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
     u_l = PropsSI("U", "T", T_int, "Q", 0, "Hydrogen")  # J/kg
     
-    # --- Boil-off mass flow ---
+    # --- Natural Boil-off mass flow ---
     m_dot_bo = (Q_l_i + Q_g_i) / (h_g - h_l + 1e-9)
+
+    # ---Vent(-) or boiled (+) mass flow rate ---
+    m_dot_extra = m_g/(V_g*rho_l)*(m_dot_bo+m_dot_l_out) + m_dot_bo
+
+    if m_dot_extra >0:
+        m_dot_extra_boi = m_dot_extra
+        m_dot_vent      = 0
+    else:
+        m_dot_vent      = - m_dot_extra
+        m_dot_extra_boi = 0
+
+
+    m_dot_bo += m_dot_extra_boi
+    m_dot_g_out += m_dot_vent
+
+    results["t"].append(t)
+    results["m_dot_bo_natural"].append(m_dot_bo-m_dot_extra_boi)
+    results["m_dot_additional"].append(m_dot_extra_boi)
+    results["m_dot_total"].append(m_dot_bo)
+    results["m_dot_vent"].append(m_dot_vent)
+
+    results["Pressure"].append(P)
     
     # --- Mass balances ---
     dm_g = m_dot_bo - m_dot_g_out
@@ -129,41 +188,43 @@ def tank_odes(t, y,m_dot_g_out,m_dot_l_out): # Still need to bring in radius len
     
     # --- Energy balances ---
     dT_g = (-Q_g_i + Q_e_g - P*dV_g + dm_g*(h_g - u_g)) / (m_g*cv_g + 1e-9)
-    dT_l = (-Q_l_i + Q_e_l- P*(-dV_g) + dm_l*(h_l - u_l)) / (m_l*cp_l + 1e-9)
-    print(m_dot_bo)
+    dT_l = (-Q_l_i + Q_e_l- P*(dV_l) + dm_l*(h_l - u_l)) / (m_l*cp_l + 1e-9)
+
     return [dm_g, dm_l, dT_g, dT_l, dV_g, dV_l]
-
-
-
-
 
 # ==================== Main function ====================
 def main():
-    # Initial conditions
-    y0 = [100, 400, 25.0, 20.0, 5,15]  # m_g, m_l, T_g, T_l, V_g,V_l
+    # Initial Volume
+    V_l = 29.379/2
+    V_g = 1.6332/2
+
+    # Inital Temperature
+    T_l = 20
+    T_g = 22
+
+    # Inital Mass 
+    rho_l = PropsSI("D", "T", T_l, "Q", 0, "Hydrogen") # kg/m^3
+    rho_g = PropsSI("D", "T", T_g, "Q", 1, "Hydrogen") # kg/m^3
+
+    m_g = rho_g * V_g
+    m_l = rho_l* V_l
+
+
+    # ==================== User input flows ====================
+    m_dot_g_out = 0   # kg/s gas outflow
+    m_dot_l_out = 0.2    # kg/s liquid outflow
+
+    results = {"t": [], "m_dot_bo_natural": [],"m_dot_additional": [],"m_dot_total": [], "m_dot_vent": [],"Pressure": []}
+
+
+
+    y0 = [m_g, m_l, T_g, T_l , V_g, V_l]  # m_g, m_l, T_g, T_l, V_g,V_l
+
     t_span = (0, 3600)
     t_eval = np.linspace(*t_span, 500)
 
-    # ==================== User input flows ====================
-    m_dot_g_out = 0.01   # kg/s gas outflow
-    m_dot_l_out = 0.1    # kg/s liquid outflow
-
     # Solve ODEs
-    sol = solve_ivp(tank_odes, t_span, y0, t_eval=t_eval,args=(m_dot_g_out,m_dot_l_out))
-
-    # --- Derived quantities ---
-    T_ints = []
-    m_boils = []
-    Press = []
-    for m_g, m_l, T_g, T_l, V_g,V_L in sol.y.T:
-        P_now = m_g * 8.314/0.002016 * T_g / max(V_g,1e-9)  # ideal gas [Pa]
-        # T_int = PropsSI("T", "P", P_now, "Q", 0, "Hydrogen")
-        # h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")
-        # h_l = PropsSI("H", "T", T_int, "Q", 0, "Hydrogen")
-        # m_dot_bo = (Q_l_i + Q_g_i) / (h_g - h_l + 1e-9)
-        # T_ints.append(T_int)
-        # #m_boils.append(m_dot_bo)
-        # Press.append(P_now/1e5)  # bar
+    sol = solve_ivp(tank_odes, t_span, y0, t_eval=t_eval,args=(m_dot_g_out,m_dot_l_out,results))
 
     # --- Plots ---
     plt.figure()
@@ -173,14 +234,27 @@ def main():
     plt.xlabel("Time [s]"); plt.ylabel("Temperature [K]")
     plt.legend(); plt.grid(True)
 
-    # plt.figure()
-    # plt.plot(sol.t, m_boils, label="Boil-off rate")
-    # plt.xlabel("Time [s]"); plt.ylabel("m_dot_bo [kg/s]")
-    # plt.legend(); plt.grid(True)
+        # =============== Plotting ==================
+    plt.figure(figsize=(8,5))
+    plt.plot(results["t"], results["m_dot_bo_natural"], label=" Natural Boil-off rate $\\dot{m}_{natural_{boil}}$")
+    #plt.plot(results["t"], m_dot_l_out*np.ones_like(results["t"]), label="Fuel Flow rate $\\dot{m}_{fuel}$")
+    plt.plot(results["t"], results["m_dot_additional"], label=" Total Boil-off rate $\\dot{m}_{additional_{boil}}$")
+    plt.plot(results["t"], results["m_dot_total"], label=" Total Boil-off rate $\\dot{m}_{bo}$")
+    # plt.plot(results["t"], results["m_dot_vent"], label="Vent/Extra boil-off $\\dot{m}_{vent}$")
+    plt.axhline(0, color='k', linestyle='--', linewidth=0.8)
+    plt.xlabel("Time [s]")
+    plt.ylabel("Mass flow rate [kg/s]")
+    plt.title("Hydrogen Boil-off and Venting Rates vs Time")
+    plt.legend()
+    plt.grid(True)
+
 
     plt.figure()
-    #plt.plot(sol.t, Press, label="Tank Pressure")
+    pressure_bar = np.asarray(results["Pressure"], dtype=float) / Units["bar"]
+    plt.plot(results["t"], pressure_bar, label="Tank Pressure")
     plt.xlabel("Time [s]"); plt.ylabel("Pressure [bar]")
+    plt.title("Tank Pressure vs Time")
+    plt.ylim(0,5)
     plt.legend(); plt.grid(True)
 
     plt.figure()
@@ -190,6 +264,7 @@ def main():
     plt.legend(); plt.grid(True)
 
     plt.show()
+
 
     
 if __name__ == "__main__":

@@ -93,7 +93,7 @@ def compute_fuel_volume(vehicle, update_max_fuel=True):
                     pass
                 else:
                     # if no error getting the method, run it normally
-                    compute_fuel_volume(wings, fuselages)
+                    compute_fuel_volume(wings, fuselages) # This looks like a bug fix it 
 
                 vehicle.total_fuel_volume += fuel_tank.fuel_volume
                 vehicle.total_fuel_mass   += fuel_tank.mass_properties.fuel
