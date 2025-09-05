@@ -56,9 +56,29 @@ def append_fuel_tank_conditions(tank, segment, distributor):
         distributor_conditions = segment.state.conditions.energy.fuel_lines[distributor.tag]
         
     distributor_conditions.fuel_tanks[tank.tag]                           = Conditions()  
-    distributor_conditions.fuel_tanks[tank.tag].mass                      = 0 * ones_row(1)  
+    distributor_conditions.fuel_tanks[tank.tag].mass                      = 0 * ones_row(1) 
     distributor_conditions.fuel_tanks[tank.tag].mass_flow_rate            = 0 * ones_row(1)  
     distributor_conditions.fuel_tanks[tank.tag].surface_temperature       = 0 * ones_row(1) 
     distributor_conditions.fuel_tanks[tank.tag].secondary_fuel_flow_rate  = tank.secondary_fuel_flow_rate * ones_row(1) 
+    
+    # Residuals
+    segment.state.conditions.network_residuals[tank.tag]                 = 0 * ones_row(1) 
+    segment.state.conditions.network_initials[tank.tag]                  = tank.fuel.mass_properties.mass * ones_row(1)  
          
     return 
+
+
+def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor): 
+
+    if type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Electrical_Bus: 
+        distributor_conditions = segment.state.conditions.energy.busses[distributor.tag]
+    elif  type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line: 
+        distributor_conditions = segment.state.conditions.energy.fuel_lines[distributor.tag]
+
+    if segment.state.initials:  
+        if type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Electrical_Bus: 
+            distributor_initals = segment.state.initals.conditions.energy.busses[distributor.tag]
+        elif  type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line: 
+         distributor_initals = segment.state.initals.conditions.energy.fuel_lines[distributor.tag]
+            
+        distributor_conditions.fuel_tanks.mass[:,0]                     = distributor_initals.fuel_tank.mass[-1,0]

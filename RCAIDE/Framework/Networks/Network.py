@@ -7,13 +7,15 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # RCAIDE Imports
 import  RCAIDE 
-from RCAIDE.Framework.Mission.Common                      import Residuals 
+from RCAIDE.Framework.Core import Data
+from RCAIDE.Framework.Mission.Common                      import Residuals, Unknowns 
 from RCAIDE.Library.Mission.Common.Unpack_Unknowns.energy import unknowns
 from RCAIDE.Library.Methods.Powertrain.Systems.compute_avionics_power_draw                import compute_avionics_power_draw
 from RCAIDE.Library.Methods.Powertrain.Systems.compute_systems_power_draw                 import compute_systems_power_draw
 from RCAIDE.Library.Methods.Powertrain.Converters.Motor.compute_motor_performance         import *
 from RCAIDE.Library.Methods.Powertrain.Converters.Generator.compute_generator_performance import * 
 from RCAIDE.Library.Components import Component
+from scipy.optimize import least_squares
 
 # python imports 
 import numpy as np
@@ -80,7 +82,8 @@ class Network(Component):
         self.system_voltage               = None  
         
     # linking the different network components
-    def evaluate(network,state,center_of_gravity):
+    def evaluate_network(network,unknowns,state,center_of_gravity):
+
         """ Computes the performance of the network
         """  
         # unpack   
@@ -104,6 +107,7 @@ class Network(Component):
             for propulsor_group in fuel_line.assigned_propulsors:
                 stored_results_flag  = False
                 stored_propulsor_tag = None 
+                conditions.energy.fuel_lines[fuel_line.tag].fuel_flow_rate = 0
                 for propulsor_tag in propulsor_group:
                     propulsor            = network.propulsors[propulsor_tag]
                     if propulsor.active and fuel_line.active:   
@@ -223,7 +227,7 @@ class Network(Component):
                                 
                 # Determine mass flow from each tank
                 for tank in fuel_line.fuel_tanks:
-                    tank.compute_tank_properties(state,fuel_line)  
+                    tank.compute_tank_properties(state,fuel_line,unknowns)  
         
         # 3.2 Electric Sources 
         time               = state.conditions.frames.inertial.time[:,0] 
@@ -286,7 +290,7 @@ class Network(Component):
                 total_mdot   += conditions.energy.busses[bus.tag].fuel_flow_rate
                                
                 # Determine mass flow from each tank
-                for tank in bus.fuel_tanks:  
+                for tank in bus.fuel_tanks:   
                     tank.compute_tank_properties(state,bus) 
                                  
         if reverse_thrust ==  True:
@@ -295,9 +299,17 @@ class Network(Component):
         conditions.energy.thrust_force_vector  = total_thrust
         conditions.energy.power                = total_mech_power 
         conditions.energy.thrust_moment_vector = total_moment 
-        conditions.weights.vehicle_mass_rate   = total_mdot  
-    
-        return
+        conditions.weights.vehicle_mass_rate   = total_mdot   
+        
+        residual_keys = list(state.conditions.network_residuals.keys())
+        residual_keys.remove('tag')
+        netowrk_res = Data()
+        full_ures_vals = Data()
+        for res in residual_keys:
+            netowrk_res[res] = state.conditions.network_residuals[res]
+            full_ures_vals[res] = netowrk_res[res] 
+
+        return full_ures_vals.pack_array()
     
     def unpack_unknowns(self,segment):
         """Unpacks the unknowns set in the mission to be available for the mission.
@@ -389,6 +401,8 @@ class Network(Component):
             N/A
         """                   
         segment.state.residuals.network = Residuals()
+        segment.state.conditions.network_residuals         = Residuals()   # Fix late
+        segment.state.conditions.network_initials         = Unknowns()   # Fix later
         
         for network in segment.analyses.energy.vehicle.networks:
             for propulsor in network.propulsors: 
@@ -407,6 +421,7 @@ class Network(Component):
                         propulsor.append_propulsor_unknowns_and_residuals(segment)
                          
                 # Assign sub component results data structures  
+            
                 for fuel_tank in  fuel_line.fuel_tanks: 
                     fuel_tank.append_operating_conditions(segment,fuel_line) 
     
@@ -481,8 +496,22 @@ class Container(Component.Container):
             Source:
                 None 
         """ 
-        for net in self.values():             
-            net.evaluate(state,center_of_gravity)  
+        for net in self.values(): 
+            unknown_keys = list(state.conditions.network_initials.keys())
+            unknown_keys.remove('tag')      
+            full_unkn_vals = Data()
+            unknown_value  = Data()
+          
+            for unkn in unknown_keys:
+                unknown_value[unkn]  = state.conditions.network_initials[unkn]  
+                full_unkn_vals[unkn] = unknown_value[unkn] 
+
+            initial_values    = full_unkn_vals.pack_array()        
+
+            sol = least_squares(net.evaluate_network, initial_values, args=(state,center_of_gravity),xtol=1e-14) 
+            print(sol.x)
+            a = 0
+
         return   
 
 # ----------------------------------------------------------------------

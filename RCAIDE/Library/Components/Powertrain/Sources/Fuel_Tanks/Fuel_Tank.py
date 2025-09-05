@@ -10,7 +10,7 @@
 
 # RCAIDE imports 
 from RCAIDE.Library.Components          import Component
-from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks  import * 
+from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks  import compute_fuel_tank_properties,append_fuel_tank_conditions
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Fuel Tank
@@ -88,7 +88,7 @@ class Fuel_Tank(Component):
         return
     
 
-    def compute_tank_properties(self,state,fuel_line):  
+    def compute_tank_properties(self,state,fuel_line,unknowns):  
         """
         Append fuel tank operating conditions for a flight segment
         
@@ -99,5 +99,5 @@ class Fuel_Tank(Component):
         fuel_line : Component
             Connected fuel line component
         """
-        #compute_fuel_tank_properties(self,state, fuel_line)  
-        return
+        compute_fuel_tank_properties(self,state, fuel_line,unknowns)  
+        return 
