@@ -235,7 +235,7 @@ class Network(Component):
                                 
                 # Determine mass flow from each tank
                 for tank in fuel_line.fuel_tanks:
-                    tank.compute_tank_properties(state,fuel_line,unknowns)  
+                    tank.compute_tank_properties(state,fuel_line)  
         
         # 3.2 Electric Sources 
         time               = state.conditions.frames.inertial.time[:,0] 

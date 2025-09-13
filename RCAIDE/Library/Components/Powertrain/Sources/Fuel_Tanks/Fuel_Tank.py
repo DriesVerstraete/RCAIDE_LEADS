@@ -82,6 +82,20 @@ class Fuel_Tank(Component):
         append_fuel_tank_conditions(self,segment, fuel_line)  
         return
     
+    def append_residual_and_unkowns(self,segment,fuel_line):
+        """
+        Append fuel tank operating conditions for a flight segment
+        
+        Parameters
+        ----------
+        segment : Segment
+            Flight segment containing state conditions
+        fuel_line : Component
+            Connected fuel line component
+        """
+        append_fuel_tank_residual_and_unkowns(self,segment, fuel_line)  
+        return
+    
     def compute_tank_properties(self,state,fuel_line):
         compute_fuel_tank_properties(self,state,fuel_line)
         return
