@@ -5,8 +5,7 @@
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
-# ----------------------------------------------------------------------------------------------------------------------
-from ast import Raise
+# ---------------------------------------------------------------------------------------------------------------------- 
 import RCAIDE
 from RCAIDE.Library.Methods.Geometry.LOPA      import  compute_layout_of_passenger_accommodations 
 from RCAIDE.Library.Methods.Geometry.Planform  import  fuselage_planform, wing_planform, bwb_wing_planform , compute_fuel_volume 
@@ -163,7 +162,7 @@ def geometry(mission):
         # --------------------------------------------------------------------------------------------------------------------
         # Compute fuel volume  
         # --------------------------------------------------------------------------------------------------------------------
-        if settings.update_fuel_volume: 
-            compute_fuel_volume(vehicle, update_max_fuel=settings.update_fuel_volume) 
+        if settings.update_fuel_volume and i ==0: 
+            compute_fuel_volume(vehicle) 
                    
     return 
