@@ -3,7 +3,10 @@
 # 
 # Created:  Jul 2023, M. Clarke
 import  RCAIDE
+from RCAIDE.Framework.Core import Data
+
 import  numpy as np
+from scipy.optimize import least_squares
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Update Thrust
@@ -27,23 +30,22 @@ def network(segment):
 
     # unpack
     energy_model = segment.analyses.energy
+    
+
+
+    unknown_keys = list(segment.state.unknowns.network.keys()) 
+    full_unkn_vals = Data()
+    unknown_value  = Data()
+    
+    for unkn in unknown_keys:
+        unknown_value[unkn]  = segment.state.unknowns.network[unkn]  
+        full_unkn_vals[unkn] = unknown_value[unkn] 
+
+    initial_values    = full_unkn_vals.pack_array()        
+
+    sol = least_squares(energy_model.evaluate, initial_values, args=(segment.state),xtol=1e-14) 
+    print(sol.x)
+    a = 0
 
     # evaluate
-    energy_model.evaluate(segment.state)    
-
-    # pack conditions
-    conditions = segment.state.conditions
-    conditions.frames.body.thrust_force_vector       = conditions.energy.thrust_force_vector
-    conditions.frames.body.thrust_moment_vector      = conditions.energy.thrust_moment_vector 
-    
-    if type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude or\
-        type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_AVL_Trimmed or \
-         type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_No_Propulsion or\
-          type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle:
-        pass
-    else: 
-        I = segment.state.numerics.time.integrate         
-        conditions.energy.fuel_consumption        = np.dot(I,conditions.weights.vehicle_mass_rate)
-        conditions.energy.cumulative_fuel_consumption =  conditions.energy.fuel_consumption
-        if segment.state.initials:  
-            conditions.energy.cumulative_fuel_consumption += segment.state.initials.conditions.energy.cumulative_fuel_consumption[-1]
+    energy_model.evaluate(segment.state)

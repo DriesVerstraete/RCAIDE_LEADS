@@ -15,7 +15,6 @@ from RCAIDE.Library.Methods.Powertrain.Systems.compute_systems_power_draw       
 from RCAIDE.Library.Methods.Powertrain.Converters.Motor.compute_motor_performance         import *
 from RCAIDE.Library.Methods.Powertrain.Converters.Generator.compute_generator_performance import * 
 from RCAIDE.Library.Components import Component
-from scipy.optimize import least_squares
 
 # python imports 
 import numpy as np
@@ -495,7 +494,7 @@ class Network(Component):
 class Container(Component.Container):
     """ The Network container class 
     """
-    def evaluate(self,state,center_of_gravity):
+    def evaluate(self,unknowns,state,center_of_gravity):
         """ This is used to evaluate the thrust and moments produced by the network.
 
             Assumptions:  
@@ -505,22 +504,9 @@ class Container(Component.Container):
                 None 
         """ 
         for net in self.values(): 
-            unknown_keys = list(state.conditions.network_initials.keys())
-            unknown_keys.remove('tag')      
-            full_unkn_vals = Data()
-            unknown_value  = Data()
-          
-            for unkn in unknown_keys:
-                unknown_value[unkn]  = state.conditions.network_initials[unkn]  
-                full_unkn_vals[unkn] = unknown_value[unkn] 
-
-            initial_values    = full_unkn_vals.pack_array()        
-
-            sol = least_squares(net.evaluate_network, initial_values, args=(state,center_of_gravity),xtol=1e-14) 
-            print(sol.x)
-            a = 0
-
+            net.evaluate(state,center_of_gravity)  
         return   
+
 
 # ----------------------------------------------------------------------
 #  Handle Linking

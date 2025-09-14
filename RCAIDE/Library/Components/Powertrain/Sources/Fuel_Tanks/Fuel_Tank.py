@@ -82,7 +82,7 @@ class Fuel_Tank(Component):
         append_fuel_tank_conditions(self,segment, fuel_line)  
         return
     
-    def append_residual_and_unkowns(self,segment,fuel_line):
+    def append_residual_and_unknowns(self,segment,fuel_line):
         """
         Append fuel tank operating conditions for a flight segment
         
@@ -93,7 +93,7 @@ class Fuel_Tank(Component):
         fuel_line : Component
             Connected fuel line component
         """
-        append_fuel_tank_residual_and_unkowns(self,segment, fuel_line)  
+        append_fuel_tank_residual_and_unknowns(self,segment, fuel_line)  
         return
     
     def compute_tank_properties(self,state,fuel_line):

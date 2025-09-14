@@ -25,12 +25,6 @@ def thrust(segment):
                     
     """ 
 
-    # unpack
-    energy_model = segment.analyses.energy
-
-    # evaluate
-    energy_model.evaluate(segment.state)    
-
     # pack conditions
     conditions = segment.state.conditions
     conditions.frames.body.thrust_force_vector       = conditions.energy.thrust_force_vector
