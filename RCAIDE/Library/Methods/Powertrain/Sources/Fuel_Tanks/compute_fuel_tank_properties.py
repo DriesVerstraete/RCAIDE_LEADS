@@ -8,6 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports
 import RCAIDE
+from RCAIDE.Library.Mission.Common.Unpack_Unknowns.energy import unknowns
 import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
@@ -45,17 +46,17 @@ def compute_fuel_tank_properties(tank,state,distributor):
          
     #     tank_conditions.boil_off_flow_rate =  m_dot_boil_off 
     
-                    
+    mass_unknowns = state.unknowns.network.fuel_lines[distributor.tag][tank.tag].mass[:,0]
     t0  = state.numerics.time.control_points[0][0]
     tf = state.numerics.time.control_points[-1][0]
     D = state.numerics.dimensionless.differentiate
     D_t = D/(tf - t0) 
 
-    dm_l = distributor_conditions.fuel_flow_rate
-    R = D_t @ unknowns - dm_l[:,0]
-    R[0] = unknowns[0] - tank_conditions.mass[0]
+    dm_l = distributor_conditions.fuel_mass_flow_rate
+    R = D_t @ mass_unknowns - dm_l[:,0]
+    R[0] = mass_unknowns[0] - tank_conditions.mass[0]
 
-    state.conditions.network_residuals[tank.tag] = R
-    #tank_conditions.mass = unknowns
-    
+    state.residuals.network.fuel_lines[distributor.tag][tank.tag].mass = R
+    tank_conditions.mass[0:,0] = mass_unknowns[0:]
+
     return 

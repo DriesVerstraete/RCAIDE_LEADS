@@ -9,6 +9,7 @@
 # RCAIDE imports
 from RCAIDE.Framework.Core     import Data
 from RCAIDE.Framework.Analyses import Analysis 
+import numpy as np
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  ANALYSIS
@@ -32,7 +33,7 @@ class Energy(Analysis):
         self.tag      = 'energy'
         self.vehicle  = Data()
         
-    def evaluate(self,state): 
+    def evaluate(self,unknowns,state): 
         """Evaluate the thrust produced by the energy network.
     
         Assumptions:
@@ -47,9 +48,23 @@ class Energy(Analysis):
         Returns:
             results : results of the thrust evaluation method. 
         """ 
-            
+        # assumes only one network exists
         networks = self.vehicle.networks
         cg       = self.vehicle.mass_properties.center_of_gravity
+        
+        # Pack the unknowns to 
+        if isinstance(unknowns,np.ndarray):
+            state.unknowns.network.unpack_array(unknowns)
+
         networks.evaluate(state,cg)
-        return  
+
+        # Unpack Residuals
+        residual_keys = list(state.residuals.network.keys())
+        netowrk_res = Data()
+        full_ures_vals = Data()
+        for res in residual_keys:
+            netowrk_res[res] = state.residuals.network[res]
+            full_ures_vals[res] = netowrk_res[res] 
+
+        return full_ures_vals.pack_array()
     

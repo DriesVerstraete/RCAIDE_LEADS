@@ -81,7 +81,7 @@ class Network(Component):
         self.system_voltage               = None  
         
     # linking the different network components
-    def evaluate_network(network,unknowns,state,center_of_gravity):
+    def evaluate(network,state,center_of_gravity):
 
         """ Computes the performance of the network
         """  
@@ -103,6 +103,7 @@ class Network(Component):
         # ----------------------------------------------------------
         # 1.1 Fuel Propulsors  
         for fuel_line in fuel_lines: 
+            conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate = 0
             for propulsor_group in fuel_line.assigned_propulsors:
                 stored_results_flag  = False
                 stored_propulsor_tag = None 
@@ -308,15 +309,7 @@ class Network(Component):
         conditions.energy.thrust_moment_vector = total_moment 
         conditions.weights.vehicle_mass_rate   = total_mdot   
         
-        residual_keys = list(state.conditions.network_residuals.keys())
-        residual_keys.remove('tag')
-        netowrk_res = Data()
-        full_ures_vals = Data()
-        for res in residual_keys:
-            netowrk_res[res] = state.conditions.network_residuals[res]
-            full_ures_vals[res] = netowrk_res[res] 
-
-        return full_ures_vals.pack_array()
+        return
     
     def unpack_unknowns(self,segment):
         """Unpacks the unknowns set in the mission to be available for the mission.
@@ -353,7 +346,7 @@ class Network(Component):
                         propulsor.unpack_propulsor_unknowns(segment) 
         return    
      
-    def residuals(self,segment):
+    def residuals(self,segment): # these arenotusedin the mission solver per  seand needto berenamed
         """ This packs the residuals to be sent to the mission solver.
     
            Assumptions:
@@ -494,7 +487,7 @@ class Network(Component):
 class Container(Component.Container):
     """ The Network container class 
     """
-    def evaluate(self,unknowns,state,center_of_gravity):
+    def evaluate(self,state,center_of_gravity):
         """ This is used to evaluate the thrust and moments produced by the network.
 
             Assumptions:  

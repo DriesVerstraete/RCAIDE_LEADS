@@ -43,7 +43,7 @@ def network(segment):
 
     initial_values    = full_unkn_vals.pack_array()        
 
-    sol = least_squares(energy_model.evaluate, initial_values, args=(segment.state),xtol=1e-14) 
+    sol = least_squares(energy_model.evaluate, initial_values, args=([segment.state]),xtol=1e-14) 
     print(sol.x)
     a = 0
 
