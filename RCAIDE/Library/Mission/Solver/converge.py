@@ -91,10 +91,10 @@ def converge(segment):
     else: 
         raise Exception('undefined mission solver type')        
         
-    if mission_converge == False:
+    if mission_converge == False or segment.state.network_numerics.solver.converged is False:
         print("Segment did not converge. Segment Tag: " + segment.tag)
         print("Error Message:\n" + error_message)
-        segment.state.numerics.solver.converged = False
+        segment.state.numerics.solver.converged = False 
         segment.converged = False
     else:
         segment.state.numerics.solver.converged = True

@@ -232,7 +232,9 @@ class Network(Component):
     
                 # Update total mass flow of system   
                 total_mdot  += conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate
-                                
+
+                #Ratio if none then compute
+                #                
                 # Determine mass flow from each tank
                 for tank in fuel_line.fuel_tanks:
                     tank.compute_tank_properties(state,fuel_line)  
@@ -298,8 +300,9 @@ class Network(Component):
                 total_mdot   += conditions.energy.busses[bus.tag].fuel_mass_flow_rate
                                
                 # Determine mass flow from each tank
-                for tank in bus.fuel_tanks:   
-                    tank.compute_tank_properties(state,bus) 
+
+                # for tank in bus.fuel_tanks:   
+                #     tank.compute_tank_properties(state,bus) 
                                  
         if reverse_thrust ==  True:
             total_thrust =  total_thrust * -1    

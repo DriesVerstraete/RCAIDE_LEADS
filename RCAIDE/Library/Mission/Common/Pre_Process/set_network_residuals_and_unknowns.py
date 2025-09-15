@@ -29,4 +29,3 @@ def set_network_residuals_and_unknowns(mission):
                 for fuel_tank in fuel_line.fuel_tanks:
                     segment.state.number_of_network_unknowns  += 1 
                     fuel_tank.append_residual_and_unknowns(segment,fuel_line)
-                    a=0

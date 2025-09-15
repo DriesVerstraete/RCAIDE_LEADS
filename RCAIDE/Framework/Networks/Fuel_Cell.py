@@ -39,3 +39,4 @@ class Fuel_Cell(Network):
         """         
 
         self.tag                          = 'fuel_cell' 
+        # self.fuel_line = 

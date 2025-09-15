@@ -6,6 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
+from pyclbr import Class
 from RCAIDE.Framework.Core import Data
 from .Conditions import Conditions 
 from RCAIDE.Library.Methods.Utilities.Chebyshev  import chebyshev_data 
@@ -14,7 +15,6 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  Numerics
 # ----------------------------------------------------------------------------------------------------------------------
-
 class Numerics(Conditions):
     """ Creates the data structure for the numerical solving of a mission.
     
@@ -70,4 +70,37 @@ class Numerics(Conditions):
         
         
         
+class Network_Numerics(Numerics):
+    """ Creates the data structure for the numerical solving of a mission.
+    
+        Assumptions:
+        None
         
+        Source:
+        None
+    """
+    
+    def __defaults__(self):
+        """This sets the default values.
+    
+            Assumptions:
+            None
+    
+            Source:
+            N/A
+    
+            Inputs:
+            None
+    
+            Outputs:
+            None
+    
+            Properties Used:
+            None
+        """           
+        self.tag                              = 'network_numerics'
+        self.solver.type                      = "least_squares"
+        self.solver.method                    = "trf"    
+        self.solver.lower_bounds              = None
+        self.solver.upper_bounds              = None
+        self.solver.print_output              = False

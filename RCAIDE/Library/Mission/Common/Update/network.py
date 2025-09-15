@@ -31,8 +31,6 @@ def network(segment):
     # unpack
     energy_model = segment.analyses.energy
     
-
-
     unknown_keys = list(segment.state.unknowns.network.keys()) 
     full_unkn_vals = Data()
     unknown_value  = Data()
@@ -41,11 +39,14 @@ def network(segment):
         unknown_value[unkn]  = segment.state.unknowns.network[unkn]  
         full_unkn_vals[unkn] = unknown_value[unkn] 
 
-    initial_values    = full_unkn_vals.pack_array()        
-
-    sol = least_squares(energy_model.evaluate, initial_values, args=([segment.state]),xtol=1e-14) 
-    print(sol.x)
-    a = 0
-
-    # evaluate
-    energy_model.evaluate(segment.state)
+    if segment.state.network_numerics.solver.type  == 'least_squares':       
+        result = least_squares(energy_model.evaluate, 
+                     full_unkn_vals.pack_array(),
+                     args=([segment.state]),
+                     method= segment.state.network_numerics.solver.method,
+                     verbose = 2 if segment.state.network_numerics.solver.print_output is  True else 0,
+                     xtol=segment.state.network_numerics.solver.tolerance_solution,) 
+        
+        segment.state.network_numerics.solver.converged = result.success
+        if result.success  is False:
+            print(result.status)

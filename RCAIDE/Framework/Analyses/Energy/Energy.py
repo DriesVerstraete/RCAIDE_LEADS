@@ -52,7 +52,7 @@ class Energy(Analysis):
         networks = self.vehicle.networks
         cg       = self.vehicle.mass_properties.center_of_gravity
         
-        # Pack the unknowns to 
+        # Pack the unknowns to pass through the network
         if isinstance(unknowns,np.ndarray):
             state.unknowns.network.unpack_array(unknowns)
 
@@ -66,5 +66,5 @@ class Energy(Analysis):
             netowrk_res[res] = state.residuals.network[res]
             full_ures_vals[res] = netowrk_res[res] 
 
-        return full_ures_vals.pack_array()
+        return  full_ures_vals.pack_array()
     
