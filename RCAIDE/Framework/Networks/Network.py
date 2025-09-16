@@ -105,6 +105,7 @@ class Network(Component):
         # 1.1 Fuel Propulsors  
         for fuel_line in fuel_lines: 
             conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate = 0
+            conditions.energy.cumulative_fuel_consumption[1:,0] = 0
             for propulsor_group in fuel_line.assigned_propulsors:
                 stored_results_flag  = False
                 stored_propulsor_tag = None 
@@ -239,7 +240,8 @@ class Network(Component):
                 # Determine mass flow from each tank
                 for tank in fuel_line.fuel_tanks:
                     tank.compute_tank_properties(state,fuel_line,network_tag)  
-        
+                    state.conditions.energy.cumulative_fuel_consumption[1:,0] += np.add.accumulate(-np.diff(state.conditions.energy.fuel_lines.fuel_line.fuel_tanks.fuel_tank.mass[:,0]))
+                    
         # 3.2 Electric Sources 
         time               = state.conditions.frames.inertial.time[:,0] 
         delta_t            = np.diff(time) 

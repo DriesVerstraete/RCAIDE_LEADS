@@ -31,7 +31,8 @@ def compute_fuel_tank_properties(tank,state,distributor,network_tag):
     D = state.numerics.dimensionless.differentiate
     D_t = D/(tf - t0) 
 
-    dm_l = distributor_conditions.fuel_mass_flow_rate
+    distributor_conditions.fuel_tanks.fuel_tank.mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * tank.flow_split_ratio
+    dm_l = -distributor_conditions.fuel_tanks.fuel_tank.mass_flow_rate 
     R = D_t @ mass_unknowns - dm_l[:,0]
     R[0] = mass_unknowns[0] - tank_conditions.mass[0][0]
 
