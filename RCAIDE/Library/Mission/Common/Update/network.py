@@ -45,7 +45,7 @@ def network(segment):
                         full_unkn_vals.pack_array(),
                         args=(segment.state,network),
                         method= segment.state.network_numerics.solver.method,
-                        verbose = 2 if segment.state.network_numerics.solver.print_output is  True else 0,
+                        verbose = 2 if segment.state.network_numerics.solver.print_output is True else 0,
                         xtol=segment.state.network_numerics.solver.tolerance_solution,) 
             
             segment.state.network_numerics.solver.converged = result.success

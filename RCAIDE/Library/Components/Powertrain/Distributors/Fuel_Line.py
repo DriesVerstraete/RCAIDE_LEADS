@@ -80,17 +80,17 @@ class Fuel_Line(Component):
         return
 
         
-    def append_segment_conditions(self, segment):
-        """
-        Append segment-specific conditions to the bus
+    # def append_segment_conditions(self, segment):
+    #     """
+    #     Append segment-specific conditions to the bus
         
-        Parameters
-        ----------
-        conditions : Data
-            Container for segment conditions
-        segment : Segment
-            Flight segment data
-        """
-        append_fuel_line_segment_conditions(self, segment)
-        return    
+    #     Parameters
+    #     ----------
+    #     conditions : Data
+    #         Container for segment conditions
+    #     segment : Segment
+    #         Flight segment data
+    #     """
+    #     append_fuel_line_segment_conditions(self, segment)
+    #     return    
         

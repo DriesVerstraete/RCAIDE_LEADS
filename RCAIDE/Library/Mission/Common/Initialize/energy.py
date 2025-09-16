@@ -101,7 +101,7 @@ def energy(segment):
                     
         # if network has fuel lines             
         for fuel_line in  network.fuel_lines:
-            fuel_line.append_segment_conditions(segment)
+            #fuel_line.append_segment_conditions(segment)
             for fuel_tank in fuel_line.fuel_tanks:
                 if segment.state.initials:
                     fuel_line_initials = segment.state.initials.conditions.energy.fuel_lines[fuel_line.tag]

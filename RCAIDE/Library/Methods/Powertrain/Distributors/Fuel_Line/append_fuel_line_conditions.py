@@ -60,44 +60,49 @@ def append_fuel_line_conditions(fuel_line,segment,network):
     segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_tanks                          = Conditions() 
     
     manual_ratio = sum(t.flow_split_ratio or 0 for t in fuel_line.fuel_tanks)
-    auto_tanks = [t for t in fuel_line.fuel_tanks if t.flow_split_ratio is None]
-    total_auto_mass = sum(t.fuel.mass_properties.mass  for t in auto_tanks)
+    auto_tanks   = [t for t in fuel_line.fuel_tanks if t.flow_split_ratio is None]
+    total_auto_mass = sum(t.fuel.mass_properties.mass for t in auto_tanks)
     remaining_ratio = max(0.0, 1.0 - manual_ratio)
 
     for t in auto_tanks:
-        t.flow_split_ratio = (t.fuel.mass_properties.mass  / total_auto_mass) * remaining_ratio if total_auto_mass else remaining_ratio / len(auto_tanks)
+        t.flow_split_ratio = (t.fuel.mass_properties.mass / total_auto_mass) * remaining_ratio if total_auto_mass else remaining_ratio / len(auto_tanks)
+
+    # Check: if all tanks are manual, ratios must sum to ~1
+    if not auto_tanks:
+        if manual_ratio!=1.0: 
+            raise ValueError(f"Manual flow_split_ratio values sum to {manual_ratio:.3f}, must equal 1.0")
+
     
-    # Add Conditions told  residuals and unknowns
-    
+    # Add Conditions for residuals and unknowns
     segment.state.unknowns[network.tag].fuel_lines[fuel_line.tag] = Conditions()
     segment.state.residuals[network.tag].fuel_lines[fuel_line.tag] = Conditions()
 
     return
 
+# This function is not necessary
+# def append_fuel_line_segment_conditions(fuel_line,segment):
+#     """
+#     Sets the initial fuel line properties at the start of each segment based on the last point from the previous segment.
+    
+#     Parameters
+#     ----------
+#     fuel_line : Fuel Line 
+#         The fuel line component for which conditions are being initialized.
+#     conditions : dict
+#         Dictionary containing conditions from the previous segment.
+#     segment : Segment
+#         The current mission segment in which the bus is operating.
+    
+#     Returns
+#     -------
+#     None 
+    
+#     This ensures continuity of energy states between mission segments. 
+    
+#     See Also
+#     --------
+#     RCAIDE.Library.Methods.Powertrain.Distributors.Fuel_Line.append_fuel_line_conditions 
+#     """     
+#     segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate[:,0]    = 0  #?????????????????????
 
-def append_fuel_line_segment_conditions(fuel_line,segment):
-    """
-    Sets the initial fuel line properties at the start of each segment based on the last point from the previous segment.
-    
-    Parameters
-    ----------
-    fuel_line : Fuel Line 
-        The fuel line component for which conditions are being initialized.
-    conditions : dict
-        Dictionary containing conditions from the previous segment.
-    segment : Segment
-        The current mission segment in which the bus is operating.
-    
-    Returns
-    -------
-    None 
-    
-    This ensures continuity of energy states between mission segments. 
-    
-    See Also
-    --------
-    RCAIDE.Library.Methods.Powertrain.Distributors.Fuel_Line.append_fuel_line_conditions 
-    """     
-    segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate[:,0]    = 0  #?????????????????????
-
-    return
+#     return
