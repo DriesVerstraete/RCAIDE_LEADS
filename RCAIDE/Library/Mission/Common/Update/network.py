@@ -3,8 +3,10 @@
 # 
 # Created:  Sep 2025, S Shekar
 
+from re import S
 from RCAIDE.Framework.Core import Data
 
+from RCAIDE.Framework.Mission.Common import Conditions
 import  numpy as np
 from scipy.optimize import least_squares
 
@@ -39,7 +41,12 @@ def network(segment):
         for unkn in unknown_keys:
             unknown_value[unkn]  = segment.state.unknowns[network.tag][unkn]  
             full_unkn_vals[unkn] = unknown_value[unkn] 
-
+        
+        # try:
+        #     network_unknowns = segment.state.network_initials[network.tag]
+        # except:
+        #     network_unknowns =  full_unkn_vals.pack_array()
+            
         if segment.state.network_numerics.solver.type  == 'least_squares':       
             result = least_squares(energy_model.evaluate, 
                         full_unkn_vals.pack_array(),
@@ -48,6 +55,10 @@ def network(segment):
                         verbose = 2 if segment.state.network_numerics.solver.print_output is True else 0,
                         xtol=segment.state.network_numerics.solver.tolerance_solution,) 
             
+            # segment.state.network_initials = Data()
+            # segment.state.network_initials[network.tag] =Data()
+            # segment.state.network_initials[network.tag] = result.x
             segment.state.network_numerics.solver.converged = result.success
+
             if result.success  is False:
                 print(result.status)
