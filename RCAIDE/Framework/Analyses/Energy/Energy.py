@@ -33,7 +33,7 @@ class Energy(Analysis):
         self.tag      = 'energy'
         self.vehicle  = Data()
         
-    def evaluate(self,unknowns,state): 
+    def evaluate(self,unknowns,state,network): 
         """Evaluate the thrust produced by the energy network.
     
         Assumptions:
@@ -49,14 +49,14 @@ class Energy(Analysis):
             results : results of the thrust evaluation method. 
         """ 
         # assumes only one network exists
-        networks = self.vehicle.networks
+    
         cg       = self.vehicle.mass_properties.center_of_gravity
         
         # Pack the unknowns to pass through the network
         if isinstance(unknowns,np.ndarray):
-            state.unknowns.network.unpack_array(unknowns)
+            state.unknowns[network.tag].unpack_array(unknowns)
 
-        networks.evaluate(state,cg)
+        network.evaluate(state,cg)
 
         # Unpack Residuals
         residual_keys = list(state.residuals.network.keys())

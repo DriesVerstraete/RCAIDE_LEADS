@@ -10,7 +10,7 @@ from RCAIDE.Framework.Mission.Common     import   Conditions
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHODS
 # ---------------------------------------------------------------------------------------------------------------------- 
-def append_fuel_line_conditions(fuel_line,segment): 
+def append_fuel_line_conditions(fuel_line,segment,network): 
     """
     Appends conditions for the fuel line to the segment's energy conditions dictionary.
 
@@ -58,6 +58,19 @@ def append_fuel_line_conditions(fuel_line,segment):
     segment.state.conditions.energy.fuel_lines[fuel_line.tag].energy                              = 0 * ones_row(1)  
     segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate                 = 0 * ones_row(1)  
     segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_tanks                          = Conditions() 
+    
+    manual_ratio = sum(t.flow_split_ratio or 0 for t in fuel_line.fuel_tanks)
+    auto_tanks = [t for t in fuel_line.fuel_tanks if t.flow_split_ratio is None]
+    total_auto_mass = sum(t.fuel.mass_properties.mass  for t in auto_tanks)
+    remaining_ratio = max(0.0, 1.0 - manual_ratio)
+
+    for t in auto_tanks:
+        t.flow_split_ratio = (t.fuel.mass_properties.mass  / total_auto_mass) * remaining_ratio if total_auto_mass else remaining_ratio / len(auto_tanks)
+    
+    # Add Conditions told  residuals and unknowns
+    
+    segment.state.unknowns[network.tag].fuel_lines[fuel_line.tag] = Conditions()
+    segment.state.residuals[network.tag].fuel_lines[fuel_line.tag] = Conditions()
 
     return
 
@@ -85,5 +98,6 @@ def append_fuel_line_segment_conditions(fuel_line,segment):
     --------
     RCAIDE.Library.Methods.Powertrain.Distributors.Fuel_Line.append_fuel_line_conditions 
     """     
-    segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate[:,0]    = 0
+    segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate[:,0]    = 0  #?????????????????????
+
     return

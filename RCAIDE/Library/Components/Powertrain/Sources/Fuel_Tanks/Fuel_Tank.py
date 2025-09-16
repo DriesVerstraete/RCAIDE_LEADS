@@ -58,7 +58,7 @@ class Fuel_Tank(Component):
         self.tag                                   = 'fuel_tank'  
         self.fuel                                  = None
         self.secondary_fuel_flow_rate              = 0.0
-        self.fuel_selector_ratio                   = 1.0    
+        self.flow_split_ratio                      = None
         self.wall_clearance                        = 0.0
         self.wall_thickness                        = 0.0
         self.symmetric                             = True
@@ -69,7 +69,7 @@ class Fuel_Tank(Component):
         self.inner_diameter                        = 0.0
         self.outer_diameter                        = 0.0
  
-    def append_operating_conditions(self,segment,fuel_line):  
+    def append_operating_conditions(self,segment,fuel_line,network):  
         """
         Append fuel tank operating conditions for a flight segment
         
@@ -81,22 +81,9 @@ class Fuel_Tank(Component):
             Connected fuel line component
         """
         append_fuel_tank_conditions(self,segment, fuel_line)  
+        append_fuel_tank_residual_and_unknowns(self,segment, fuel_line,network)  
         return
     
-    def append_residual_and_unknowns(self,segment,fuel_line):
-        """
-        Append fuel tank operating conditions for a flight segment
-        
-        Parameters
-        ----------
-        segment : Segment
-            Flight segment containing state conditions
-        fuel_line : Component
-            Connected fuel line component
-        """
-        append_fuel_tank_residual_and_unknowns(self,segment, fuel_line)  
-        return
-    
-    def compute_tank_properties(self,state,fuel_line):
-        compute_fuel_tank_properties(self,state,fuel_line)
+    def compute_tank_properties(self,state,fuel_line,network_tag):
+        compute_fuel_tank_properties(self,state,fuel_line,network_tag)
         return

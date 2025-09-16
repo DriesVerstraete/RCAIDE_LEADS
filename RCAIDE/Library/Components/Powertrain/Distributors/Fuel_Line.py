@@ -67,7 +67,7 @@ class Fuel_Line(Component):
         self.efficiency                    = 1.0
         
 
-    def append_operating_conditions(self, segment):
+    def append_operating_conditions(self, segment,network):
         """
         Append operating conditions for a flight segment
         
@@ -76,7 +76,7 @@ class Fuel_Line(Component):
         segment : Segment
             Flight segment containing operating conditions
         """
-        append_fuel_line_conditions(self, segment)
+        append_fuel_line_conditions(self, segment,network)
         return
 
         

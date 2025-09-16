@@ -86,6 +86,7 @@ class Network(Component):
         """ Computes the performance of the network
         """  
         # unpack   
+        network_tag          = network.tag
         conditions           = state.conditions 
         busses               = network.busses 
         fuel_lines           = network.fuel_lines 
@@ -237,7 +238,7 @@ class Network(Component):
                 #                
                 # Determine mass flow from each tank
                 for tank in fuel_line.fuel_tanks:
-                    tank.compute_tank_properties(state,fuel_line)  
+                    tank.compute_tank_properties(state,fuel_line,network_tag)  
         
         # 3.2 Electric Sources 
         time               = state.conditions.frames.inertial.time[:,0] 
@@ -415,7 +416,7 @@ class Network(Component):
                 converter.append_operating_conditions(segment,segment.state.conditions.energy)                 
     
             for fuel_line_i, fuel_line in enumerate(network.fuel_lines):
-                fuel_line.append_operating_conditions(segment)              
+            #     fuel_line.append_operating_conditions(segment)              
                   
                 # Assign network-specific  residuals, unknowns and results data structures 
                 if fuel_line.active:
@@ -425,8 +426,8 @@ class Network(Component):
                          
                 # Assign sub component results data structures  
             
-                for fuel_tank in  fuel_line.fuel_tanks: 
-                    fuel_tank.append_operating_conditions(segment,fuel_line) 
+                # for fuel_tank in  fuel_line.fuel_tanks: 
+                #     fuel_tank.append_operating_conditions(segment,fuel_line) 
     
             # ------------------------------------------------------------------------------------------------------            
             # Create bus results data structure  
@@ -455,8 +456,8 @@ class Network(Component):
                     if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
                         bus_item.append_operating_conditions(segment,bus)
          
-                for fuel_tank in  bus.fuel_tanks: 
-                    fuel_tank.append_operating_conditions(segment,bus)
+                # for fuel_tank in  bus.fuel_tanks: 
+                #     fuel_tank.append_operating_conditions(segment,bus)
                                                     
     
             for coolant_line_i, coolant_line in enumerate(network.coolant_lines):  
@@ -499,9 +500,9 @@ class Container(Component.Container):
             Source:
                 None 
         """ 
-        for net in self.values(): 
-            net.evaluate(state,center_of_gravity)  
-        return   
+      
+        self.evaluate(state,center_of_gravity)  
+      
 
 
 # ----------------------------------------------------------------------

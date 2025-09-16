@@ -79,6 +79,10 @@ def append_bus_conditions(bus,segment):
         segment.state.conditions.energy.busses[bus.tag].energy                    = initial_battery_energy* ones_row(1)
         segment.state.conditions.energy.busses[bus.tag].state_of_charge           = segment.initial_battery_state_of_charge* ones_row(1) 
         segment.state.conditions.energy.busses[bus.tag].depth_of_discharge        = 1 - segment.initial_battery_state_of_charge* ones_row(1)
+
+    # Add Conditions told  residuals and unknowns
+    segment.state.unknowns.network.fuel_lines[bus.tag] = Conditions()
+    segment.state.residuals.network.fuel_lines[bus.tag] = Conditions()
    
     return
 
