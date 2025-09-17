@@ -82,7 +82,7 @@ class Constant_Throttle_Constant_Speed(Evaluate):
         iterate.conditions.forces                     = Common.Update.forces
         iterate.conditions.moments                    = Common.Update.moments
         iterate.conditions.planet_position            = Common.Update.planet_position
-        iterate.residuals.flight_dynamics             = Common.Residuals.flight_dynamics 
+        iterate.residuals.mission.flight_dynamics             = Common.Residuals.flight_dynamics 
         
         return
 

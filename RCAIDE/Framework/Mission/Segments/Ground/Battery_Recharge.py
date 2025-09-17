@@ -54,7 +54,7 @@ class Battery_Recharge(Evaluate):
         converge                           = self.process.converge 
         converge.solver                    = skip 
         iterate                            = self.process.iterate 
-        iterate.unknowns.mission           = skip
+        iterate.unknowns.mission.mission           = skip
         iterate.conditions.aerodynamics    = skip
         iterate.conditions.stability       = skip  
         post_process                       = self.process.post_process  
