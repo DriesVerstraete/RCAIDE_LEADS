@@ -49,16 +49,29 @@ class State(Conditions):
             Properties Used:
             None
         """           
-        
+
         self.tag                 = 'state'
         self.initials            = Conditions()
         self.numerics            = Numerics()
         self.network_numerics    = Network_Numerics()
-        self.unknowns            = Unknowns()
+
+        # Unknowns
+        self.unknowns            = Conditions()
+        self.unknowns.mission    = Unknowns()
+        self.unknowns.network    = Unknowns()
+
+        # Residuals
+        self.residuals           = Conditions()
+        self.residuals.mission   = Residuals()
+        self.residuals.network   = Residuals()
+
+        # Conditions
         self.conditions          = Conditions()
-        self.residuals           = Residuals()
+
+        # Bookkeeping
         self.number_of_residuals = 0
         self.number_of_unknowns  = 0
+
         
     def expand_rows(self,rows,override=False):
         """ Makes a 1-D array the right size. Often used after a mission is initialized to size out the vectors to the

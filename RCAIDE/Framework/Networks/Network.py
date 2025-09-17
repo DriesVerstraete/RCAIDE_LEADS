@@ -406,7 +406,7 @@ class Network(Component):
             Properties Used:
             N/A
         """                   
-        segment.state.residuals.network = Residuals()
+        segment.state.residuals.mission.network = Residuals()
         segment.state.conditions.network_residuals         = Residuals()   # Fix late
         segment.state.conditions.network_initials         = Unknowns()   # Fix later
         

@@ -145,7 +145,7 @@ def setup_operating_conditions(component, velocity_range=np.array([10]), altitud
     segment.sideslip_angle                           = 0 
     segment.state.conditions                         = conditions    
     orientations(segment) 
-    segment.state.residuals.network                  = Residuals()
+    segment.state.residuals.mission.network                  = Residuals()
     
     # append component-specific operating conditions 
     component.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)    

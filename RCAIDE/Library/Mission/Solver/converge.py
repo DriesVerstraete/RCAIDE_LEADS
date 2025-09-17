@@ -37,7 +37,7 @@ def converge(segment):
     state.numerics.tolerance_solution  [Unitless]
 
     Outputs:
-    state.unknowns                     [Any]
+    state.unknowns.mission                     [Any]
     segment.state.numerics.converged   [Unitless]
 
     Properties Used:
@@ -67,7 +67,7 @@ def converge(segment):
             mission_converge = True
      
     elif segment.state.numerics.solver.type  == "root_finder": 
-        unknowns = segment.state.unknowns.pack_array() 
+        unknowns = segment.state.unknowns.mission.pack_array() 
          
         if segment.state.number_of_unknowns != segment.state.number_of_residuals:
             raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_unknowns) + \
@@ -116,7 +116,7 @@ def iterate_root_finder(unknowns, segment):
     N/A
 
     Inputs:
-    state.unknowns                [Data]
+    state.unknowns.mission                [Data]
     segment.process.iterate       [Data]
 
     Outputs:
@@ -126,13 +126,13 @@ def iterate_root_finder(unknowns, segment):
     N/A
     """       
     if isinstance(unknowns,np.ndarray):
-        segment.state.unknowns.unpack_array(unknowns)
+        segment.state.unknowns.mission.unpack_array(unknowns)
     else:
-        segment.state.unknowns = unknowns
+        segment.state.unknowns.mission = unknowns
         
     segment.process.iterate(segment)
     
-    residuals = segment.state.residuals.pack_array()
+    residuals = segment.state.residuals.mission.pack_array()
         
     return residuals
 
@@ -175,7 +175,7 @@ def add_mission_variables(segment):
     # Step 2: Optimizer Inputs 
     # Step 2.1: Extract inputs
     input_count   = 0
-    unknown_keys  = list(segment.state.unknowns.keys())  
+    unknown_keys  = list(segment.state.unknowns.mission.keys())  
     unknown_keys.remove('tag') 
     if ground_seg_flag: 
         n_points      = segment.state.numerics.number_of_control_points
@@ -195,7 +195,7 @@ def add_mission_variables(segment):
     full_upper_bound_vals = Data()
     full_lower_bound_vals = Data()
     for unkn in unknown_keys: 
-        full_unkn_vals[unkn]  = segment.state.unknowns[unkn]
+        full_unkn_vals[unkn]  = segment.state.unknowns.mission[unkn]
         full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.lower_bounds[unkn])
         full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.upper_bounds[unkn])
 
@@ -249,18 +249,18 @@ def add_mission_variables(segment):
 
     if ground_seg_flag:       
         output_numbers = np.linspace(0,n_points-2,n_points-1,dtype=np.int16)
-        basic_string_con[unknown_keys[1]] = np.tile('segment.state.unknowns.'+unknown_keys[1]+'[', n_points-1)
+        basic_string_con[unknown_keys[1]] = np.tile('segment.state.unknowns.mission.'+unknown_keys[1]+'[', n_points-1)
         input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],np.array(output_numbers).astype(str)))
         input_string        = np.array(input_string[0])
         input_string        = np.core.defchararray.add(input_string, np.tile(']',len_inputs-1))
         input_aliases       = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0]  = input_names
-        input_aliases[0,1]  = 'segment.state.unknowns.'+unknown_keys[0] 
+        input_aliases[0,1]  = 'segment.state.unknowns.mission.'+unknown_keys[0] 
         input_aliases[1:,1] = input_string 
         
     elif single_pt_seg:  
         for unkn in unknown_keys:
-            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
+            basic_string_con[unkn] = np.tile('segment.state.unknowns.mission.'+unkn+'[', n_points)
             input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
         input_string       = np.ravel(input_string)
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
@@ -270,7 +270,7 @@ def add_mission_variables(segment):
     else:  
         output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
         for unkn in unknown_keys:
-            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
+            basic_string_con[unkn] = np.tile('segment.state.unknowns.mission.'+unkn+'[', n_points)
             input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
         input_string       = np.ravel(input_string)
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
@@ -279,7 +279,7 @@ def add_mission_variables(segment):
         input_aliases[:,1] = input_string
     
     # Step 4.2: Setup the aliases for the residuals
-    basic_string_res      = np.tile('segment.state.residuals.pack_array()[', len_residuals)
+    basic_string_res      = np.tile('segment.state.residuals.mission.pack_array()[', len_residuals)
     residual_string       = np.core.defchararray.add(basic_string_res,np.array(con_numbers-1).astype(str))
     residual_string       = np.core.defchararray.add(residual_string, np.tile(']',len_residuals))
     residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
@@ -340,15 +340,15 @@ def iterate_segment():
 def iterate_optimizer(nexus):
     segment = nexus.segment
      
-    unknowns = segment.state.unknowns.pack_array()
+    unknowns = segment.state.unknowns.mission.pack_array()
     if isinstance(unknowns,np.ndarray):
-        segment.state.unknowns.unpack_array(unknowns)
+        segment.state.unknowns.mission.unpack_array(unknowns)
     else:
-        segment.state.unknowns = unknowns
+        segment.state.unknowns.mission = unknowns
         
     segment.process.iterate(segment)
     
-    residuals = segment.state.residuals.pack_array()    
+    residuals = segment.state.residuals.mission.pack_array()    
     nexus.residuals =  residuals
     return nexus
 

@@ -6,7 +6,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports   
-from RCAIDE.Framework.Mission.Common     import   Conditions
+from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHODS
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -74,8 +74,8 @@ def append_fuel_line_conditions(fuel_line,segment,network):
 
     
     # Add Conditions for residuals and unknowns
-    segment.state.unknowns[network.tag].fuel_lines[fuel_line.tag] = Conditions()
-    segment.state.residuals[network.tag].fuel_lines[fuel_line.tag] = Conditions()
+    segment.state.unknowns.network[network.tag].fuel_lines[fuel_line.tag] = Unknowns()
+    segment.state.residuals.network[network.tag].fuel_lines[fuel_line.tag] = Residuals()
 
     return
 

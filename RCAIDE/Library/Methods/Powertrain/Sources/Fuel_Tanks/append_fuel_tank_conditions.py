@@ -86,11 +86,12 @@ def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor):
 def append_fuel_tank_residual_and_unknowns(fuel_tank, segment, distributor,network):
     ones_row    = segment.state.ones_row
 
-    distributor_unknowns   = segment.state.unknowns[network.tag].fuel_lines[distributor.tag]
-    distributor_residuals = segment.state.residuals[network.tag].fuel_lines[distributor.tag]
+    distributor_unknowns   = segment.state.unknowns.network[network.tag].fuel_lines[distributor.tag]
+    distributor_residuals = segment.state.residuals.network[network.tag].fuel_lines[distributor.tag]
 
     distributor_unknowns[fuel_tank.tag] = Unknowns()
     distributor_residuals[fuel_tank.tag] = Residuals()
     distributor_unknowns[fuel_tank.tag].mass  = ones_row(1) *fuel_tank.fuel.mass_properties.mass
     distributor_residuals[fuel_tank.tag].mass = ones_row(1)*0
+    return
     

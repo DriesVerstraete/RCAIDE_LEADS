@@ -54,16 +54,16 @@ class Energy(Analysis):
         
         # Pack the unknowns to pass through the network
         if isinstance(unknowns,np.ndarray):
-            state.unknowns[network.tag].unpack_array(unknowns)
+            state.unknowns.network[network.tag].unpack_array(unknowns)
 
         network.evaluate(state,cg)
 
         # Unpack Residuals
-        residual_keys = list(state.residuals[network.tag].keys())
+        residual_keys = list(state.residuals.network[network.tag].keys())
         netowrk_res = Data()
         full_ures_vals = Data()
         for res in residual_keys:
-            netowrk_res[res] = state.residuals[network.tag][res]
+            netowrk_res[res] = state.residuals.network[network.tag][res]
             full_ures_vals[res] = netowrk_res[res] 
 
         return  full_ures_vals.pack_array()
