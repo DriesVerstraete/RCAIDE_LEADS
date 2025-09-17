@@ -482,8 +482,8 @@ class Network(Component):
                     reservoir.append_operating_conditions(segment, coolant_line)                           
     
         # Ensure the mission knows how to pack and unpack the unknowns and residuals
-        segment.process.iterate.unknowns.network            = self.unpack_unknowns
-        segment.process.iterate.residuals.network           = self.residuals   
+        segment.process.iterate.unknowns.mission.network            = self.unpack_unknowns
+        segment.process.iterate.residuals.mission.network           = self.residuals   
         
         return segment
  

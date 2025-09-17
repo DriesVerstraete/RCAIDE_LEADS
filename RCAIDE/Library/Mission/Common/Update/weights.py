@@ -38,7 +38,6 @@ def weights(segment):
     
     # unpack
     conditions   = segment.state.conditions
-    I            = segment.state.numerics.time.integrate  
     m0           = conditions.weights.total_mass[0,0]
     mdot         = conditions.weights.vehicle_mass_rate
     g            = conditions.freestream.gravity   
@@ -56,18 +55,18 @@ def weights(segment):
         conditions.frames.inertial.gravity_force_vector[:,2] = W[:,0]
         
     else: 
-        for network in networks:
-            if 'fuel_lines' in network:
-                for fuel_line in network.fuel_lines:  
-                    fuel_line_results   = conditions.energy.fuel_lines[fuel_line.tag]
-                    for fuel_tank in fuel_line.fuel_tanks: 
-                        fuel_line_results.fuel_tanks[fuel_tank.tag].mass[:,0]  =  fuel_line_results.fuel_tanks[fuel_tank.tag].mass[0,0]  +\
-                            np.dot(I, -fuel_line_results.fuel_tanks[fuel_tank.tag].mass_flow_rate[:,0])
+        # for network in networks:
+        #     if 'fuel_lines' in network:
+        #         for fuel_line in network.fuel_lines:  
+        #             fuel_line_results   = conditions.energy.fuel_lines[fuel_line.tag]
+        #             for fuel_tank in fuel_line.fuel_tanks: 
+        #                 fuel_line_results.fuel_tanks[fuel_tank.tag].mass[:,0]  =  fuel_line_results.fuel_tanks[fuel_tank.tag].mass[0,0]  +\
+        #                     np.dot(I, -fuel_line_results.fuel_tanks[fuel_tank.tag].mass_flow_rate[:,0])
         
         # --------------------------------------------------------------------------       
         # update mass 
         # --------------------------------------------------------------------------   
-        m = m0 + np.dot(I, -mdot)
+        m = m0 - conditions.energy.cumulative_fuel_consumption
     
         # weight
         W = m*g

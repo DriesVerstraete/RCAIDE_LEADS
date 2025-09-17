@@ -51,5 +51,5 @@ def network(segment):
                         xtol=segment.state.network_numerics.solver.tolerance_solution,) 
 
             segment.state.network_numerics.solver.converged = result.success
-            if result.success  is False:
+            if result.success is False:
                 print('The network solver fails with exit condition: ',result.status)
