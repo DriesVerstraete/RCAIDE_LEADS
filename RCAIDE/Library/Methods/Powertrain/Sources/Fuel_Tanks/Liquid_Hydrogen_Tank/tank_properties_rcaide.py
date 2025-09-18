@@ -9,7 +9,9 @@ from RCAIDE.Library.Mission.Common.Initialize import differentials_dimensionless
 from RCAIDE.Library.Mission.Common.Initialize import time
 from RCAIDE.Framework.Core import Data
 from scipy.optimize import least_squares
+from scipy.optimize import fsolve
 import scipy
+import time
 from RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
 
 
@@ -18,6 +20,8 @@ from RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
 
 # ==================== Main function ====================
 def main():
+    method = 'least_squaresaaa'
+    ti                   = time.time()
 
     # Initial Volume
     V_l = 29.379/2
@@ -32,6 +36,7 @@ def main():
 
     m_g = rho_g * V_g
     m_l = rho_l* V_l
+
 
 
     # ==================== User input flows ====================
@@ -64,15 +69,29 @@ def main():
     
     t_nodes = t0 + (tf - t0)*x
     D_t =D/(tf - t0)
-    sol_cheb =  least_squares(residual, y0, args=(D_t,segment,m_dot_g_out,m_dot_l_out,y0), xtol=1e-6)
-    cp = segment.state.numerics.number_of_control_points
-    m_g = sol_cheb.x[:cp]
-    m_l = sol_cheb.x[cp:2*cp]
-    T_g = sol_cheb.x[2*cp:3*cp]
-    T_l = sol_cheb.x[3*cp:4*cp]
-    V_g = sol_cheb.x[4*cp:5*cp]
-    V_l = sol_cheb.x[5*cp:6*cp]
+    if method == 'least_squares':
+        sol_cheb =  least_squares(residual, y0, args=(D_t,segment,m_dot_g_out,m_dot_l_out,y0), xtol=1e-6)
+        cp = segment.state.numerics.number_of_control_points
+        m_g = sol_cheb.x[:cp]
+        m_l = sol_cheb.x[cp:2*cp]
+        T_g = sol_cheb.x[2*cp:3*cp]
+        T_l = sol_cheb.x[3*cp:4*cp]
+        V_g = sol_cheb.x[4*cp:5*cp]
+        V_l = sol_cheb.x[5*cp:6*cp]
+    else:
+        
+        sol_cheb =  fsolve(residual, y0, args=(D_t,segment,m_dot_g_out,m_dot_l_out,y0), xtol=1e-6)
+        cp = segment.state.numerics.number_of_control_points
+        m_g = sol_cheb[:cp]
+        m_l = sol_cheb[cp:2*cp]
+        T_g = sol_cheb[2*cp:3*cp]
+        T_l = sol_cheb[3*cp:4*cp]
+        V_g = sol_cheb[4*cp:5*cp]
+        V_l = sol_cheb[5*cp:6*cp]
 
+    tf                   = time.time()
+    elapsed_time         = ((tf-ti))
+    print(' Simulation Time: ' + str(elapsed_time) + ' s')      
 
     # Plot T_g and T_l vs time
     plt.figure(figsize=(8,5))

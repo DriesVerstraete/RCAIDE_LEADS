@@ -68,7 +68,10 @@ def converge(segment):
      
     elif segment.state.numerics.solver.type  == "root_finder": 
         unknowns = segment.state.unknowns.mission.pack_array() 
-         
+        if segment.state.network_numerics.solver.type is None:
+            unknowns = np.concatenate([unknowns, segment.state.unknowns.network.pack_array()])
+
+
         if segment.state.number_of_unknowns != segment.state.number_of_residuals:
             raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_unknowns) + \
                                  ') is not equal to the number of residuals (equations) (' + str(segment.state.number_of_residuals) + '). Either enforce of unknowns '+\
@@ -125,15 +128,30 @@ def iterate_root_finder(unknowns, segment):
     Properties Used:
     N/A
     """       
-    if isinstance(unknowns,np.ndarray):
-        segment.state.unknowns.mission.unpack_array(unknowns)
+    if isinstance(unknowns, np.ndarray):
+        mission_vec = segment.state.unknowns.mission.pack_array()
+        mission_len = mission_vec.size
+        segment.state.unknowns.mission.unpack_array(unknowns[:mission_len])
+        if segment.state.network_numerics.solver.type is None:
+            network_vec = segment.state.unknowns.network.pack_array()
+            network_len = network_vec.size
+            segment.state.unknowns.network.unpack_array(
+                unknowns[mission_len:mission_len + network_len]
+            )
     else:
         segment.state.unknowns.mission = unknowns
-        
+        if segment.state.network_numerics.solver.type is None:
+            segment.state.unknowns.network = unknowns
+
     segment.process.iterate(segment)
-    
+
     residuals = segment.state.residuals.mission.pack_array()
-        
+    if segment.state.network_numerics.solver.type is None:
+        residuals = np.concatenate([
+            residuals,
+            segment.state.residuals.network.pack_array(),
+        ])
+
     return residuals
 
 

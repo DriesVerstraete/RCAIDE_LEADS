@@ -8,7 +8,7 @@ from RCAIDE.Framework.Core import Data
 
 from RCAIDE.Framework.Mission.Common import Conditions
 import  numpy as np
-from scipy.optimize import least_squares
+from scipy.optimize import fsolve, least_squares
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Solve Network
@@ -53,3 +53,18 @@ def network(segment):
             segment.state.network_numerics.solver.converged = result.success
             if result.success is False:
                 print('The network solver fails with exit condition: ',result.status)
+        elif segment.state.network_numerics.solver.type  == 'root_finder':
+            result,_,ier,error_message = fsolve(energy_model.evaluate, 
+                        full_unkn_vals.pack_array(),
+                        args=(segment,network),
+                        xtol=segment.state.network_numerics.solver.tolerance_solution,
+                        maxfev = segment.state.numerics.solver.max_evaluations,
+                        epsfcn = segment.state.numerics.solver.step_size,
+                        full_output = 1) 
+
+            segment.state.network_numerics.solver.converged = False if ier == 0 else True
+            if ier == 0:
+                print('The network solver fails with exit condition: ',error_message)
+                
+        else: # If a network solver is not needed it will unpack values from the missino solver
+            energy_model.evaluate(full_unkn_vals.pack_array(), segment, network)

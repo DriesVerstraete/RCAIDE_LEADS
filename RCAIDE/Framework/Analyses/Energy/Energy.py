@@ -53,12 +53,12 @@ class Energy(Analysis):
     
         cg       = self.vehicle.mass_properties.center_of_gravity
         state = segment.state
-        
+
         # Pack the unknowns to pass through the network
         if isinstance(unknowns,np.ndarray):
             state.unknowns.network[network.tag].unpack_array(unknowns)
         
-        RCAIDE.Library.Mission.Common.Initialize.energy(segment)
+        # RCAIDE.Library.Mission.Common.Initialize.energy(segment)
         network.evaluate(state,cg)
 
         # Unpack Residuals

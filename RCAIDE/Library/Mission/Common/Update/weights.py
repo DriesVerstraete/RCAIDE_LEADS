@@ -38,11 +38,9 @@ def weights(segment):
     
     # unpack
     conditions   = segment.state.conditions
-    m0           = conditions.weights.total_mass[0,0]
-    mdot         = conditions.weights.vehicle_mass_rate
+    m0           = segment.analyses.energy.vehicle.mass_properties.takeoff # USe the take off weight from the last analyses
     g            = conditions.freestream.gravity   
     
-    networks = segment.analyses.energy.vehicle.networks 
     if (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude) or\
                     (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_AVL_Trimmed) or \
                     (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_No_Propulsion) or \
