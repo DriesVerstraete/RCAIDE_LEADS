@@ -105,8 +105,10 @@ def compute_thermal_performance(fuel_tank):
         fuel_volume   *=2
 
     fuel_tank.volume_properties.net_volume      = tank_volume_i
+    fuel_tank.fuel.volume_properties.gross_volume = deepcopy(tank_volume_i)
     fuel_tank.fuel.volume_properties.net_volume = deepcopy(fuel_volume)
     fuel_tank.fuel.mass_properties.mass         = deepcopy(fuel_tank.fuel.volume_properties.net_volume *  fuel_tank.fuel.density)
+    fuel_tank.ullage.mass_properties.mass = (tank_volume_i-fuel_volume) * fuel_tank.ullage.density
 
     return 
 

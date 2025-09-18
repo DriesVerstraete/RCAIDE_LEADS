@@ -7,11 +7,15 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # RCAIDE imports
+# from RCAIDE.Library.Attributes.Gases import Gas
+# from RCAIDE.Library.Attributes.Propellants import Liquid_Hydrogen
+from RCAIDE.Framework.Core.Data import Data
 from .Non_Integral_Tank  import Non_Integral_Tank 
 from RCAIDE.Framework.Core import Units
 
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Non_Integral_Tank.compute_non_integral_tank_volume               import *
-from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.append_liquid_hydrogen_fuel_tank_conditions import append_liquid_hydrogen_fuel_tank_conditions
+from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.append_liquid_hydrogen_fuel_tank_conditions import *
+from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_liquid_hydrogen_tank_performance    import compute_liquid_hydrogen_tank_performance
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_structural_performance              import compute_structural_performance
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_thermal_performance                 import compute_thermal_performance
 
@@ -100,20 +104,15 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         self.design_isa_deviation     = 0
         self.ullage_volume_fraction   = 0.07
         self.design_external_pressure = 0 
-
-    def append_operating_conditions(self, segment, fuel_line):
-        """
-        Append fuel tank operating conditions for a flight segment
+        self.ullage_temperature        = 21 #K
+        self.liquid_temperature        = 20 #K
+        self.vent_rate                 = 0
+        self.fuel                      = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()
+        # fix this later on
+        self.ullage                    = Data()
+        self.ullage.density            = 1.35  
+        self.ullage.mass_properties    = RCAIDE.Framework.Core.Data()
         
-        Parameters
-        ----------
-        segment : Segment
-            Flight segment containing state conditions
-        fuel_line : Component
-            Connected fuel line component
-         """
-        append_liquid_hydrogen_fuel_tank_conditions(self,segment, fuel_line)  
-        return    
 
     def compute_volume(self, wings, fuselages):
         """
@@ -162,7 +161,21 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
                     compute_structural_performance(self)
                     compute_thermal_performance(self)
         return
-    def compute_tank_properties(self, state, fuel_line):
+    def append_operating_conditions(self,segment,fuel_line,network):  
+        """
+        Append fuel tank operating conditions for a flight segment
         
-        ## add methods from tank
-        return 
+        Parameters
+        ----------
+        segment : Segment
+            Flight segment containing state conditions
+        fuel_line : Component
+        Connected fuel line component
+        """
+        append_liquid_hydrogen_tank_conditions(self,segment, fuel_line)  
+        append_liquid_hydrogen_tank_residual_and_unknowns(self,segment, fuel_line,network)  
+        return
+    
+    def compute_tank_properties(self,state,fuel_line,network_tag):
+        compute_liquid_hydrogen_tank_performance(self,state,fuel_line,network_tag)
+        return

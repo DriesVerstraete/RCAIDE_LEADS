@@ -87,3 +87,7 @@ class Fuel_Tank(Component):
     def compute_tank_properties(self,state,fuel_line,network_tag):
         compute_fuel_tank_properties(self,state,fuel_line,network_tag)
         return
+    
+    def append_segment_conditions(self, segment, distributor):
+        append_fuel_tank_segment_conditions(self, segment, distributor)
+        return

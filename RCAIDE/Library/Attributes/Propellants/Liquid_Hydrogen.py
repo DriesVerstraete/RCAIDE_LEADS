@@ -144,7 +144,7 @@ class Liquid_Hydrogen(Propellant):
         interp = interp1d(temps, props, kind="linear", fill_value=None)
         
         return interp(T)
-
+    
 def load_hydrogen_properties(): 
     """
     Load hydrogen property data from the RES file.
@@ -175,3 +175,4 @@ def load_hydrogen_properties():
     rel_path  = os.path.dirname(ospath) + separator     
 
     return RCAIDE.load(rel_path+ 'H2_properties.res')
+
