@@ -11,6 +11,7 @@
 # Python imports
 import numpy as np
 from CoolProp.CoolProp import PropsSI
+from scipy.optimize import brentq, fsolve
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -43,8 +44,8 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
 
     
     # --- Geometry placeholders ---
-    A_int = (fuel_tank.inner_diameter*fuel_tank.inner_length) + np.pi*fuel_tank.inner_diameter
-    L_int = fuel_tank.inner_diameter
+    L_int,A_int= compute_interface_geometric_properties(fuel_tank, V_l[:,0])
+
 
     # Liquid properties
     k_liq = PropsSI("L", "T", T_l, "Q", 0, "Hydrogen")   # thermal conductivity [W/m-K]
@@ -211,3 +212,53 @@ def Q_gas_to_int(T_g, T_int, A_int, L_int, rho_g, cp_g, mu_g, k_g,
     Q = alpha * A_int * (T_g[:,0] - T_int)
     
     return Q
+
+# ==================== Compute Height of the Liquid in the tank given a particular volume ====================
+
+def solve_height_equation(h, r, l, v):
+    """
+    v = (
+    l * (
+        r**2 * np.arccos((r - h) / r)
+        - (r - h) * np.sqrt(2 * r * h - h**2)
+    )
+    + (np.pi / 3) * h**2 * (3 * r - h)
+)
+    """
+    return  l * (r**2 * np.arccos((r - h) / r) - (r - h) * np.sqrt(2 * r * h - h**2))+ (np.pi / 3) * h**2 * (3 * r - h) - v
+
+def solve_height_equation(h, r, l, v):
+    return (
+        l * (
+            r**2 * np.arccos((r - h) / r)
+            - (r - h) * np.sqrt(2 * r * h - h**2)
+        )
+        + (np.pi / 3) * h**2 * (3 * r - h)
+        - v
+    )
+
+def compute_liquid_height_per_volume(r, l, v):
+    """Scalar: solve for liquid height given a single volume v."""
+    return brentq(solve_height_equation, 0.0, 2*r, args=(r, l, v))
+
+def compute_liquid_height(r, l, v_array):
+    """Vectorized: works for scalar or array input v_array."""
+    v_array = np.atleast_1d(v_array)
+    h_array = np.fromiter(
+        (compute_liquid_height_per_volume(r, l, vv) for vv in v_array),
+        dtype=float
+    )
+    return h_array.reshape(np.shape(v_array))
+
+def compute_interface_geometric_properties(fuel_tank, v_l):
+    l_in = fuel_tank.inner_length
+    r_in = fuel_tank.inner_diameter / 2
+
+    # h is array if v_l is array
+    h = compute_liquid_height(r_in, l_in, v_l)
+
+    lamda = h / (2 * r_in)
+    L_int = 4 * r_in * np.sqrt(lamda - lamda**2)
+    A_int = (np.pi * 2 * r_in * L_int**2 / 4) + L_int * l_in
+
+    return L_int, A_int
