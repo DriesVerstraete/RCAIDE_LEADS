@@ -65,6 +65,8 @@ def plot_liquid_hydrogen_tank_properties(results,
                     liquid_volume      = tank_conditions.liquid_volume[:, 0]
                     ullage_volume      = tank_conditions.ullage_volume[:, 0]
                     pressure           = tank_conditions.pressure[:, 0]
+                    vent_rate          = tank_conditions.vent_rate[:, 0]
+                    boil_off_rate = tank_conditions.boil_off_rate[:,0]
 
                     tank_label = f"{segment.tag}_{fuel_tank.tag}".replace("_"," ")
 
@@ -87,14 +89,16 @@ def plot_liquid_hydrogen_tank_properties(results,
                                 linestyle="--", linewidth=ps.line_width, label=f"{tank_label} ullage V")
 
                     # --- Pressure
-                    axis_4.plot(time, pressure, color=line_colors[i],
-                                linewidth=ps.line_width, label=f"{tank_label} pressure")
+                    axis_4.plot(time, vent_rate, color=line_colors[i],
+                                linewidth=ps.line_width, label=f"{tank_label} Vent Rate")
+                    axis_4.plot(time, boil_off_rate, color='b',
+                                linewidth=ps.line_width, label=f"{tank_label} Boiloff Rate")
 
     # Axis labels
     axis_1.set_ylabel("Mass (kg)")
     axis_2.set_ylabel("Temperature (K)")
     axis_3.set_ylabel("Volume (m³)")
-    axis_4.set_ylabel("Pressure (Pa)")
+    axis_4.set_ylabel("Mass Flow (kg/s)")
 
     for ax in [axis_1, axis_2, axis_3, axis_4]:
         ax.set_xlabel("Time (min)")

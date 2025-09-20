@@ -7,8 +7,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # RCAIDE imports
-# from RCAIDE.Library.Attributes.Gases import Gas
-# from RCAIDE.Library.Attributes.Propellants import Liquid_Hydrogen
+
 from RCAIDE.Framework.Core.Data import Data
 from .Non_Integral_Tank  import Non_Integral_Tank 
 from RCAIDE.Framework.Core import Units
@@ -172,6 +171,7 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         fuel_line : Component
         Connected fuel line component
         """
+        
         append_liquid_hydrogen_tank_conditions(self,segment, fuel_line)  
         append_liquid_hydrogen_tank_residual_and_unknowns(self,segment, fuel_line,network)  
         return
@@ -179,3 +179,7 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
     def compute_tank_properties(self,state,fuel_line,network_tag):
         compute_liquid_hydrogen_tank_performance(self,state,fuel_line,network_tag)
         return
+
+    def append_segment_conditions(self, segment, distributor):
+        append_hydrogen_fuel_tank_segment_conditions(self,segment,distributor)
+        return 

@@ -106,7 +106,7 @@ def energy(segment):
                 if segment.state.initials:
                     
                     segment.state.conditions.energy.cumulative_fuel_consumption[:,0] = segment.state.initials.conditions.energy.cumulative_fuel_consumption[-1,0]
-                    fuel_tank.append_segment_conditions(fuel_tank,segment,fuel_line)
+                    fuel_tank.append_segment_conditions(segment,fuel_line)
 
                 elif  vehicle.networks[network.tag].fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].fuel != None:
                     segment.state.conditions.energy.cumulative_fuel_consumption[:,0] = 0

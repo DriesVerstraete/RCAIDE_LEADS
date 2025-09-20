@@ -1,17 +1,17 @@
-# RCAIDE/Methods/Powertrain/Sources/Fuel_Tanks/compute_fuel_tank_properties.py
+# RCAIDE/Methods/Powertrain/Sources/Fuel_Tanks/
 # 
 # 
-# Created:  Jul 2023, M. Clarke
-
+# Created:  
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports
 
 # Python imports
+from copy import deepcopy
 import numpy as np
 from CoolProp.CoolProp import PropsSI
-from scipy.optimize import brentq, fsolve
+from scipy.optimize import brentq
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -29,8 +29,14 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     T_l = tank_unknowns.liquid_temperature
     V_g = tank_unknowns.ullage_volume
     V_l = tank_unknowns.liquid_volume
+    
 
-    tank_conditions.mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * fuel_tank.flow_split_ratio    
+    flow_split_ratio  = fuel_tank.flow_split_ratio
+
+    if fuel_tank.symmetric:
+        flow_split_ratio  = fuel_tank.flow_split_ratio/2
+
+    tank_conditions.mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * flow_split_ratio    
     
     m_dot_l_out =  tank_conditions.mass_flow_rate  
     m_dot_g_out =  tank_conditions.vent_rate
@@ -41,6 +47,7 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
 
     # --- Interface saturation temperature ---
     T_int = PropsSI("T", "P", P, "Q", 1, "Hydrogen")  # [K]
+
 
     
     # --- Geometry placeholders ---
@@ -56,7 +63,7 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     # Gas (ullage vapor) properties
     k_g   = PropsSI("L", "T", T_g, "Q", 1, "Hydrogen")   # thermal conductivity [W/m-K]
     mu_g  = PropsSI("V", "T", T_g, "Q", 1, "Hydrogen")   # viscosity [Pa·s]
-    cp_g  = PropsSI("C", "T", T_g, "Q", 1, "Hydrogen")   # Cp [J/kg-K] # maybe wrong check thisn later
+    cp_g  = PropsSI("Cpmass", "T", T_g, "Q", 1, "Hydrogen")   # Cp [J/kg-K] # maybe wrong check thisn later
     rho_g = PropsSI("D", "T", T_g, "Q", 1, "Hydrogen")   # density [kg/m³]
 
     # --- Heat fluxes interface exchange ---
@@ -75,8 +82,8 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     # Q_e_l = Q_env_to_hydrogen(A_wet_liquid, T_h, T_l, N_layers=30)
     
     # --- Heat fluxes environment exchange assume constant for testing code ---
-    Q_e_g = 20*np.ones_like(Q_l_i)
-    Q_e_l = 25 *np.ones_like(Q_l_i)
+    Q_e_g = 1*np.ones_like(Q_l_i)
+    Q_e_l = 1  *np.ones_like(Q_l_i)
 
     # --- Enthalpies ---
     h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
@@ -138,7 +145,12 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     tank_conditions.liquid_temperature[1:,0] = tank_unknowns.liquid_temperature[1:,0]
     tank_conditions.ullage_volume[1:,0]      = tank_unknowns.ullage_volume[1:,0]
     tank_conditions.liquid_volume[1:,0]      = tank_unknowns.liquid_volume[1:,0]
-
+    tank_conditions.vent_rate                = m_dot_g_out
+    tank_conditions.boil_off_rate[:,0]       = m_dot_bo
+    print(tank_unknowns.ullage_temperature[:,0])
+    if fuel_tank.symmetric:
+        symmetric_tag = fuel_tank.tag  + "_symmetric"
+        distributor_conditions.fuel_tanks[symmetric_tag] = deepcopy(distributor_conditions.fuel_tanks[fuel_tank.tag])
 
     return
 
@@ -225,17 +237,9 @@ def solve_height_equation(h, r, l, v):
     + (np.pi / 3) * h**2 * (3 * r - h)
 )
     """
+    v = np.clip(v, 0.0, 11.51659305)
     return  l * (r**2 * np.arccos((r - h) / r) - (r - h) * np.sqrt(2 * r * h - h**2))+ (np.pi / 3) * h**2 * (3 * r - h) - v
 
-def solve_height_equation(h, r, l, v):
-    return (
-        l * (
-            r**2 * np.arccos((r - h) / r)
-            - (r - h) * np.sqrt(2 * r * h - h**2)
-        )
-        + (np.pi / 3) * h**2 * (3 * r - h)
-        - v
-    )
 
 def compute_liquid_height_per_volume(r, l, v):
     """Scalar: solve for liquid height given a single volume v."""
@@ -260,5 +264,4 @@ def compute_interface_geometric_properties(fuel_tank, v_l):
     lamda = h / (2 * r_in)
     L_int = 4 * r_in * np.sqrt(lamda - lamda**2)
     A_int = (np.pi * 2 * r_in * L_int**2 / 4) + L_int * l_in
-
     return L_int, A_int
