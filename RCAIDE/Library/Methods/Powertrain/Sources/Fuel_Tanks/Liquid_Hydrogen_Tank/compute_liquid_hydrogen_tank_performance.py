@@ -82,8 +82,8 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     # Q_e_l = Q_env_to_hydrogen(A_wet_liquid, T_h, T_l, N_layers=30)
     
     # --- Heat fluxes environment exchange assume constant for testing code ---
-    Q_e_g = 1*np.ones_like(Q_l_i)
-    Q_e_l = 1  *np.ones_like(Q_l_i)
+    Q_e_g = 200*np.ones_like(Q_l_i)
+    Q_e_l = 200*np.ones_like(Q_l_i)
 
     # --- Enthalpies ---
     h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
@@ -237,7 +237,7 @@ def solve_height_equation(h, r, l, v):
     + (np.pi / 3) * h**2 * (3 * r - h)
 )
     """
-    v = np.clip(v, 0.0, 11.51659305)
+
     return  l * (r**2 * np.arccos((r - h) / r) - (r - h) * np.sqrt(2 * r * h - h**2))+ (np.pi / 3) * h**2 * (3 * r - h) - v
 
 
@@ -257,6 +257,7 @@ def compute_liquid_height(r, l, v_array):
 def compute_interface_geometric_properties(fuel_tank, v_l):
     l_in = fuel_tank.inner_length
     r_in = fuel_tank.inner_diameter / 2
+    v_l[v_l<0] = 0
 
     # h is array if v_l is array
     h = compute_liquid_height(r_in, l_in, v_l)
