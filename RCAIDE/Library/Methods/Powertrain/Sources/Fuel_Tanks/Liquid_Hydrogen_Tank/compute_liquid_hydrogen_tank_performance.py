@@ -29,6 +29,8 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     T_l = tank_unknowns.liquid_temperature
     V_g = tank_unknowns.ullage_volume
     V_l = tank_unknowns.liquid_volume
+    T_g[T_g<10] = 10
+    T_g[T_g>30] = 30
     
 
     flow_split_ratio  = fuel_tank.flow_split_ratio
@@ -59,13 +61,13 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     mu_liq = PropsSI("V", "T", T_l, "Q", 0, "Hydrogen")  # viscosity [Pa·s]
     cp_liq = PropsSI("C", "T", T_l, "Q", 0, "Hydrogen")  # Cp [J/kg-K]
     rho_l  = PropsSI("D", "T", T_l, "Q", 0, "Hydrogen")  # density [kg/m³]
-
+    
     # Gas (ullage vapor) properties
     k_g   = PropsSI("L", "T", T_g, "Q", 1, "Hydrogen")   # thermal conductivity [W/m-K]
     mu_g  = PropsSI("V", "T", T_g, "Q", 1, "Hydrogen")   # viscosity [Pa·s]
     cp_g  = PropsSI("Cpmass", "T", T_g, "Q", 1, "Hydrogen")   # Cp [J/kg-K] # maybe wrong check thisn later
     rho_g = PropsSI("D", "T", T_g, "Q", 1, "Hydrogen")   # density [kg/m³]
-
+    
     # --- Heat fluxes interface exchange ---
     Q_l_i = Q_liq_to_int(
         T_l, T_int, A_int, L_int,
@@ -82,8 +84,8 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     # Q_e_l = Q_env_to_hydrogen(A_wet_liquid, T_h, T_l, N_layers=30)
     
     # --- Heat fluxes environment exchange assume constant for testing code ---
-    Q_e_g = 200*np.ones_like(Q_l_i)
-    Q_e_l = 200*np.ones_like(Q_l_i)
+    Q_e_g = 20*np.ones_like(Q_l_i)
+    Q_e_l = 20*np.ones_like(Q_l_i)
 
     # --- Enthalpies ---
     h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
@@ -147,7 +149,7 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     tank_conditions.liquid_volume[1:,0]      = tank_unknowns.liquid_volume[1:,0]
     tank_conditions.vent_rate                = m_dot_g_out
     tank_conditions.boil_off_rate[:,0]       = m_dot_bo
-    print(tank_unknowns.ullage_temperature[:,0])
+
     if fuel_tank.symmetric:
         symmetric_tag = fuel_tank.tag  + "_symmetric"
         distributor_conditions.fuel_tanks[symmetric_tag] = deepcopy(distributor_conditions.fuel_tanks[fuel_tank.tag])

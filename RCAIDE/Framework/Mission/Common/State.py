@@ -65,6 +65,12 @@ class State(Conditions):
         self.residuals.mission   = Residuals()
         self.residuals.network   = Residuals()
 
+        # Bounds
+        self.lower_bounds = Conditions()
+        self.lower_bounds.network = Conditions()
+        self.upper_bounds = Conditions()
+        self.upper_bounds.network = Conditions()
+
         # Conditions
         self.conditions          = Conditions()
 

@@ -12,6 +12,8 @@ from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknown
 
 from copy import deepcopy
 
+import numpy as np
+
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -110,6 +112,27 @@ def append_liquid_hydrogen_tank_residual_and_unknowns(fuel_tank, segment, distri
 
     distributor_residuals[fuel_tank.tag].ullage_volume        = ones_row(1) * 0
     distributor_residuals[fuel_tank.tag].liquid_volume        = ones_row(1) * 0
+
+    segment.state.numerics.solver.lower_bounds.ullage_temperature = 10 * ones_row(1) 
+    segment.state.numerics.solver.upper_bounds.ullage_temperature = 30 * ones_row(1) 
+
+    segment.state.numerics.solver.lower_bounds.liquid_temperature = 10 * ones_row(1) 
+    segment.state.numerics.solver.upper_bounds.liquid_temperature = 30 * ones_row(1) 
+
+    segment.state.numerics.solver.lower_bounds.ullage_volume = -np.inf* ones_row(1) 
+    segment.state.numerics.solver.upper_bounds.ullage_volume =  np.inf* ones_row(1)
+
+    segment.state.numerics.solver.lower_bounds.liquid_volume = -np.inf* ones_row(1) 
+    segment.state.numerics.solver.upper_bounds.liquid_volume =  np.inf* ones_row(1) 
+
+    segment.state.numerics.solver.lower_bounds.ullage_mass = -np.inf* ones_row(1) 
+    segment.state.numerics.solver.upper_bounds.ullage_mass =  np.inf* ones_row(1)
+
+    segment.state.numerics.solver.lower_bounds.liquid_mass = -np.inf* ones_row(1) 
+    segment.state.numerics.solver.upper_bounds.liquid_mass =  np.inf* ones_row(1) 
+    
+
+
           
 
     return

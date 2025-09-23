@@ -195,6 +195,10 @@ def add_mission_variables(segment):
     input_count   = 0
     unknown_keys  = list(segment.state.unknowns.mission.keys())  
     unknown_keys.remove('tag') 
+
+    net_unknown_keys  = list(segment.state.unknowns.network.keys())  
+    net_unknown_keys.remove('tag') 
+
     if ground_seg_flag: 
         n_points      = segment.state.numerics.number_of_control_points
         len_inputs    = n_points
@@ -205,8 +209,9 @@ def add_mission_variables(segment):
         len_residuals = segment.state.number_of_residuals
     else:
         n_points      = segment.state.numerics.number_of_control_points  
-        len_inputs    = n_points*segment.state.number_of_unknowns
-        len_residuals = n_points*segment.state.number_of_residuals
+        n_points_net  = segment.state.network_numerics.number_of_control_points
+        len_inputs    = n_points*segment.state.number_of_unknowns + n_points_net * segment.state.number_of_network_unknowns
+        len_residuals = n_points*segment.state.number_of_residuals + n_points_net*segment.state.number_of_network_residuals
           
             
     full_unkn_vals        = Data()
@@ -216,6 +221,18 @@ def add_mission_variables(segment):
         full_unkn_vals[unkn]  = segment.state.unknowns.mission[unkn]
         full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.lower_bounds[unkn])
         full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.upper_bounds[unkn])
+    
+    # full_net_upper_bound_vals = Data()
+    # full_net_lower_bound_vals = Data()
+    # net_keys = (['ullage_temperature', 'liquid_temperature', 'ullage_volume', 'liquid_volume', 'ullage_mass', 'liquid_mass'])
+    for net_unkn in net_unknown_keys:
+        full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
+        full_lower_bound_vals[net_unkn] = segment.state.lower_bounds.network[net_unkn]
+        full_upper_bound_vals[net_unkn] = segment.state.upper_bounds.network[net_unkn]
+    # for net_unkn in net_keys:
+    #     full_lower_bound_net_vals[net_unkn] = np.atleast_2d(segment.state.numerics.solver.lower_bounds[net_unkn])
+    #     full_uuper_bound_net_vals[net_unkn] = np.atleast_2d(segment.state.numerics.solver.upper_bounds[net_unkn])
+
 
     # Step 2.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
@@ -223,7 +240,7 @@ def add_mission_variables(segment):
     input_numbers     = np.linspace(1,len_inputs,len_inputs,dtype=np.int16)
     input_names       = np.core.defchararray.add(input_len_strings,np.array(input_numbers+input_count).astype(str))
     lower_bounds      = full_lower_bound_vals.pack_array()
-    upper_bounds      = full_upper_bound_vals.pack_array()     
+    upper_bounds      = full_upper_bound_vals.pack_array()
     units             = np.broadcast_to(Units.less,(len_inputs,))
     new_inputs        = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None,None])),len_inputs), (-1, 6))
     
@@ -287,23 +304,72 @@ def add_mission_variables(segment):
         input_aliases[:,1] = input_string    
     else:  
         output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
-        for unkn in unknown_keys:
-            basic_string_con[unkn] = np.tile('segment.state.unknowns.mission.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
+        # for unkn in unknown_keys:
+        #     basic_string_con[unkn] = np.tile('segment.state.unknowns.mission.'+unkn+'[', n_points)
+        #     input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
+        # for unkn in net_unknown_keys:
+            # basic_string_con[unkn] = np.tile('segment.state.unknowns.network.'+unkn+'[', n_points)
+            # input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
+        stack = [(segment.state.unknowns, "segment.state.unknowns")]
+        while stack:
+            D, prefix = stack.pop()
+            for k, v in D.items():
+                if k == "tag":     
+                    continue
+                if isinstance(v, dict):
+                    stack.append((v, prefix + f".{k}"))
+                else:
+                    base = prefix + f".{k}["
+                    prefix_array = np.tile(base, n_points)
+                    ref_strings = np.core.defchararray.add(prefix_array, output_numbers.astype(str))
+                    # ref_strings = np.core.defchararray.add(ref_strings, "]")
+                    input_string.append(ref_strings)
+
+        # input_strings is a list of arrays, just like your example
+        
         input_string       = np.ravel(input_string)
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
         input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string
-    
-    # Step 4.2: Setup the aliases for the residuals
-    basic_string_res      = np.tile('segment.state.residuals.mission.pack_array()[', len_residuals)
-    residual_string       = np.core.defchararray.add(basic_string_res,np.array(con_numbers-1).astype(str))
-    residual_string       = np.core.defchararray.add(residual_string, np.tile(']',len_residuals))
-    residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
-    residual_aliases[:,0] = con_names
-    residual_aliases[:,1] = residual_string
         
+    # Step 4.2: Setup the aliases for the residuals
+    residual_string = []
+    residual_names  = []
+
+    stack = [(segment.state.residuals, "segment.state.residuals")]
+    counter = 0  # global residual index
+
+    while stack:
+        D, prefix = stack.pop()
+        for k, v in D.items():
+            if k == "tag":
+                continue
+            if isinstance(v, dict):
+                stack.append((v, prefix + f".{k}"))
+            else:
+                base = prefix + f".{k}["
+                # determine how many residuals this variable has
+                n_res = len(v) if hasattr(v, "__len__") else 1
+                for i in range(n_res):
+                    residual_string.append(base + str(i) + "]")
+                    residual_names.append(f"Residual_{counter+1}")
+                    counter += 1
+
+    # convert to arrays
+    residual_string = np.array(residual_string)
+    residual_names  = np.array(residual_names)
+    len_residuals   = residual_string.shape[0]
+
+    # create alias array
+    residual_aliases      = np.reshape(
+        np.tile(np.atleast_2d(np.array((None, None))), len_residuals),
+        (-1, 2)
+    )
+    residual_aliases[:, 0] = residual_names
+    residual_aliases[:, 1] = residual_string
+
+    
     # Step 4.3: Append Aliases
     aliases = []
     for ii in range(len_inputs):
