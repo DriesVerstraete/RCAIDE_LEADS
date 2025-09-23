@@ -121,11 +121,11 @@ def append_liquid_hydrogen_tank_residual_and_unknowns(fuel_tank, segment, distri
     distributor_lower_bounds[fuel_tank.tag] = Conditions()
     distributor_upper_bounds[fuel_tank.tag] = Conditions()
 
-    distributor_lower_bounds[fuel_tank.tag].ullage_mass = 0 * ones_row(1)
-    distributor_upper_bounds[fuel_tank.tag].ullage_mass = np.inf * ones_row(1)#fuel_tank.ullage.mass_properties.mass * ones_row(1)
+    distributor_lower_bounds[fuel_tank.tag].ullage_mass = 1e-6* ones_row(1)
+    distributor_upper_bounds[fuel_tank.tag].ullage_mass = fuel_tank.mass_properties.mass * ones_row(1)
     
-    distributor_lower_bounds[fuel_tank.tag].mass         = 0* ones_row(1)
-    distributor_upper_bounds[fuel_tank.tag].mass         = np.inf * ones_row(1)
+    distributor_lower_bounds[fuel_tank.tag].mass         = 1e-6* ones_row(1)
+    distributor_upper_bounds[fuel_tank.tag].mass         = fuel_tank.mass_properties.mass * ones_row(1)
 
     distributor_lower_bounds[fuel_tank.tag].ullage_temperature = 5 * ones_row(1)
     distributor_upper_bounds[fuel_tank.tag].ullage_temperature = 35 * ones_row(1)
@@ -133,10 +133,10 @@ def append_liquid_hydrogen_tank_residual_and_unknowns(fuel_tank, segment, distri
     distributor_lower_bounds[fuel_tank.tag].liquid_temperature = 5 * ones_row(1) 
     distributor_upper_bounds[fuel_tank.tag].liquid_temperature = 40 * ones_row(1) 
 
-    distributor_lower_bounds[fuel_tank.tag].ullage_volume = 0* ones_row(1)
-    distributor_upper_bounds[fuel_tank.tag].ullage_volume = np.inf * ones_row(1)#fuel_tank.fuel.volume_properties.net_volume* ones_row(1)
+    distributor_lower_bounds[fuel_tank.tag].ullage_volume = 1e-6* ones_row(1)
+    distributor_upper_bounds[fuel_tank.tag].ullage_volume = fuel_tank.fuel.volume_properties.net_volume* ones_row(1)
 
-    distributor_lower_bounds[fuel_tank.tag].liquid_volume = 0 * ones_row(1)
+    distributor_lower_bounds[fuel_tank.tag].liquid_volume = 1e-6 * ones_row(1)
     distributor_upper_bounds[fuel_tank.tag].liquid_volume = fuel_tank.fuel.volume_properties.net_volume * ones_row(1)
 
     return

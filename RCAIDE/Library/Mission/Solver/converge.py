@@ -48,8 +48,8 @@ def converge(segment):
         problem  = add_mission_variables(segment) 
        
         # Commense suppression of console window output  
-        devnull = open(os.devnull,'w')
-        sys.stdout = devnull
+        # devnull = open(os.devnull,'w')
+        # sys.stdout = devnull
          
         outputs  = scipy_setup.SciPy_Solve(problem,
                                            solver     = segment.state.numerics.solver.method,
@@ -58,7 +58,7 @@ def converge(segment):
                                            tolerance  = segment.state.numerics.solver.tolerance_solution)
     
         # Terminate suppression of console window output   
-        sys.stdout = sys.__stdout__  
+        # sys.stdout = sys.__stdout__  
          
         if outputs[3] != 0:
             mission_converge = False        
