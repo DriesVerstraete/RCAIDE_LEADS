@@ -222,9 +222,7 @@ def add_mission_variables(segment):
         full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.lower_bounds[unkn])
         full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.upper_bounds[unkn])
     
-    # full_net_upper_bound_vals = Data()
-    # full_net_lower_bound_vals = Data()
-    # net_keys = (['ullage_temperature', 'liquid_temperature', 'ullage_volume', 'liquid_volume', 'ullage_mass', 'liquid_mass'])
+
     for net_unkn in net_unknown_keys:
         full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
         full_lower_bound_vals[net_unkn] = segment.state.lower_bounds.network[net_unkn]
@@ -303,72 +301,58 @@ def add_mission_variables(segment):
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string    
     else:  
-        output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
-        # for unkn in unknown_keys:
-        #     basic_string_con[unkn] = np.tile('segment.state.unknowns.mission.'+unkn+'[', n_points)
-        #     input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
-        # for unkn in net_unknown_keys:
-            # basic_string_con[unkn] = np.tile('segment.state.unknowns.network.'+unkn+'[', n_points)
-            # input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
-        stack = [(segment.state.unknowns, "segment.state.unknowns")]
-        while stack:
-            D, prefix = stack.pop()
-            for k, v in D.items():
-                if k == "tag":     
+        output_numbers = np.arange(n_points, dtype=np.int16)
+
+        def iter_unknown_leaves(node, prefix):
+            for key, value in node.items():
+                if key == "tag":
                     continue
-                if isinstance(v, dict):
-                    stack.append((v, prefix + f".{k}"))
+                path = f"{prefix}.{key}"
+                if isinstance(value, dict):
+                    yield from iter_unknown_leaves(value, path)
                 else:
-                    base = prefix + f".{k}["
-                    prefix_array = np.tile(base, n_points)
-                    ref_strings = np.core.defchararray.add(prefix_array, output_numbers.astype(str))
-                    # ref_strings = np.core.defchararray.add(ref_strings, "]")
-                    input_string.append(ref_strings)
+                    yield path
 
-        # input_strings is a list of arrays, just like your example
-        
-        input_string       = np.ravel(input_string)
-        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
-        input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
-        input_aliases[:,0] = input_names
-        input_aliases[:,1] = input_string
-        
+        input_string = [
+            np.core.defchararray.add(
+                np.tile(f"{path}[", n_points),
+                output_numbers.astype(str),
+            )
+            for path in iter_unknown_leaves(segment.state.unknowns, "segment.state.unknowns")
+        ]
+        input_string = np.ravel(input_string)
+        input_string = np.core.defchararray.add(input_string, np.tile("]", len_inputs))
+        input_aliases = np.reshape(
+            np.tile(np.atleast_2d(np.array((None, None))), len_inputs), (-1, 2)
+        )
+        input_aliases[:, 0] = input_names
+        input_aliases[:, 1] = input_string
+
     # Step 4.2: Setup the aliases for the residuals
-    residual_string = []
-    residual_names  = []
-
-    stack = [(segment.state.residuals, "segment.state.residuals")]
-    counter = 0  # global residual index
-
-    while stack:
-        D, prefix = stack.pop()
-        for k, v in D.items():
-            if k == "tag":
+    def iter_residual_entries(node, prefix):
+        for key, value in node.items():
+            if key == "tag":
                 continue
-            if isinstance(v, dict):
-                stack.append((v, prefix + f".{k}"))
+            path = f"{prefix}.{key}"
+            if isinstance(value, dict):
+                yield from iter_residual_entries(value, path)
             else:
-                base = prefix + f".{k}["
-                # determine how many residuals this variable has
-                n_res = len(v) if hasattr(v, "__len__") else 1
-                for i in range(n_res):
-                    residual_string.append(base + str(i) + "]")
-                    residual_names.append(f"Residual_{counter+1}")
-                    counter += 1
+                arr = np.atleast_1d(value)
+                length = arr.shape[0] if arr.ndim > 1 else arr.size
+                for idx in range(length):
+                    yield f"{path}[{idx}]"
 
-    # convert to arrays
-    residual_string = np.array(residual_string)
-    residual_names  = np.array(residual_names)
-    len_residuals   = residual_string.shape[0]
+    residual_string = np.array(
+        list(iter_residual_entries(segment.state.residuals, "segment.state.residuals"))
+    )
+    residual_names = np.array([f"Residual_{i+1}" for i in range(residual_string.size)])
+    len_residuals = residual_string.size
 
-    # create alias array
-    residual_aliases      = np.reshape(
-        np.tile(np.atleast_2d(np.array((None, None))), len_residuals),
-        (-1, 2)
+    residual_aliases = np.reshape(
+        np.tile(np.atleast_2d(np.array((None, None))), len_residuals), (-1, 2)
     )
     residual_aliases[:, 0] = residual_names
     residual_aliases[:, 1] = residual_string
-
     
     # Step 4.3: Append Aliases
     aliases = []
@@ -424,15 +408,25 @@ def iterate_segment():
 def iterate_optimizer(nexus):
     segment = nexus.segment
      
-    unknowns = segment.state.unknowns.mission.pack_array()
-    if isinstance(unknowns,np.ndarray):
-        segment.state.unknowns.mission.unpack_array(unknowns)
+    unknowns = segment.state.unknowns.pack_array()
+    if isinstance(unknowns, np.ndarray):
+        mission_vec = segment.state.unknowns.mission.pack_array()
+        mission_len = mission_vec.size
+        segment.state.unknowns.mission.unpack_array(unknowns[:mission_len])
+        if segment.state.network_numerics.solver.type is None:
+            network_vec = segment.state.unknowns.network.pack_array()
+            network_len = network_vec.size
+            segment.state.unknowns.network.unpack_array(
+                unknowns[mission_len:mission_len + network_len]
+            )
     else:
         segment.state.unknowns.mission = unknowns
+        if segment.state.network_numerics.solver.type is None:
+            segment.state.unknowns.network = unknowns
         
     segment.process.iterate(segment)
     
-    residuals = segment.state.residuals.mission.pack_array()    
+    residuals = segment.state.residuals.pack_array()    
     nexus.residuals =  residuals
     return nexus
 

@@ -24,7 +24,7 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     tank_residuals = state.residuals.network[network_tag].fuel_lines[distributor.tag][fuel_tank.tag]
     
     m_g = tank_unknowns.ullage_mass
-    m_l = tank_unknowns.liquid_mass
+    m_l = tank_unknowns.mass
     T_g = tank_unknowns.ullage_temperature
     T_l = tank_unknowns.liquid_temperature
     V_g = tank_unknowns.ullage_volume
@@ -125,8 +125,8 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     tank_residuals.ullage_mass = D_t @ m_g[:,0] - dm_g
     tank_residuals.ullage_mass[0] = m_g[0] -  tank_conditions.ullage_mass[0]
 
-    tank_residuals.liquid_mass = D_t @ m_l[:,0] - dm_l
-    tank_residuals.liquid_mass[0] = m_l[0] - tank_conditions.mass[0]
+    tank_residuals.mass = D_t @ m_l[:,0] - dm_l
+    tank_residuals.mass[0] = m_l[0] - tank_conditions.mass[0]
 
     tank_residuals.ullage_temperature = D_t @ T_g[:,0] - dT_g
     tank_residuals.ullage_temperature[0] = T_g[0] - tank_conditions.ullage_temperature[0,0]
@@ -142,7 +142,7 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
 
 
     tank_conditions.ullage_mass[1:,0]        = tank_unknowns.ullage_mass[1:,0]
-    tank_conditions.mass[1:,0]               = tank_unknowns.liquid_mass[1:,0]
+    tank_conditions.mass[1:,0]               = tank_unknowns.mass[1:,0]
     tank_conditions.ullage_temperature[1:,0] = tank_unknowns.ullage_temperature[1:,0]
     tank_conditions.liquid_temperature[1:,0] = tank_unknowns.liquid_temperature[1:,0]
     tank_conditions.ullage_volume[1:,0]      = tank_unknowns.ullage_volume[1:,0]
