@@ -62,8 +62,8 @@ def plot_liquid_hydrogen_tank_properties(results,
                     ullage_mass        = tank_conditions.ullage_mass[:, 0]
                     liquid_temp        = tank_conditions.liquid_temperature[:, 0]
                     ullage_temp        = tank_conditions.ullage_temperature[:, 0]
-                    liquid_volume      = tank_conditions.liquid_volume[:, 0]
-                    ullage_volume      = tank_conditions.ullage_volume[:, 0]
+                    liquid_volume      = tank_conditions.liquid_volume[:, 0]/Units.gallons
+                    ullage_volume      = tank_conditions.ullage_volume[:, 0]/Units.gallons
                     pressure           = tank_conditions.pressure[:, 0]
                     vent_rate          = tank_conditions.vent_rate[:, 0]
                     boil_off_rate = tank_conditions.boil_off_rate[:,0]
@@ -97,7 +97,7 @@ def plot_liquid_hydrogen_tank_properties(results,
     # Axis labels
     axis_1.set_ylabel("Mass (kg)")
     axis_2.set_ylabel("Temperature (K)")
-    axis_3.set_ylabel("Volume (m³)")
+    axis_3.set_ylabel("Volume (gal)")
     axis_4.set_ylabel("Mass Flow (kg/s)")
 
     for ax in [axis_1, axis_2, axis_3, axis_4]:
