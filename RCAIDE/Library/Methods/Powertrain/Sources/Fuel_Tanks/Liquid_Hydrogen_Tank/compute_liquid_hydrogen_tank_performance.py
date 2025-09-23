@@ -24,12 +24,13 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     tank_residuals = state.residuals.network[network_tag].fuel_lines[distributor.tag][fuel_tank.tag]
     
     m_g = tank_unknowns.ullage_mass
-    m_l = tank_unknowns.mass
+    m_l = tank_unknowns.liquid_mass
     T_g = tank_unknowns.ullage_temperature
     T_l = tank_unknowns.liquid_temperature
     V_g = tank_unknowns.ullage_volume
     V_l = tank_unknowns.liquid_volume
     
+
     flow_split_ratio  = fuel_tank.flow_split_ratio
 
     if fuel_tank.symmetric:
@@ -39,19 +40,6 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     
     m_dot_l_out =  tank_conditions.mass_flow_rate  
     m_dot_g_out =  tank_conditions.vent_rate
-
-     # Liquid properties
-    k_liq = PropsSI("L", "T", T_l, "Q", 0, "Hydrogen")   # thermal conductivity [W/m-K]
-    mu_liq = PropsSI("V", "T", T_l, "Q", 0, "Hydrogen")  # viscosity [Pa·s]
-    cp_liq = PropsSI("C", "T", T_l, "Q", 0, "Hydrogen")  # Cp [J/kg-K]
-    rho_l  = PropsSI("D", "T", T_l, "Q", 0, "Hydrogen")  # density [kg/m³]
-    
-    # Gas (ullage vapor) properties
-    k_g   = PropsSI("L", "T", T_g, "Q", 1, "Hydrogen")   # thermal conductivity [W/m-K]
-    mu_g  = PropsSI("V", "T", T_g, "Q", 1, "Hydrogen")   # viscosity [Pa·s]
-    cp_g  = PropsSI("Cpmass", "T", T_g, "Q", 1, "Hydrogen")   # Cp [J/kg-K] # maybe wrong check thisn later
-    rho_g = m_g[:,0] / V_g[:,0] # PropsSI("D", "T", T_g, "Q", 1, "Hydrogen")   # density [kg/m³]
-
 
     # --- Interface saturation Pressure ---
     P = PropsSI("P", "T", T_g[:,0], "D", m_g[:,0] / V_g[:,0], "Hydrogen")
@@ -66,7 +54,18 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     L_int,A_int= compute_interface_geometric_properties(fuel_tank, V_l[:,0])
 
 
-    
+    # Liquid properties
+    k_liq = PropsSI("L", "T", T_l, "Q", 0, "Hydrogen")   # thermal conductivity [W/m-K]
+    mu_liq = PropsSI("V", "T", T_l, "Q", 0, "Hydrogen")  # viscosity [Pa·s]
+    cp_liq = PropsSI("C", "T", T_l, "Q", 0, "Hydrogen")  # Cp [J/kg-K]
+    rho_l  = PropsSI("D", "T", T_l, "Q", 0, "Hydrogen")  # density [kg/m³]
+
+    # Gas (ullage vapor) properties
+    k_g   = PropsSI("L", "T", T_g, "Q", 1, "Hydrogen")   # thermal conductivity [W/m-K]
+    mu_g  = PropsSI("V", "T", T_g, "Q", 1, "Hydrogen")   # viscosity [Pa·s]
+    cp_g  = PropsSI("Cpmass", "T", T_g, "Q", 1, "Hydrogen")   # Cp [J/kg-K] # maybe wrong check thisn later
+    rho_g = PropsSI("D", "T", T_g, "Q", 1, "Hydrogen")   # density [kg/m³]
+
     # --- Heat fluxes interface exchange ---
     Q_l_i = Q_liq_to_int(
         T_l, T_int, A_int, L_int,
@@ -83,8 +82,8 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     # Q_e_l = Q_env_to_hydrogen(A_wet_liquid, T_h, T_l, N_layers=30)
     
     # --- Heat fluxes environment exchange assume constant for testing code ---
-    Q_e_g = 350*np.ones_like(Q_l_i)
-    Q_e_l = 350*np.ones_like(Q_l_i)
+    Q_e_g = 200*np.ones_like(Q_l_i)
+    Q_e_l = 200*np.ones_like(Q_l_i)
 
     # --- Enthalpies ---
     h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
@@ -121,34 +120,34 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     D_t = D/(tf - t0) 
 
 
-    tank_residuals.ullage_mass[:,0] = D_t @ m_g[:,0] - dm_g
-    tank_residuals.ullage_mass[0,0] = m_g[0] -  tank_conditions.ullage_mass[0]
+    tank_residuals.ullage_mass = D_t @ m_g[:,0] - dm_g
+    tank_residuals.ullage_mass[0] = m_g[0] -  tank_conditions.ullage_mass[0]
 
-    tank_residuals.mass[:,0] = D_t @ m_l[:,0] - dm_l
-    tank_residuals.mass[0,0] = m_l[0] - tank_conditions.mass[0,0]
+    tank_residuals.liquid_mass = D_t @ m_l[:,0] - dm_l
+    tank_residuals.liquid_mass[0] = m_l[0] - tank_conditions.mass[0]
 
-    tank_residuals.ullage_temperature[:,0] = D_t @ T_g[:,0] - dT_g
-    tank_residuals.ullage_temperature[0,0] = T_g[0] - tank_conditions.ullage_temperature[0,0]
+    tank_residuals.ullage_temperature = D_t @ T_g[:,0] - dT_g
+    tank_residuals.ullage_temperature[0] = T_g[0] - tank_conditions.ullage_temperature[0,0]
     
-    tank_residuals.liquid_temperature[:,0] = D_t @ T_l[:,0] - dT_l
-    tank_residuals.liquid_temperature[0,0] = T_l[0] - tank_conditions.liquid_temperature[0,0]
+    tank_residuals.liquid_temperature = D_t @ T_l[:,0] - dT_l
+    tank_residuals.liquid_temperature[0] = T_l[0] - tank_conditions.liquid_temperature[0,0]
     
-    tank_residuals.ullage_volume[:,0] = D_t @ V_g[:,0] - dV_g
-    tank_residuals.ullage_volume[0,0] = V_g[0] - tank_conditions.ullage_volume[0,0]
+    tank_residuals.ullage_volume = D_t @ V_g[:,0] - dV_g
+    tank_residuals.ullage_volume[0] = V_g[0] - tank_conditions.ullage_volume[0,0]
     
-    tank_residuals.liquid_volume[:,0] = D_t @ V_l[:,0] - dV_l
-    tank_residuals.liquid_volume[0,0] = V_l[0] - tank_conditions.liquid_volume[0,0]
+    tank_residuals.liquid_volume = D_t @ V_l[:,0] - dV_l
+    tank_residuals.liquid_volume[0] = V_l[0] - tank_conditions.liquid_volume[0,0]
 
 
     tank_conditions.ullage_mass[1:,0]        = tank_unknowns.ullage_mass[1:,0]
-    tank_conditions.mass[1:,0]               = tank_unknowns.mass[1:,0]
+    tank_conditions.mass[1:,0]               = tank_unknowns.liquid_mass[1:,0]
     tank_conditions.ullage_temperature[1:,0] = tank_unknowns.ullage_temperature[1:,0]
     tank_conditions.liquid_temperature[1:,0] = tank_unknowns.liquid_temperature[1:,0]
     tank_conditions.ullage_volume[1:,0]      = tank_unknowns.ullage_volume[1:,0]
     tank_conditions.liquid_volume[1:,0]      = tank_unknowns.liquid_volume[1:,0]
     tank_conditions.vent_rate                = m_dot_g_out
     tank_conditions.boil_off_rate[:,0]       = m_dot_bo
-
+    print(tank_unknowns.ullage_temperature[:,0])
     if fuel_tank.symmetric:
         symmetric_tag = fuel_tank.tag  + "_symmetric"
         distributor_conditions.fuel_tanks[symmetric_tag] = deepcopy(distributor_conditions.fuel_tanks[fuel_tank.tag])
