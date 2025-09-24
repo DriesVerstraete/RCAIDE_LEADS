@@ -55,6 +55,7 @@ class Numerics(Conditions):
         self.solver.print_output              = True
         self.solver.max_evaluations           = 200
         self.solver.step_size                 = 1E-8   
+        self.solver.fallback_to_unbounded     = False
         self.solver.lower_bounds              = Conditions()
         self.solver.upper_bounds              = Conditions()
         
@@ -99,7 +100,7 @@ class Network_Numerics(Numerics):
             None
         """           
         self.tag                              = 'network_numerics'
-        self.solver.type                      = "least_squares"
+        self.solver.type                      = None
         self.solver.method                    = "trf"    
         self.solver.lower_bounds              = None
         self.solver.upper_bounds              = None
