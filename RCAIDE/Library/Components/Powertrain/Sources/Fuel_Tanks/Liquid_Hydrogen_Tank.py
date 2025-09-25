@@ -103,13 +103,13 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         self.design_isa_deviation     = 0
         self.ullage_volume_fraction   = 0.07
         self.design_external_pressure = 0 
-        self.ullage_temperature        = 21 #K
+        self.ullage_temperature        = 25 #K
         self.liquid_temperature        = 20 #K
         self.vent_rate                 = 0
         self.fuel                      = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()
         # fix this later on
         self.ullage                    = Data()
-        self.ullage.density            = 1.35
+        self.ullage.density            = 2.5
         self.ullage.mass_properties    = RCAIDE.Framework.Core.Data()
         
 

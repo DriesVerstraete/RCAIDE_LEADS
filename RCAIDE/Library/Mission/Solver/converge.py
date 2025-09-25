@@ -85,40 +85,11 @@ def converge(segment):
                                                  maxfev = segment.state.numerics.solver.max_evaluations,
                                                  epsfcn = segment.state.numerics.solver.step_size,
                                                  full_output = 1)
-                                                        
+        
         if ier !=1:
             mission_converge = False
         else:
             mission_converge = True
-
-
-            
-                            
-    elif segment.state.numerics.solver.type  == "bounded_root_finder":  # Tring a different method here
-        unknowns = segment.state.unknowns.mission.pack_array() 
-        if segment.state.network_numerics.solver.type is None:
-            unknowns = np.concatenate([unknowns, segment.state.unknowns.network.pack_array()])
-
-        lower_bound = np.concatenate([segment.state.numerics.solver.lower_bounds.pack_array() , segment.state.lower_bounds.pack_array()])
-        upper_bound = np.concatenate([segment.state.numerics.solver.upper_bounds.pack_array() , segment.state.upper_bounds.pack_array()])
-        bounds = scipy.optimize.Bounds(lower_bound,upper_bound)
-        if segment.state.number_of_unknowns != segment.state.number_of_residuals:
-            raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_unknowns) + \
-                                 ') is not equal to the number of residuals (equations) (' + str(segment.state.number_of_residuals) + '). Either enforce of unknowns '+\
-                                 ' to be equal to the number of residuals (equations) to use fsolve or switch RCAIDE solver type to "optimize" when defining the segment.'+ \
-
-                                 '\n i.e. segment.state.numerics.solver.type  = "optimize" ') 
-        
-        else:
-            result = scipy.optimize.least_squares(iterate_root_finder,
-                                                 unknowns,
-                                                 bounds= bounds,
-                                                 args   = (segment),
-                                                 verbose = 2 if segment.state.numerics.solver.print_output else 0,
-                                                 )
-            mission_converge = False
-            if result.success:
-                mission_converge = True      
             
     else: 
         raise Exception('undefined mission solver type')        
@@ -181,7 +152,7 @@ def iterate_root_finder(unknowns, segment):
             segment.state.residuals.network.pack_array(),
         ])
 
-    return np.linalg.norm(residuals)# residuals
+    return residuals
 
 
 
