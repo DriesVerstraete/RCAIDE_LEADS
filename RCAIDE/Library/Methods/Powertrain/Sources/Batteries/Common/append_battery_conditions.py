@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports 
 import RCAIDE 
-from RCAIDE.Framework.Mission.Common     import   Conditions
+from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHODS
@@ -103,7 +103,7 @@ def append_battery_conditions(battery_module,segment,bus):
     # Conditions for recharging battery module
     if isinstance(segment,RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge):
         segment.state.conditions.energy.recharging  = True 
-        segment.state.unknowns.mission['recharge']          =  0* ones_row(1)  
+        segment.state.unknowns.mission['recharge']          =  0* ones_row(1)  # need to check what this does
         segment.state.residuals.mission.network['recharge'] =  0* ones_row(1)
         segment.state.number_of_unknowns  += 1
         segment.state.number_of_residuals += 1    
@@ -161,6 +161,47 @@ def append_battery_conditions(battery_module,segment,bus):
         segment.increment_battery_age_by_one_day   = False    
      
     return 
+
+def append_battery_unknowns_residuals(battery_module,segment,bus,network):
+    
+    # compute ambient conditions
+    atmosphere    = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+    alt           = -segment.conditions.frames.inertial.position_vector[:,2] 
+    if segment.temperature_deviation != None:
+        temp_dev = segment.temperature_deviation    
+    atmo_data    = atmosphere.compute_values(altitude = alt,temperature_deviation=temp_dev)  
+    ones_row    = segment.state.ones_row
+    
+    segment.state.number_of_network_unknowns  += 1 
+    segment.state.number_of_network_residuals += 1
+
+    bus_unknowns  = segment.state.unknowns.network[network.tag].busses[bus.tag]
+    bus_residuals = segment.state.residuals.network[network.tag].busses[bus.tag]
+
+    bus_unknowns[battery_module.tag] = Unknowns()
+    bus_residuals[battery_module.tag] = Residuals()
+
+    bus_unknowns[battery_module.tag].cell= Unknowns()
+    bus_residuals[battery_module.tag].cell = Residuals()
+
+    if 'battery_cell_temperature' in segment:
+        cell_temperature  = segment.battery_cell_temperature  
+    else:
+        cell_temperature                                      = atmo_data.temperature[0,0] 
+    bus_unknowns[battery_module.tag].cell.temperature  = ones_row(1) * cell_temperature
+    bus_residuals[battery_module.tag].cell.temperature = ones_row(1)* 0
+
+    if 'initial_battery_state_of_charge' in segment:
+        initial_battery_energy                                                   = segment.initial_battery_state_of_charge*battery_module.maximum_energy   
+        bus_unknowns[battery_module.tag].energy = ones_row(1) * initial_battery_energy
+    else:
+        bus_unknowns[battery_module.tag].energy = ones_row(1) * 0
+    bus_residuals[battery_module.tag].energy = ones_row(1)* 0
+
+    
+
+    return
+
     
 def append_battery_segment_conditions(battery_module, segment, bus): 
     """Sets the initial battery energy at the start of each segment as the last point from the previous segment 

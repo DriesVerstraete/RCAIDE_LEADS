@@ -10,7 +10,7 @@
 # RCAIDE imports
 from RCAIDE.Framework.Core        import Data
 from RCAIDE.Library.Components    import Component   
-from RCAIDE.Library.Methods.Powertrain.Sources.Batteries.Common.append_battery_conditions import append_battery_conditions, append_battery_segment_conditions
+from RCAIDE.Library.Methods.Powertrain.Sources.Batteries.Common.append_battery_conditions import *
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Battery
@@ -151,8 +151,12 @@ class Generic_Battery_Module(Component):
             Electrical bus connected to this battery
         """
         append_battery_conditions(self,segment,bus)  
+        
         return
-    
+    def append_unknowns_residuals(self,segment,bus,network):
+        append_battery_unknowns_residuals(self,segment,bus,network)  
+        return
+
     def append_battery_segment_conditions(self,segment,bus):
         """
         Append segment-specific battery conditions

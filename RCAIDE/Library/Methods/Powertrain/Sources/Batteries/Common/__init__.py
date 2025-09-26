@@ -21,7 +21,7 @@ RCAIDE.Library.Components.Powertrain.Sources.Battery_Modules.Aluminum_Air
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 
-from .append_battery_conditions               import append_battery_conditions, append_battery_segment_conditions
+from .append_battery_conditions               import append_battery_conditions, append_battery_segment_conditions, append_battery_unknowns_residuals
 from .find_ragone_properties                  import find_ragone_properties
 from .find_specific_power                     import find_specific_power
 from .find_mass_gain_rate                     import find_mass_gain_rate

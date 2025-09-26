@@ -6,6 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------  
+import RCAIDE
 from RCAIDE.Framework.Core import Units, Data
 from RCAIDE.Framework.Mission.Common import Conditions
 # ----------------------------------------------------------------------------------------------------------------------
@@ -33,3 +34,18 @@ def set_network_residuals_and_unknowns(mission):
 
                 for fuel_tank in fuel_line.fuel_tanks:
                     fuel_tank.append_operating_conditions(segment,fuel_line,network)
+            for bus in network.busses:   
+                segment.state.unknowns.network[network.tag].busses      = Conditions()
+                segment.state.residuals.network[network.tag].busses     = Conditions()     
+                # segment.state.lower_bounds.network[network.tag].busses      = Conditions()
+                # segment.state.upper_bounds.network[network.tag].busses     = Conditions()               
+                bus.append_operating_conditions(segment,network) 
+
+                for index,battery_module in  enumerate(bus.battery_modules): 
+                    battery_module.append_operating_conditions(segment,bus) 
+                    if bus.identical_battery_modules == True and index ==0:
+                        battery_module.append_unknowns_residuals(segment,bus,network) 
+                for tag, bus_item in bus.items():  
+                    if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
+                        bus_item.append_operating_conditions(segment,bus)
+    

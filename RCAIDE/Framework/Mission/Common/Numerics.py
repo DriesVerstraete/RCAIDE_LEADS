@@ -99,7 +99,7 @@ class Network_Numerics(Numerics):
             None
         """           
         self.tag                              = 'network_numerics'
-        self.solver.type                      = "least_squares"
+        self.solver.type                      = None
         self.solver.method                    = "trf"    
         self.solver.lower_bounds              = None
         self.solver.upper_bounds              = None

@@ -107,7 +107,7 @@ class Electrical_Bus(Component):
         self.battery_module_electric_configuration  = "Series"
         self.fuel_cell_stack_electric_configuration = "Series"
         
-    def append_operating_conditions(self, segment):
+    def append_operating_conditions(self, segment, network):
         """
         Append operating conditions for a flight segment
         
@@ -116,7 +116,7 @@ class Electrical_Bus(Component):
         segment : Segment
             Flight segment containing operating conditions
         """
-        append_bus_conditions(self, segment)
+        append_bus_conditions(self, segment,network)
         return
         
     def append_segment_conditions(self, segment):
@@ -143,7 +143,7 @@ class Electrical_Bus(Component):
         initialize_bus_properties(self)
         return
         
-    def compute_distributor_conditions(self,state,t_idx, delta_t):
+    def compute_distributor_conditions(self,state):
         """
         Compute electrical conditions during operation
         
@@ -156,5 +156,5 @@ class Electrical_Bus(Component):
         delta_t : float
             Time step
         """
-        compute_bus_conditions(self,state,t_idx, delta_t)
+        compute_bus_conditions(self,state)
         return    

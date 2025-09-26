@@ -7,11 +7,11 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports  
 import RCAIDE
-from RCAIDE.Framework.Mission.Common     import   Conditions
+from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHODS
 # ---------------------------------------------------------------------------------------------------------------------- 
-def append_bus_conditions(bus,segment): 
+def append_bus_conditions(bus,segment,network): 
     """
     Appends conditions for the electrical bus to the segment's energy conditions dictionary.
 
@@ -80,9 +80,15 @@ def append_bus_conditions(bus,segment):
         segment.state.conditions.energy.busses[bus.tag].state_of_charge           = segment.initial_battery_state_of_charge* ones_row(1) 
         segment.state.conditions.energy.busses[bus.tag].depth_of_discharge        = 1 - segment.initial_battery_state_of_charge* ones_row(1)
 
-    # # Add Conditions told  residuals and unknowns
-    # segment.state.unknowns.network.fuel_lines[bus.tag] = Conditions() #???
-    # segment.state.residuals.network.fuel_lines[bus.tag] = Conditions()
+     # Add Conditions for residuals and unknowns
+    segment.state.unknowns.network[network.tag].busses[bus.tag] = Unknowns()
+    segment.state.residuals.network[network.tag].busses[bus.tag] = Residuals()
+
+    # segment.state.lower_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
+    # segment.state.upper_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
+
+    
+    
    
     return
 

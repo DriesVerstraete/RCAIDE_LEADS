@@ -233,62 +233,57 @@ class Network(Component):
     
                 # Update total mass flow of system   
                 total_mdot  += conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate
-
-                #Ratio if none then compute
-                #                
+                
                 # Determine mass flow from each tank
                 for tank in fuel_line.fuel_tanks:
                     tank.compute_tank_properties(state,fuel_line,network_tag)  
                     state.conditions.energy.cumulative_fuel_consumption[1:,0] += np.cumsum(-np.diff(state.conditions.energy.fuel_lines.fuel_line.fuel_tanks[tank.tag].mass[:,0]))
                     
         # 3.2 Electric Sources 
-        time               = state.conditions.frames.inertial.time[:,0] 
-        delta_t            = np.diff(time) 
-        
         for bus in  busses:
             if bus.active: 
-                for t_idx in range(state.numerics.number_of_control_points):            
-                    stored_results_flag       = False
-                    stored_battery_cell_tag   = None
                     
-                    # ------------------------------------------------------------------------------------------------------------------- 
-                    # 3.1 Batteries
-                    # -------------------------------------------------------------------------------------------------------------------                
-                    for battery_module in  bus.battery_modules:                   
-                        if bus.identical_battery_modules == False:
-                            # run analysis  
-                            stored_results_flag, stored_battery_cell_tag =  battery_module.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                        else:             
-                            if stored_results_flag == False: 
-                                # run battery analysis 
-                                stored_results_flag, stored_battery_cell_tag  =  battery_module.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                            else:
-                                # use previous battery results 
-                                battery_module.reuse_stored_data(state,bus,stored_results_flag, stored_battery_cell_tag)
-                      
-                    # ------------------------------------------------------------------------------------------------------------------- 
-                    # 3.2 Fuel Cell Stacks
-                    # ------------------------------------------------------------------------------------------------------------------- 
-                    stored_results_flag       = False   
-                    stored_fuel_cell_tag      = None                  
-                    for fuel_cell_stack in  bus.fuel_cell_stacks:                   
-                        if bus.identical_fuel_cell_stacks == False:
-                            # run analysis  
-                            stored_results_flag, stored_fuel_cell_tag =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                        else:             
-                            if stored_results_flag == False: 
-                                # run battery analysis 
-                                stored_results_flag, stored_fuel_cell_tag  =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                            else:
-                                # use previous battery results 
-                                fuel_cell_stack.reuse_stored_data(state,bus,stored_results_flag, stored_fuel_cell_tag)
+                stored_results_flag       = False
+                stored_battery_cell_tag   = None
+                
+                # ------------------------------------------------------------------------------------------------------------------- 
+                # 3.1 Batteries
+                # -------------------------------------------------------------------------------------------------------------------                
+                for battery_module in  bus.battery_modules:                   
+                    if bus.identical_battery_modules == False:
+                        # run analysis  
+                        stored_results_flag, stored_battery_cell_tag =  battery_module.energy_calc(state,bus,coolant_lines)
+                    else:             
+                        if stored_results_flag == False: 
+                            # run battery analysis 
+                            stored_results_flag, stored_battery_cell_tag  =  battery_module.energy_calc(state,bus,coolant_lines,network_tag)
+                        else:
+                            # use previous battery results 
+                            battery_module.reuse_stored_data(state,bus,stored_results_flag, stored_battery_cell_tag)
+                    
+                    # # ------------------------------------------------------------------------------------------------------------------- 
+                    # # 3.2 Fuel Cell Stacks
+                    # # ------------------------------------------------------------------------------------------------------------------- 
+                    # stored_results_flag       = False   
+                    # stored_fuel_cell_tag      = None                  
+                    # for fuel_cell_stack in  bus.fuel_cell_stacks:                   
+                    #     if bus.identical_fuel_cell_stacks == False:
+                    #         # run analysis  
+                    #         stored_results_flag, stored_fuel_cell_tag =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
+                    #     else:             
+                    #         if stored_results_flag == False: 
+                    #             # run battery analysis 
+                    #             stored_results_flag, stored_fuel_cell_tag  =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
+                    #         else:
+                    #             # use previous battery results 
+                    #             fuel_cell_stack.reuse_stored_data(state,bus,stored_results_flag, stored_fuel_cell_tag)
                              
-                        # compute mass flow rate                    
-                        conditions.energy.busses[bus.tag].fuel_mass_flow_rate[t_idx]  = state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag].H2_mass_flow_rate[t_idx]      
+                    #     # compute mass flow rate                    
+                    #     conditions.energy.busses[bus.tag].fuel_mass_flow_rate[t_idx]  = state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag].H2_mass_flow_rate[t_idx]      
                           
                        
                     # Step 3: Compute bus properties          
-                    bus.compute_distributor_conditions(state,t_idx,delta_t)
+                    bus.compute_distributor_conditions(state)
                     
                     # Step 4 : Battery Thermal Management Calculations                    
                     for coolant_line in coolant_lines:
@@ -434,7 +429,7 @@ class Network(Component):
             # Create bus results data structure  
             # ------------------------------------------------------------------------------------------------------     
             for bus_i, bus in enumerate(network.busses): 
-                bus.append_operating_conditions(segment)                  
+                # bus.append_operating_conditions(segment)                  
     
                 # ------------------------------------------------------------------------------------------------------
                 # Assign network-specific  residuals, unknowns and results data structures
@@ -444,18 +439,18 @@ class Network(Component):
                         propulsor =  network.propulsors[propulsor_group[0]]
                         propulsor.append_propulsor_unknowns_and_residuals(segment)
                         
-                # ------------------------------------------------------------------------------------------------------
-                # Assign sub component results data structures
-                # ------------------------------------------------------------------------------------------------------ 
-                for battery_module in  bus.battery_modules: 
-                    battery_module.append_operating_conditions(segment,bus) 
+                # # ------------------------------------------------------------------------------------------------------
+                # # Assign sub component results data structures
+                # # ------------------------------------------------------------------------------------------------------ 
+                # for battery_module in  bus.battery_modules: 
+                #     battery_module.append_operating_conditions(segment,bus) 
     
                 for fuel_cell_stack in  bus.fuel_cell_stacks: 
                     fuel_cell_stack.append_operating_conditions(segment,bus)      
                     
-                for tag, bus_item in bus.items():  
-                    if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
-                        bus_item.append_operating_conditions(segment,bus)
+                # for tag, bus_item in bus.items():  
+                #     if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
+                #         bus_item.append_operating_conditions(segment,bus)
          
                 # for fuel_tank in  bus.fuel_tanks: 
                 #     fuel_tank.append_operating_conditions(segment,bus)

@@ -52,7 +52,7 @@ def network(segment):
 
             segment.state.network_numerics.solver.converged = result.success
             if result.success is False:
-                print('The network solver fails with exit condition: ',result.status)
+                print('The network solver fails with exit condition: ',result.message)
         elif segment.state.network_numerics.solver.type  == 'root_finder':
             result,_,ier,error_message = fsolve(energy_model.evaluate, 
                         full_unkn_vals.pack_array(),
