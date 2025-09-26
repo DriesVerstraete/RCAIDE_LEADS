@@ -80,9 +80,10 @@ def initialize_conditions(segment):
 
     for network in vehicle.networks:
         for bus in  network.busses:
-            bus.append_operating_conditions(segment)
+            bus.append_operating_conditions(segment,network)
             for battery_module in  bus.battery_modules:
                 battery_module.append_operating_conditions(segment,bus)
+                battery_module.append_unknowns_residuals(segment,bus,network)
 
             for fuel_cell_stack in  bus.fuel_cell_stacks:
                 fuel_cell_stack.append_operating_conditions(segment,bus)
@@ -91,8 +92,8 @@ def initialize_conditions(segment):
                 if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
                     bus_item.append_operating_conditions(segment,bus)
 
-            for fuel_tank in  bus.fuel_tanks:
-                fuel_tank.append_operating_conditions(segment,bus)
+            # for fuel_tank in  bus.fuel_tanks:
+            #     fuel_tank.append_operating_conditions(segment,bus)
 
 
     if isinstance(segment, RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge):
