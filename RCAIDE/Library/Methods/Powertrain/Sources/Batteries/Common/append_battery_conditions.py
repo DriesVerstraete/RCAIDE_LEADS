@@ -192,7 +192,7 @@ def append_battery_unknowns_residuals(battery_module,segment,bus,network):
     bus_residuals[battery_module.tag].cell.temperature = ones_row(1)* 0
 
     if 'initial_battery_state_of_charge' in segment:
-        initial_battery_energy                                                   = segment.initial_battery_state_of_charge*battery_module.maximum_energy   
+        initial_battery_energy                                                   = segment.initial_battery_state_of_charge #*battery_module.maximum_energy   
         bus_unknowns[battery_module.tag].energy = ones_row(1) * initial_battery_energy
     else:
         bus_unknowns[battery_module.tag].energy = ones_row(1) * 0

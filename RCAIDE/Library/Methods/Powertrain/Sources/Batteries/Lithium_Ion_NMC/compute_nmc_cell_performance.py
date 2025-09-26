@@ -205,7 +205,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     SOC_module         = battery_module_conditions.state_of_charge
     E_cell             = battery_module_conditions.cell.energy   
     #E_module           = battery_module_conditions.energy
-    E_module_unkn      = battery_module_unknowns.energy[:, 0]
+    E_module_unkn      = battery_module_unknowns.energy[:, 0] * E_module_max
     Q_cell             = battery_module_conditions.cell.charge_throughput              
     DOD_cell           = battery_module_conditions.cell.depth_of_discharge
     
@@ -263,7 +263,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     V_oc_cell      = V_ul_cell + (abs(I_cell) * R_0_cell)              
 
     # Effective Power flowing through battery_module 
-    P_module       = P_bus /no_modules  + np.abs(Q_heat_module) 
+    P_module       = -(P_bus /no_modules  + np.abs(Q_heat_module))
 
     # store remaining variables 
     V_oc_module     = V_oc_cell*n_series 
@@ -272,9 +272,13 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     P_cell          = P_module/n_total 
     E_module        = E_bus/no_modules 
     E_cell          = E_module/n_total  
+    
+    R_0_module = (R_0_cell / n_parallel) * n_series
+    battery_module_conditions.internal_resistance      = R_0_module
+    battery_module_conditions.cell.internal_resistance = R_0_cell
 
     battery_module_conditions.voltage_open_circuit       = V_oc_module
-    battery_module_conditions.cell.voltage_open_circuit  = V_ul_module
+    battery_module_conditions.cell.voltage_open_circuit = V_oc_cell
     battery_module_conditions.temperature            = T_module   
     battery_module_conditions.cell.power = P_cell    
     battery_module_conditions.cell.energy   = E_cell 
@@ -298,27 +302,27 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
         battery_module_residuals.cell.temperature = R
         battery_module_conditions.cell.temperature = T_cell_unkn
         battery_module_conditions.temperature = battery_module_conditions.cell.temperature
-        print(T_cell_unkn.T)
+        #print(T_cell_unkn.T)
 
         
         # Compute state of charge and depth of discarge of the battery_module
-        R_E = D_t @ E_module_unkn - P_module[:, 0]
+        R_E = D_t @ E_module_unkn + P_module[:, 0]
         R_E[0] = E_module_unkn[0] - E_module[0]
         battery_module_residuals.energy[:, 0] = R_E
 
-        SOC_cell                                     = E_module/E_module_max 
-        SOC_cell[SOC_cell>1]                = 1.
-        SOC_cell[SOC_cell<0]                = 0. 
+        SOC_cell = E_module_unkn / E_module_max
+        # SOC_cell = np.clip(SOC_cell, 0., 1.)
+        DOD_cell = 1. - SOC_cell
         DOD_cell                                     = 1 - SOC_cell  
         SOC_module                                   = SOC_cell
 
-        battery_module_conditions.cell.state_of_charge  = SOC_cell
-        battery_module_conditions.state_of_charge        = SOC_module        
+        battery_module_conditions.cell.state_of_charge[:,0]   = SOC_cell
+        battery_module_conditions.state_of_charge[:,0]         = SOC_module        
         battery_module_conditions.cell.energy[:,0]   = E_module_unkn     
         battery_module_conditions.energy[:,0] =  E_module_unkn  
-        battery_module_conditions.cell.depth_of_discharge[:,0] = DOD_cell[:,0]
+        battery_module_conditions.cell.depth_of_discharge[:,0] = DOD_cell
 
-        print(SOC_cell.T)
+        print(E_module_unkn)
 
     
         # Determine new charge throughput (the amount of charge gone through the battery_module)
