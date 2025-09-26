@@ -103,16 +103,16 @@ def append_battery_conditions(battery_module,segment,bus):
     # Conditions for recharging battery module
     if isinstance(segment,RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge):
         segment.state.conditions.energy.recharging  = True 
-        segment.state.unknowns.mission['recharge']          =  0* ones_row(1)  # need to check what this does
-        segment.state.residuals.mission.network['recharge'] =  0* ones_row(1)
-        segment.state.number_of_unknowns  += 1
-        segment.state.number_of_residuals += 1    
+        #segment.state.unknowns.mission['recharge']          =  0* ones_row(1)  # need to check what this does
+        #segment.state.residuals.mission.network['recharge'] =  0* ones_row(1)
+        #segment.state.number_of_unknowns  += 1
+        #segment.state.number_of_residuals += 1    
     elif type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Battery_Discharge:
         segment.state.conditions.energy.recharging   = False 
-        segment.state.unknowns.mission['discharge']          =  0* ones_row(1)  
-        segment.state.residuals.mission.network['discharge'] =  0* ones_row(1) 
-        segment.state.number_of_unknowns  += 1
-        segment.state.number_of_residuals += 1    
+        #segment.state.unknowns.mission['discharge']          =  0* ones_row(1)  
+        #segment.state.residuals.mission.network['discharge'] =  0* ones_row(1) 
+        #segment.state.number_of_unknowns  += 1
+        #segment.state.number_of_residuals += 1    
     else:
         segment.state.conditions.energy.recharging  = False 
         

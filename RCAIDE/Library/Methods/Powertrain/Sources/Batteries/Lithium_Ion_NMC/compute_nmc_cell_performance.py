@@ -302,8 +302,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
         battery_module_residuals.cell.temperature = R
         battery_module_conditions.cell.temperature = T_cell_unkn
         battery_module_conditions.temperature = battery_module_conditions.cell.temperature
-        #print(T_cell_unkn.T)
-
+        #print(T_cell_unkn.T) 
         
         # Compute state of charge and depth of discarge of the battery_module
         R_E = D_t @ E_module_unkn + P_module[:, 0]
@@ -322,7 +321,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
         battery_module_conditions.energy[:,0] =  E_module_unkn  
         battery_module_conditions.cell.depth_of_discharge[:,0] = DOD_cell
 
-        print(E_module_unkn)
+        #print(E_module_unkn)
 
     
         # Determine new charge throughput (the amount of charge gone through the battery_module)
