@@ -95,8 +95,8 @@ def compute_bus_conditions(bus, state):
         
 
     # Handle fully charged state
-    #if state.conditions.energy.recharging and np.float16(bus_conditions.state_of_charge ) == 1:
-        #bus_conditions.charging_current  = 0
-        #bus_conditions.power_draw        = 0
-        #bus_conditions.current_draw      = 0
+    if state.conditions.energy.recharging and np.float16(bus_conditions.state_of_charge ) == 1:
+        bus_conditions.charging_current  = 0
+        bus_conditions.power_draw        = 0
+        bus_conditions.current_draw      = 0
     return
