@@ -8,8 +8,9 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports 
-import RCAIDE 
-from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
+import RCAIDE
+import numpy as np
+from RCAIDE.Framework.Mission.Common     import   Conditions
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHODS
@@ -162,37 +163,34 @@ def append_battery_unknowns_residuals(battery_module,segment,bus,network):
     atmo_data    = atmosphere.compute_values(altitude = alt,temperature_deviation=temp_dev)  
     ones_row     = segment.state.ones_row
     ones_row_m1  = segment.state.ones_row_m1
-    
-    # initalize battery unknowns  
-    bus_unknowns  = segment.state.unknowns.network[network.tag].busses[bus.tag]
-    bus_residuals = segment.state.residuals.network[network.tag].busses[bus.tag] 
-    bus_unknowns[battery_module.tag]  = Unknowns()
-    bus_residuals[battery_module.tag] = Residuals()   
  
     # temperature unknown and residual 
     segment.state.number_of_network_unknowns  += 1 
-    segment.state.number_of_network_residuals += 1 
+    segment.state.number_of_network_residuals += 1
+    segment.state.numerics.network_solver.lower_bounds[battery_module.tag + '_cell_temperature'] = ones_row(1) * 0
+    segment.state.numerics.network_solver.upper_bounds[battery_module.tag + '_cell_temperature'] = ones_row(1) * np.inf
     if segment.state.initials: 
         battery_initials  = segment.state.initials.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]     
-        bus_unknowns[battery_module.tag].cell_temperature = ones_row_m1(1) * battery_initials.temperature[-1,0] 
+        segment.state.unknowns.network[battery_module.tag + '_cell_temperature'] = ones_row(1) * battery_initials.temperature[-1,0] 
     elif segment.initial_battery_conditions.cell_temperature is not None:
-        bus_unknowns[battery_module.tag].cell_temperature = ones_row_m1(1) * segment.initial_battery_conditions.cell_temperature
+        segment.state.unknowns.network[battery_module.tag+ '_cell_temperature']  = ones_row(1) * segment.initial_battery_conditions.cell_temperature
     else:
-        bus_unknowns[battery_module.tag].cell_temperature = ones_row_m1(1) * atmo_data.temperature[0,0]   
-    bus_residuals[battery_module.tag].cell_temperature    = ones_row_m1(1) * 0 
-    
-    
+        segment.state.unknowns.network[battery_module.tag+ '_cell_temperature'] = ones_row(1) * atmo_data.temperature[0,0]   
+    segment.state.residuals.network[battery_module.tag+ '_cell_temperature']    = ones_row(1) * 0 
+     
     # state of charge unknown and residual 
     segment.state.number_of_network_unknowns  += 1 
     segment.state.number_of_network_residuals += 1
+    segment.state.numerics.network_solver.lower_bounds[battery_module.tag + '_cell_state_of_charge'] = ones_row(1) * 0
+    segment.state.numerics.network_solver.upper_bounds[battery_module.tag + '_cell_state_of_charge'] = ones_row(1)  
     if segment.state.initials: 
         battery_initials  = segment.state.initials.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]     
-        bus_unknowns[battery_module.tag].cell_state_of_charge = ones_row(1) * battery_initials.cell.state_of_charge[-1,0] 
+        segment.state.unknowns.network[battery_module.tag + '_cell_state_of_charge'] = ones_row(1) * battery_initials.cell.state_of_charge[-1,0] 
     elif segment.initial_battery_conditions.state_of_charge is not None:
-        bus_unknowns[battery_module.tag].cell_state_of_charge = ones_row(1) * segment.initial_battery_conditions.state_of_charge
+        segment.state.unknowns.network[battery_module.tag + '_cell_state_of_charge']  = ones_row(1) * segment.initial_battery_conditions.state_of_charge
     else:
-        bus_unknowns[battery_module.tag].cell_state_of_charge = ones_row(1)  
-    bus_residuals[battery_module.tag].cell_power              = ones_row(1) * 0 
+        segment.state.unknowns.network[battery_module.tag + '_cell_state_of_charge']  = ones_row(1)  
+    segment.state.residuals.network[battery_module.tag + '_cell_power']               = ones_row(1) * 0 
     return
 
     
@@ -217,7 +215,7 @@ def append_battery_segment_conditions(battery_module, segment, bus):
 
     module_conditions = segment.state.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]
     if segment.state.initials:  
-        battery_initials                                        = segment.state.initials.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]  
+        battery_initials  = segment.state.initials.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]  
         if type(segment) ==  RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge:             
             module_conditions.battery_discharge_flag           = False 
         else:                   

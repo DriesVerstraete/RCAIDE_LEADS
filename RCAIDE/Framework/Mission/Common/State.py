@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core import DataOrdered
 from .Conditions           import Conditions
 from .Unknowns             import Unknowns
 from .Residuals            import Residuals
-from .Numerics             import Network_Numerics, Numerics   
+from .Numerics             import Numerics   
 
 # python imports
 import numpy as np
@@ -50,26 +50,25 @@ class State(Conditions):
             None
         """           
 
-        self.tag                 = 'state'
-        self.initials            = Conditions()
-        self.numerics            = Numerics()
-        self.network_numerics    = Network_Numerics()
+        self.tag                  = 'state'
+        self.initials             = Conditions()
+        self.numerics             = Numerics()
+        
+        # Unknowns 
+        self.unknowns             = Conditions()
+        self.unknowns.mission     = Unknowns()
+        self.unknowns.network     = Unknowns()
+ 
+        # Residuals 
+        self.residuals            = Conditions()
+        self.residuals.mission    = Residuals()
+        self.residuals.network    = Residuals()
 
-        # Unknowns
-        self.unknowns            = Conditions()
-        self.unknowns.mission    = Unknowns()
-        self.unknowns.network    = Unknowns()
-
-        # Residuals
-        self.residuals           = Conditions()
-        self.residuals.mission   = Residuals()
-        self.residuals.network   = Residuals()
-
-        # Bounds
-        self.lower_bounds = Conditions()
-        self.lower_bounds.network = Conditions()
-        self.upper_bounds = Conditions()
-        self.upper_bounds.network = Conditions()
+        ## Bounds
+        #self.lower_bounds         = Conditions()
+        #self.lower_bounds.network = Conditions()
+        #self.upper_bounds         = Conditions()
+        #self.upper_bounds.network = Conditions()
 
         # Conditions
         self.conditions          = Conditions()

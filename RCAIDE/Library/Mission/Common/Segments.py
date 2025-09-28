@@ -39,13 +39,13 @@ def sequential_segments(mission):
 
             # the moment we see a non-converged segment, flip to red
             if segment.state.initials != {}:
-                if not segment.state.initials.numerics.solver.converged and not error_flag:
+                if not segment.state.initials.numerics.mission_solver.converged and not error_flag:
                     pbar.colour = "red"
                     error_flag = True
 
             # do the init/skip dance
             segment.process.initialize.expand_state(segment)
-            segment.process.initialize.expand_state = RCAIDE.Library.Methods.skip
+            #segment.process.initialize.expand_state = RCAIDE.Library.Methods.skip
 
             segment.evaluate()
             segment.state.number_of_residuals = 0

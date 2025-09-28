@@ -159,7 +159,7 @@ def mission_setup(analyses):
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment() 
-    base_segment.state.numerics.solver.type = 'optimize' 
+    base_segment.state.numerics.mission_solver.method = 'optimize' 
     
 
     beta_cruise = analyses.low_speed_transition.energy.vehicle.networks.electric.propulsors.prop_rotor_propulsor_1.rotor.cruise.design_blade_pitch_command
@@ -177,9 +177,9 @@ def mission_setup(analyses):
     segment.air_speed_start           = 90.  * Units['mph']  
     
 
-    segment.state.numerics.solver.step_size                 = 1E-2 
-    segment.state.numerics.solver.tolerance_solution        = 1E-6 
-    segment.state.numerics.solver.objective                 = None
+    segment.state.numerics.mission_solver.step_size                 = 1E-2 
+    segment.state.numerics.mission_solver.tolerance        = 1E-6 
+    segment.state.numerics.mission_solver.objective                 = None
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  

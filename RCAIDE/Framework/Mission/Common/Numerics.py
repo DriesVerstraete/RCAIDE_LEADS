@@ -43,64 +43,41 @@ class Numerics(Conditions):
             Properties Used:
             None
         """           
-        self.tag                              = 'numerics' 
-        self.number_of_control_points         = 16
-        self.discretization_method            = chebyshev_data
-        self.solver                           = Conditions()
-        self.solver.type                      = "optimize" # options: "optimize", "root_finder"
-        self.solver.method                    = "SLSQP"    
-        self.solver.objective                 = "energy"   # options: # None, energy , power 
-        self.solver.tolerance_solution        = 1E-6     
-        self.solver.converged                 = None
-        self.solver.print_output              = True
-        self.solver.max_evaluations           = 200
-        self.solver.step_size                 = 1E-8   
-        self.solver.lower_bounds              = Conditions()
-        self.solver.upper_bounds              = Conditions()
+        self.tag                                = 'numerics' 
+        self.number_of_control_points           = 16
+        self.discretization_method              = chebyshev_data
+        self.combine_mission_and_network_solver = True
         
-        self.dimensionless                    = Conditions()
-        self.dimensionless.control_points     = np.empty([0,0])
-        self.dimensionless.differentiate      = np.empty([0,0])
-        self.dimensionless.integrate          = np.empty([0,0]) 
-            
-        self.time                             = Conditions()
-        self.time.control_points              = np.empty([0,0])
-        self.time.differentiate               = np.empty([0,0])
-        self.time.integrate                   = np.empty([0,0]) 
-        
-        
-        
-class Network_Numerics(Numerics):
-    """ Creates the data structure for the numerical solving of a mission.
-    
-        Assumptions:
-        None
-        
-        Source:
-        None
-    """
-    
-    def __defaults__(self):
-        """This sets the default values.
-    
-            Assumptions:
-            None
-    
-            Source:
-            N/A
-    
-            Inputs:
-            None
-    
-            Outputs:
-            None
-    
-            Properties Used:
-            None
-        """           
-        self.tag                              = 'network_numerics'
-        self.solver.type                      = None
-        self.solver.method                    = "trf"    
-        self.solver.lower_bounds              = None
-        self.solver.upper_bounds              = None
-        self.solver.print_output              = False
+        # mission solver 
+        self.mission_solver                     = Conditions()
+        self.mission_solver.method              = "optimize" # options: "optimize", "root_finder"
+        self.mission_solver.algorithm           = "SLSQP"    
+        self.mission_solver.objective           = "energy"   # options: # None, energy , power 
+        self.mission_solver.tolerance           = 1E-6     
+        self.mission_solver.converged           = None
+        self.mission_solver.print_output        = True
+        self.mission_solver.max_evaluations     = 200
+        self.mission_solver.step_size           = 1E-8 
+        self.mission_solver.lower_bounds        = Conditions()
+        self.mission_solver.upper_bounds        = Conditions()
+           
+        # network solver    
+        self.network_solver                     = Conditions()
+        self.network_solver.method              = None 
+        self.network_solver.tolerance           = 1E-6     
+        self.network_solver.converged           = None
+        self.network_solver.print_output        = True
+        self.network_solver.max_evaluations     = 200
+        self.network_solver.step_size           = 1E-8  
+        self.network_solver.lower_bounds        = Conditions()
+        self.network_solver.upper_bounds        = Conditions()
+           
+        self.dimensionless                      = Conditions()
+        self.dimensionless.control_points       = np.empty([0,0])
+        self.dimensionless.differentiate        = np.empty([0,0])
+        self.dimensionless.integrate            = np.empty([0,0]) 
+               
+        self.time                               = Conditions()
+        self.time.control_points                = np.empty([0,0])
+        self.time.differentiate                 = np.empty([0,0])
+        self.time.integrate                     = np.empty([0,0])

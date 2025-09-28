@@ -127,11 +127,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.body_angle = ones_row(1) * 3.0 * Units.degrees
                 
             if ctrls.body_angle.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.body_angle = ctrls.body_angle.bounds[0][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds.body_angle = ctrls.body_angle.bounds[0][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds.body_angle = ctrls.body_angle.bounds[0][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds.body_angle = ctrls.body_angle.bounds[0][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds.body_angle =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds.body_angle =   np.inf * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds.body_angle =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds.body_angle =   np.inf * ones_row(1)
     
         # Bank Angle  
         if ctrls.bank_angle.active:
@@ -142,11 +142,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.bank_angle = ones_row(1) * 0.0 * Units.degrees
     
             if ctrls.bank_angle.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.bank_angle = ctrls.bank_angle.bounds[0][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds.bank_angle = ctrls.bank_angle.bounds[0][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds.bank_angle = ctrls.bank_angle.bounds[0][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds.bank_angle = ctrls.bank_angle.bounds[0][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds.bank_angle =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds.bank_angle =   np.inf * ones_row(1)                
+                segment.state.numerics.mission_solver.lower_bounds.bank_angle =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds.bank_angle =   np.inf * ones_row(1)                
                 
         # Wing Angle  
         if ctrls.wind_angle.active:
@@ -157,11 +157,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.wind_angle = ones_row(1) * 1.0 * Units.degrees
     
             if ctrls.wind_angle.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.wind_angle = ctrls.wind_angle.bounds[0][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds.wind_angle = ctrls.wind_angle.bounds[0][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds.wind_angle = ctrls.wind_angle.bounds[0][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds.wind_angle = ctrls.wind_angle.bounds[0][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds.wind_angle =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds.wind_angle =   np.inf * ones_row(1)                 
+                segment.state.numerics.mission_solver.lower_bounds.wind_angle =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds.wind_angle =   np.inf * ones_row(1)                 
             
         # Throttle
         if ctrls.throttle.active: 
@@ -173,11 +173,11 @@ def set_residuals_and_unknowns(mission):
                     segment.state.unknowns.mission["throttle_" + str(i)] = ones_row(1) *  0.5 
         
                 if ctrls.throttle.bounds !=  None:
-                    segment.state.numerics.solver.lower_bounds["throttle_" + str(i)] = ctrls.throttle.bounds[i][0] * ones_row(1)
-                    segment.state.numerics.solver.upper_bounds["throttle_" + str(i)] = ctrls.throttle.bounds[i][1] * ones_row(1)
+                    segment.state.numerics.mission_solver.lower_bounds["throttle_" + str(i)] = ctrls.throttle.bounds[i][0] * ones_row(1)
+                    segment.state.numerics.mission_solver.upper_bounds["throttle_" + str(i)] = ctrls.throttle.bounds[i][1] * ones_row(1)
                 else:
-                    segment.state.numerics.solver.lower_bounds["throttle_" + str(i)] =  -np.inf * ones_row(1) 
-                    segment.state.numerics.solver.upper_bounds["throttle_" + str(i)] =   np.inf * ones_row(1)                      
+                    segment.state.numerics.mission_solver.lower_bounds["throttle_" + str(i)] =  -np.inf * ones_row(1) 
+                    segment.state.numerics.mission_solver.upper_bounds["throttle_" + str(i)] =   np.inf * ones_row(1)                      
                         
         # Thrust Vector  
         if ctrls.thrust_vector_angle.active: 
@@ -189,11 +189,11 @@ def set_residuals_and_unknowns(mission):
                     segment.state.unknowns.mission["thrust_vector_angle_" + str(i)] = ones_row(1) *  0.5 
     
                 if ctrls.thrust_vector_angle.bounds !=  None:
-                    segment.state.numerics.solver.lower_bounds["thrust_vector_angle_" + str(i)] = ctrls.thrust_vector_angle.bounds[i][0] * ones_row(1)
-                    segment.state.numerics.solver.upper_bounds["thrust_vector_angle_" + str(i)] = ctrls.thrust_vector_angle.bounds[i][1] * ones_row(1)
+                    segment.state.numerics.mission_solver.lower_bounds["thrust_vector_angle_" + str(i)] = ctrls.thrust_vector_angle.bounds[i][0] * ones_row(1)
+                    segment.state.numerics.mission_solver.upper_bounds["thrust_vector_angle_" + str(i)] = ctrls.thrust_vector_angle.bounds[i][1] * ones_row(1)
                 else:
-                    segment.state.numerics.solver.lower_bounds["thrust_vector_angle_" + str(i)] =  -np.inf * ones_row(1) 
-                    segment.state.numerics.solver.upper_bounds["thrust_vector_angle_" + str(i)] =   np.inf * ones_row(1)                     
+                    segment.state.numerics.mission_solver.lower_bounds["thrust_vector_angle_" + str(i)] =  -np.inf * ones_row(1) 
+                    segment.state.numerics.mission_solver.upper_bounds["thrust_vector_angle_" + str(i)] =   np.inf * ones_row(1)                     
 
         # Blade Pitch Command 
         if ctrls.blade_pitch_command.active: 
@@ -205,11 +205,11 @@ def set_residuals_and_unknowns(mission):
                     segment.state.unknowns.mission["blade_pitch_command_" + str(i)] = ones_row(1) *  0.5 
     
                 if ctrls.blade_pitch_command.bounds !=  None:
-                    segment.state.numerics.solver.lower_bounds["blade_pitch_command_" + str(i)] = ctrls.blade_pitch_command.bounds[i][0] * ones_row(1)
-                    segment.state.numerics.solver.upper_bounds["blade_pitch_command_" + str(i)] = ctrls.blade_pitch_command.bounds[i][1] * ones_row(1)
+                    segment.state.numerics.mission_solver.lower_bounds["blade_pitch_command_" + str(i)] = ctrls.blade_pitch_command.bounds[i][0] * ones_row(1)
+                    segment.state.numerics.mission_solver.upper_bounds["blade_pitch_command_" + str(i)] = ctrls.blade_pitch_command.bounds[i][1] * ones_row(1)
                 else:
-                    segment.state.numerics.solver.lower_bounds["blade_pitch_command_" + str(i)] =  -np.inf * ones_row(1) 
-                    segment.state.numerics.solver.upper_bounds["blade_pitch_command_" + str(i)] =   np.inf * ones_row(1)                      
+                    segment.state.numerics.mission_solver.lower_bounds["blade_pitch_command_" + str(i)] =  -np.inf * ones_row(1) 
+                    segment.state.numerics.mission_solver.upper_bounds["blade_pitch_command_" + str(i)] =   np.inf * ones_row(1)                      
                     
         # Velocity 
         if ctrls.velocity.active:  
@@ -220,11 +220,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.velocity = ones_row(1) *  100 
                  
             if ctrls.velocity.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.velocity = ctrls.velocity.bounds[0][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds.velocity = ctrls.velocity.bounds[0][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds.velocity = ctrls.velocity.bounds[0][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds.velocity = ctrls.velocity.bounds[0][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds.velocity =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds.velocity =   np.inf * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds.velocity =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds.velocity =   np.inf * ones_row(1)
                 
         # Ground Velocity 
         if ctrls.ground_velocity.active:  
@@ -235,11 +235,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.ground_velocity = ones_row(1) *  100 
     
             if ctrls.ground_velocity.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.ground_velocity = ctrls.ground_velocity.bounds[0][0] * ones_row_m1(1)
-                segment.state.numerics.solver.upper_bounds.ground_velocity = ctrls.ground_velocity.bounds[0][1] * ones_row_m1(1)
+                segment.state.numerics.mission_solver.lower_bounds.ground_velocity = ctrls.ground_velocity.bounds[0][0] * ones_row_m1(1)
+                segment.state.numerics.mission_solver.upper_bounds.ground_velocity = ctrls.ground_velocity.bounds[0][1] * ones_row_m1(1)
             else:
-                segment.state.numerics.solver.lower_bounds.ground_velocity =  -np.inf * ones_row_m1(1) 
-                segment.state.numerics.solver.upper_bounds.ground_velocity =   np.inf * ones_row_m1(1)
+                segment.state.numerics.mission_solver.lower_bounds.ground_velocity =  -np.inf * ones_row_m1(1) 
+                segment.state.numerics.mission_solver.upper_bounds.ground_velocity =   np.inf * ones_row_m1(1)
                         
         
         # Altitude
@@ -251,11 +251,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.altitude = ones_row(1) * 0.0 
         
             if ctrls.altitude.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.altitude = ctrls.altitude.bounds[0][0] * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds.altitude = ctrls.altitude.bounds[0][1] * ones_row(1)  
+                segment.state.numerics.mission_solver.lower_bounds.altitude = ctrls.altitude.bounds[0][0] * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds.altitude = ctrls.altitude.bounds[0][1] * ones_row(1)  
             else:
-                segment.state.numerics.solver.lower_bounds.altitude = -np.inf * ones_row(1)    
-                segment.state.numerics.solver.upper_bounds.altitude =  np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.lower_bounds.altitude = -np.inf * ones_row(1)    
+                segment.state.numerics.mission_solver.upper_bounds.altitude =  np.inf * ones_row(1) 
                         
         # Acceleration 
         if ctrls.acceleration.active:  
@@ -266,11 +266,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.acceleration = ones_row(1) *  1.
     
             if ctrls.acceleration.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.acceleration = ctrls.acceleration.bounds[0][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds.acceleration = ctrls.acceleration.bounds[0][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds.acceleration = ctrls.acceleration.bounds[0][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds.acceleration = ctrls.acceleration.bounds[0][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds.acceleration =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds.acceleration =   np.inf * ones_row(1)                 
+                segment.state.numerics.mission_solver.lower_bounds.acceleration =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds.acceleration =   np.inf * ones_row(1)                 
 
         # Time
         if ctrls.elapsed_time.active:  
@@ -281,11 +281,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission.elapsed_time = 30 
         
             if ctrls.elapsed_time.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds.elapsed_time = ctrls.elapsed_time.bounds[0][0] 
-                segment.state.numerics.solver.upper_bounds.elapsed_time = ctrls.elapsed_time.bounds[0][1]  
+                segment.state.numerics.mission_solver.lower_bounds.elapsed_time = ctrls.elapsed_time.bounds[0][0] 
+                segment.state.numerics.mission_solver.upper_bounds.elapsed_time = ctrls.elapsed_time.bounds[0][1]  
             else:
-                segment.state.numerics.solver.lower_bounds.elapsed_time = -np.inf    
-                segment.state.numerics.solver.upper_bounds.elapsed_time =  np.inf    
+                segment.state.numerics.mission_solver.lower_bounds.elapsed_time = -np.inf    
+                segment.state.numerics.mission_solver.upper_bounds.elapsed_time =  np.inf    
                                 
         # Elevator 
         if ctrls.elevator_deflection.active:      
@@ -296,11 +296,11 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission["elevator"] = ones_row(1) * 0.0 * Units.degrees
 
             if ctrls.elevator_deflection.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds["elevator"] = ctrls.elevator_deflection.bounds[i][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds["elevator"] = ctrls.elevator_deflection.bounds[i][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds["elevator"] = ctrls.elevator_deflection.bounds[i][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds["elevator"] = ctrls.elevator_deflection.bounds[i][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds["elevator"] =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds["elevator"] =   np.inf * ones_row(1)                   
+                segment.state.numerics.mission_solver.lower_bounds["elevator"] =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds["elevator"] =   np.inf * ones_row(1)                   
                 
         # Rudder
         if ctrls.rudder_deflection.active:    
@@ -312,11 +312,11 @@ def set_residuals_and_unknowns(mission):
                 
     
             if ctrls.rudder_deflection.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds["rudder"] = ctrls.rudder_deflection.bounds[i][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds["rudder"] = ctrls.rudder_deflection.bounds[i][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds["rudder"] = ctrls.rudder_deflection.bounds[i][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds["rudder"] = ctrls.rudder_deflection.bounds[i][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds["rudder"] =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds["rudder"] =   np.inf * ones_row(1)                   
+                segment.state.numerics.mission_solver.lower_bounds["rudder"] =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds["rudder"] =   np.inf * ones_row(1)                   
                   
         # Aileron  
         if ctrls.aileron_deflection.active:   
@@ -327,10 +327,10 @@ def set_residuals_and_unknowns(mission):
                 segment.state.unknowns.mission["aileron" ] = ones_row(1) * 0.0 * Units.degrees 
         
             if ctrls.aileron_deflection.bounds !=  None:
-                segment.state.numerics.solver.lower_bounds["aileron"] = ctrls.aileron_deflection.bounds[i][0] * ones_row(1)
-                segment.state.numerics.solver.upper_bounds["aileron"] = ctrls.aileron_deflection.bounds[i][1] * ones_row(1)
+                segment.state.numerics.mission_solver.lower_bounds["aileron"] = ctrls.aileron_deflection.bounds[i][0] * ones_row(1)
+                segment.state.numerics.mission_solver.upper_bounds["aileron"] = ctrls.aileron_deflection.bounds[i][1] * ones_row(1)
             else:
-                segment.state.numerics.solver.lower_bounds["aileron"] =  -np.inf * ones_row(1) 
-                segment.state.numerics.solver.upper_bounds["aileron"] =   np.inf * ones_row(1)                 
+                segment.state.numerics.mission_solver.lower_bounds["aileron"] =  -np.inf * ones_row(1) 
+                segment.state.numerics.mission_solver.upper_bounds["aileron"] =   np.inf * ones_row(1)                 
     return 
                                                                                                                                                                 

@@ -43,8 +43,8 @@ def converge(segment):
     Properties Used:
     N/A
     """ 
-    
-    if segment.state.numerics.solver.type  == "optimize": 
+    numerics = segment.state.numerics
+    if numerics.mission_solver.method  == "optimize": 
         problem  = add_mission_variables(segment) 
        
         # Commense suppression of console window output  
@@ -52,10 +52,10 @@ def converge(segment):
         sys.stdout = devnull
          
         outputs  = scipy_setup.SciPy_Solve(problem,
-                                           solver     = segment.state.numerics.solver.method,
-                                           sense_step = segment.state.numerics.solver.step_size,
-                                           iter       = segment.state.numerics.solver.max_evaluations,
-                                           tolerance  = segment.state.numerics.solver.tolerance_solution)
+                                           solver     = numerics.mission_solver.algorithm,
+                                           sense_step = numerics.mission_solver.step_size,
+                                           iter       = numerics.mission_solver.max_evaluations,
+                                           tolerance  = numerics.mission_solver.tolerance)
     
         # Terminate suppression of console window output   
         sys.stdout = sys.__stdout__  
@@ -66,9 +66,9 @@ def converge(segment):
         else:
             mission_converge = True
      
-    elif segment.state.numerics.solver.type  == "root_finder": 
+    elif numerics.mission_solver.method  == "root_finder": 
         unknowns = segment.state.unknowns.mission.pack_array() 
-        if segment.state.network_numerics.solver.type is None:
+        if segment.state.numerics.network_solver.method is None:
             unknowns = np.concatenate([unknowns, segment.state.unknowns.network.pack_array()])
 
 
@@ -76,14 +76,14 @@ def converge(segment):
             raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_unknowns) + \
                                  ') is not equal to the number of residuals (equations) (' + str(segment.state.number_of_residuals) + '). Either enforce of unknowns '+\
                                  ' to be equal to the number of residuals (equations) to use fsolve or switch RCAIDE solver type to "optimize" when defining the segment.'+ \
-                                 '\n i.e. segment.state.numerics.solver.type  = "optimize" ') 
+                                 '\n i.e. numerics.mission_solver.method  = "optimize" ') 
         else:
             unknowns,infodict,ier,error_message = scipy.optimize.fsolve(iterate_root_finder,
                                                  unknowns,
                                                  args   = segment,
-                                                 xtol   = segment.state.numerics.solver.tolerance_solution,
-                                                 maxfev = segment.state.numerics.solver.max_evaluations,
-                                                 epsfcn = segment.state.numerics.solver.step_size,
+                                                 xtol   = numerics.mission_solver.tolerance,
+                                                 maxfev = numerics.mission_solver.max_evaluations,
+                                                 epsfcn = numerics.mission_solver.step_size,
                                                  full_output = 1)
         
         if ier !=1:
@@ -94,13 +94,13 @@ def converge(segment):
     else: 
         raise Exception('undefined mission solver type')        
         
-    if mission_converge == False or segment.state.network_numerics.solver.converged is False:
+    if mission_converge == False or segment.state.numerics.network_solver.converged is False:
         print("Segment did not converge. Segment Tag: " + segment.tag)
         print("Error Message:\n" + error_message)
-        segment.state.numerics.solver.converged = False 
+        numerics.mission_solver.converged = False 
         segment.converged = False
     else:
-        segment.state.numerics.solver.converged = True
+        numerics.mission_solver.converged = True
         segment.converged = True
                                 
     return
@@ -132,7 +132,7 @@ def iterate_root_finder(unknowns, segment):
         mission_vec = segment.state.unknowns.mission.pack_array()
         mission_len = mission_vec.size
         segment.state.unknowns.mission.unpack_array(unknowns[:mission_len])
-        if segment.state.network_numerics.solver.type is None:
+        if segment.state.numerics.network_solver.method is None:
             network_vec = segment.state.unknowns.network.pack_array()
             network_len = network_vec.size
             segment.state.unknowns.network.unpack_array(
@@ -140,13 +140,13 @@ def iterate_root_finder(unknowns, segment):
             )
     else:
         segment.state.unknowns.mission = unknowns
-        if segment.state.network_numerics.solver.type is None:
+        if segment.state.numerics.network_solver.method is None:
             segment.state.unknowns.network = unknowns
 
     segment.process.iterate(segment)
 
     residuals = segment.state.residuals.mission.pack_array()
-    if segment.state.network_numerics.solver.type is None:
+    if segment.state.numerics.network_solver.method is None:
         residuals = np.concatenate([
             residuals,
             segment.state.residuals.network.pack_array(),
@@ -176,59 +176,66 @@ def add_mission_variables(segment):
         Properties Used:
         None
     """             
+    # Unpack 
+    numerics        = segment.state.numerics
+    combined_solver = numerics.combine_mission_and_network_solver 
+    SPS             = RCAIDE.Framework.Mission.Segments.Single_Point   
+    GS              = RCAIDE.Framework.Mission.Segments.Ground    
     
     # Step 1: Define Nexus
     nexus                        = Nexus()
-    optimization_problem         = Data() 
+    optimization_problem         = Data()
     
     # Step 2 : Get segment type 
-    ground_seg_flag =  (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Landing) or\
-                       (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Takeoff) or \
-                       (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Ground)  
-    single_pt_seg = (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude) or\
-                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_AVL_Trimmed) or \
-                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_No_Propulsion) or \
-                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle)  
+    ground_seg_flag =  (type(segment) == GS.Landing) or\
+                       (type(segment) == GS.Takeoff) or \
+                       (type(segment) == GS.Ground)  
+    single_pt_seg = (type(segment) == SPS.Set_Speed_Set_Altitude) or\
+                    (type(segment) == SPS.Set_Speed_Set_Altitude_AVL_Trimmed) or \
+                    (type(segment) == SPS.Set_Speed_Set_Altitude_No_Propulsion) or \
+                    (type(segment) == SPS.Set_Speed_Set_Throttle)  
     
-    # Step 2: Optimizer Inputs 
-    # Step 2.1: Extract inputs
-    input_count   = 0
-    unknown_keys  = list(segment.state.unknowns.mission.keys())  
-    unknown_keys.remove('tag') 
-
-    net_unknown_keys  = list(segment.state.unknowns.network.keys())  
-    net_unknown_keys.remove('tag') 
-
+    # Step 2: Determine dimension of solver 
+    input_count   = 0  
     if ground_seg_flag: 
-        n_points      = segment.state.numerics.number_of_control_points
+        n_points      = numerics.number_of_control_points
         len_inputs    = n_points
-        len_residuals = n_points
+        len_residuals = n_points  
     elif single_pt_seg:
         n_points      = 1
         len_inputs    = segment.state.number_of_unknowns
         len_residuals = segment.state.number_of_residuals
     else:
-        n_points      = segment.state.numerics.number_of_control_points  
-        n_points_net  = segment.state.network_numerics.number_of_control_points
-        len_inputs    = n_points*segment.state.number_of_unknowns + n_points_net * segment.state.number_of_network_unknowns
-        len_residuals = n_points*segment.state.number_of_residuals + n_points_net*segment.state.number_of_network_residuals
-          
-            
+        n_points      = numerics.number_of_control_points  
+        len_inputs    = n_points*segment.state.number_of_unknowns  
+        len_residuals = n_points*segment.state.number_of_residuals
+        
+    if combined_solver: 
+        n_points_net  = segment.state.numerics.number_of_control_points      
+        len_inputs    += n_points_net * segment.state.number_of_network_unknowns
+        len_residuals += n_points_net * segment.state.number_of_network_residuals      
+    
+    # Step 3: Design Variables     
+    # Step 3.1: Pack variables for solver      
+    unknown_keys  = list(segment.state.unknowns.mission.keys())  
+    unknown_keys.remove('tag')                
     full_unkn_vals        = Data()
     full_upper_bound_vals = Data()
     full_lower_bound_vals = Data()
     for unkn in unknown_keys: 
         full_unkn_vals[unkn]  = segment.state.unknowns.mission[unkn]
-        full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.lower_bounds[unkn])
-        full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.upper_bounds[unkn])
+        full_lower_bound_vals[unkn] = np.atleast_2d(numerics.mission_solver.lower_bounds[unkn])
+        full_upper_bound_vals[unkn] = np.atleast_2d(numerics.mission_solver.upper_bounds[unkn]) 
     
-
-    for net_unkn in net_unknown_keys:
-        full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
-        full_lower_bound_vals[net_unkn] = segment.state.lower_bounds.network[net_unkn]
-        full_upper_bound_vals[net_unkn] = segment.state.upper_bounds.network[net_unkn]
+    if combined_solver:
+        net_unknown_keys  = list(segment.state.unknowns.network.keys())  
+        net_unknown_keys.remove('tag')  
+        for net_unkn in net_unknown_keys:
+            full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
+            full_lower_bound_vals[net_unkn] = np.atleast_2d(numerics.network_solver.lower_bounds[net_unkn])
+            full_upper_bound_vals[net_unkn] = np.atleast_2d(numerics.network_solver.lower_bounds[net_unkn])
   
-    # Step 2.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
+    # Step 3.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
     input_len_strings = np.tile('Variable_', len_inputs)
     input_numbers     = np.linspace(1,len_inputs,len_inputs,dtype=np.int16)
@@ -238,12 +245,12 @@ def add_mission_variables(segment):
     units             = np.broadcast_to(Units.less,(len_inputs,))
     new_inputs        = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None,None])),len_inputs), (-1, 6))
     
-    # scaling factor for optimizer 
+    # Step 3.3: scaling factor for optimizer 
     factor = np.ceil(np.log10(abs(initial_values)))
     factor[np.isinf(factor)] = 0
     scale  = 10 ** (factor)
     
-    # Step 2.4 Add in the inputs 
+    # Step 3.4 Add in the inputs 
     new_inputs[:,0]     = input_names   
     new_inputs[:,1]     = initial_values 
     new_inputs[:,2]     = lower_bounds   
@@ -252,8 +259,8 @@ def add_mission_variables(segment):
     new_inputs[:,5]     = units 
     optimization_problem.inputs = np.array(new_inputs,dtype=object)
     
-    # Step 3: Constraints 
-    # Step 3.1 : Create the equality constraints to the beginning of the constraints all equality constraints are 0, scale 1, and unitless
+    # Step 4: Constraints 
+    # Step 4.1 : Create the equality constraints to the beginning of the constraints all equality constraints are 0, scale 1, and unitless
     new_con = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None])),len_residuals), (-1, 5))  
     con_count       = 0
     con_len_strings = np.tile('Residual_', len_residuals)
@@ -263,7 +270,7 @@ def add_mission_variables(segment):
     zeros           = np.zeros(len_residuals)
     ones            = np.ones(len_residuals)
     
-    # Step 3.2 Add in the new constraints
+    # Step 4.2 Add in the new constraints
     new_con[:,0]    = con_names
     new_con[:,1]    = equals
     new_con[:,2]    = zeros  
@@ -271,8 +278,8 @@ def add_mission_variables(segment):
     new_con[:,4]    = 1*Units.less
     optimization_problem.constraints =  np.array(new_con,dtype=object)            
     
-    # Step 4. Aliases 
-    # Step 4.1: Setup the aliases for the inputs
+    # Step 5. Aliases 
+    # Step 5.1: Setup the aliases for the inputs
     basic_string_con = Data()
     input_string = []
 
@@ -297,7 +304,7 @@ def add_mission_variables(segment):
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string    
     else:  
-        output_numbers = np.arange(n_points, dtype=np.int16)
+        output_numbers = np.arange(n_points, dtype=np.int16) 
 
         def iter_unknown_leaves(node, prefix):
             for key, value in node.items():
@@ -324,7 +331,7 @@ def add_mission_variables(segment):
         input_aliases[:, 0] = input_names
         input_aliases[:, 1] = input_string
 
-    # Step 4.2: Setup the aliases for the residuals
+    # Step 5.2: Setup the aliases for the residuals
     def iter_residual_entries(node, prefix):
         for key, value in node.items():
             if key == "tag":
@@ -350,21 +357,21 @@ def add_mission_variables(segment):
     residual_aliases[:, 0] = residual_names
     residual_aliases[:, 1] = residual_string
     
-    # Step 4.3: Append Aliases
+    # Step 5.3: Append Aliases
     aliases = []
     for ii in range(len_inputs):
         aliases.append(input_aliases[ii].tolist())
     for jj in range(len_residuals):   
         aliases.append(residual_aliases[jj].tolist())
     
-    # Step 5: Objective function
-    if segment.state.numerics.solver.objective == None:     
+    # Step 6: Objective function
+    if numerics.mission_solver.objective == None:     
         aliases.append([ 'nothing'                   , 'postprocess.nothing']) 
         optimization_problem.objective = np.array([ [  'nothing'  ,  1   ,    1*Units.less]  ],dtype=object)            
-    elif segment.state.numerics.solver.objective == "energy":
+    elif numerics.mission_solver.objective == "energy":
         aliases.append([ 'energy_consumed'          , 'postprocess.energy_consumed']) 
         optimization_problem.objective = np.array([ [  'energy_consumed'  ,  1   ,    1*Units.less]  ],dtype=object)            
-    elif segment.state.numerics.solver.objective == "power":
+    elif numerics.mission_solver.objective == "power":
         aliases.append([ 'maximum_power'          , 'postprocess.maximum_power'])
         optimization_problem.objective = np.array([ [  'maximum_power'  ,  1   ,    1*Units.less]  ],dtype=object)   
     else:
@@ -373,22 +380,22 @@ def add_mission_variables(segment):
     # append aliases 
     optimization_problem.aliases = aliases        
     
-    # Step 6: Expand Rows  
+    # Step 7: Expand Rows  
     segment.process.initialize.expand_state(segment)
     
-    # Step 7: Update iteration
+    # Step 8: Update iteration
     input_count = input_count+input_numbers[-1]      
      
-    # Step 8: Append segment
+    # Step 9: Append segment
     nexus.segment = segment
      
-    # Step 9: Append procedure
+    # Step 10: Append procedure
     nexus.procedure = iterate_segment()
      
-    # Step 9: Append post-process
+    # Step 11: Append post-process
     nexus.postprocess = Data()
     
-    # Step 10: Append optimization problem 
+    # Step 12: Append optimization problem 
     nexus.optimization_problem   = optimization_problem
     
     return nexus
@@ -409,7 +416,7 @@ def iterate_optimizer(nexus):
         mission_vec = segment.state.unknowns.mission.pack_array()
         mission_len = mission_vec.size
         segment.state.unknowns.mission.unpack_array(unknowns[:mission_len])
-        if segment.state.network_numerics.solver.type is None:
+        if segment.state.numerics.network_solver.method is None:
             network_vec = segment.state.unknowns.network.pack_array()
             network_len = network_vec.size
             segment.state.unknowns.network.unpack_array(
@@ -417,7 +424,7 @@ def iterate_optimizer(nexus):
             )
     else:
         segment.state.unknowns.mission = unknowns
-        if segment.state.network_numerics.solver.type is None:
+        if segment.state.numerics.network_solver.method is None:
             segment.state.unknowns.network = unknowns
         
     segment.process.iterate(segment)
@@ -429,18 +436,19 @@ def iterate_optimizer(nexus):
 
   
 def segment_post_process(nexus):
-    # unpack
+    # unpack 
     power      = nexus.segment.state.conditions.energy.power
     I          = nexus.segment.state.numerics.time.integrate
+    SPS        =  RCAIDE.Framework.Mission.Segments.Single_Point
     
     # compute max power of segment 
     max_power  = np.max(nexus.segment.state.conditions.energy.power)
     
     # compute total energy consumed 
-    if (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude) or\
-                    (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_AVL_Trimmed) or \
-                    (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_No_Propulsion) or \
-                    (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle): 
+    if (type(nexus.segment) == SPS.Set_Speed_Set_Altitude) or\
+                    (type(nexus.segment) == SPS.Set_Speed_Set_Altitude_AVL_Trimmed) or \
+                    (type(nexus.segment) == SPS.Set_Speed_Set_Altitude_No_Propulsion) or \
+                    (type(nexus.segment) == SPS.Set_Speed_Set_Throttle): 
         energy_consumed =  0
     else:
         energy_consumed = np.dot(I,power)[-1][0]

@@ -313,7 +313,7 @@ def mission_setup(analyses):
     segment.climb_angle                                              = 5.   * Units.degrees 
     segment.dynamic_pressure                                         = 3800 * Units.pascals
      
-    segment.state.numerics.solver.type  = "root_finder"  
+    segment.state.numerics.mission_solver.method  = "root_finder"  
                 
     # define flight dynamics to model             
     segment.flight_dynamics.force_x                                  = True  
@@ -336,8 +336,8 @@ def mission_setup(analyses):
     segment.climb_rate                                               = 730. * Units['ft/min']    
     segment.dynamic_pressure                                         = 12000 * Units.pascals 
 
-    segment.state.numerics.solver.type       = "optimize"
-    segment.state.numerics.solver.objective  = "power"  #options: # None, energy , power
+    segment.state.numerics.mission_solver.method       = "optimize"
+    segment.state.numerics.mission_solver.objective  = "power"  #options: # None, energy , power
     
     # define flight dynamics to model             
     segment.flight_dynamics.force_x                                  = True  
@@ -363,8 +363,8 @@ def mission_setup(analyses):
     segment.assigned_control_variables.altitude.active               = True
     segment.assigned_control_variables.altitude.bounds               = [[-10, 20000]]
 
-    segment.state.numerics.solver.type       = "optimize"
-    segment.state.numerics.solver.objective  = None
+    segment.state.numerics.mission_solver.method       = "optimize"
+    segment.state.numerics.mission_solver.objective  = None
     
     # define flight dynamics to model           
     segment.flight_dynamics.force_x                                  = True  
@@ -515,8 +515,8 @@ def mission_setup(analyses):
     segment.mach_number                                              = 0.5
     segment.climb_angle                                              = 3.5 * Units.degrees  
     
-    segment.state.numerics.solver.type       = "optimize"
-    segment.state.numerics.solver.objective  = None
+    segment.state.numerics.mission_solver.method       = "optimize"
+    segment.state.numerics.mission_solver.objective  = None
     
     # define flight dynamics to model           
     segment.flight_dynamics.force_x                                  = True  
