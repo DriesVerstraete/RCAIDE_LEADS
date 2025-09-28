@@ -30,6 +30,6 @@ def energy(segment):
         busses  = network.busses
         for bus in busses:
             for battery in bus.battery_modules: 
-                increment_day = segment.increment_battery_age_by_one_day
+                increment_day = segment.initial_battery_conditions.increment_battery_age
                 battery_conditions  = segment.conditions.energy.busses[bus.tag].battery_modules[battery.tag]
                 battery.update_battery_age(segment,battery_conditions,increment_battery_age_by_one_day = increment_day) 

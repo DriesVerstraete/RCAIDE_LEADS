@@ -74,20 +74,15 @@ def append_bus_conditions(bus,segment,network):
 
      # first segment  
     if 'initial_battery_state_of_charge' in segment:  
-        initial_battery_energy                                             = segment.initial_battery_state_of_charge*bus.maximum_energy   
+        initial_battery_energy                                                    = segment.initial_battery_conditions.state_of_charge*bus.maximum_energy   
         segment.state.conditions.energy.busses[bus.tag].maximum_initial_energy    = initial_battery_energy
         segment.state.conditions.energy.busses[bus.tag].energy                    = initial_battery_energy* ones_row(1)
-        segment.state.conditions.energy.busses[bus.tag].state_of_charge           = segment.initial_battery_state_of_charge* ones_row(1) 
-        segment.state.conditions.energy.busses[bus.tag].depth_of_discharge        = 1 - segment.initial_battery_state_of_charge* ones_row(1)
+        segment.state.conditions.energy.busses[bus.tag].state_of_charge           = segment.initial_battery_conditions.state_of_charge* ones_row(1) 
+        segment.state.conditions.energy.busses[bus.tag].depth_of_discharge        = 1 - segment.initial_battery_conditions.state_of_charge* ones_row(1)
 
      # Add Conditions for residuals and unknowns
     segment.state.unknowns.network[network.tag].busses[bus.tag] = Unknowns()
-    segment.state.residuals.network[network.tag].busses[bus.tag] = Residuals()
-
-    # segment.state.lower_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
-    # segment.state.upper_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
-
-    
+    segment.state.residuals.network[network.tag].busses[bus.tag] = Residuals()   
     
    
     return

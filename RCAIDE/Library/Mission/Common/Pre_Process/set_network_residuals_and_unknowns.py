@@ -36,9 +36,7 @@ def set_network_residuals_and_unknowns(mission):
                     fuel_tank.append_operating_conditions(segment,fuel_line,network)
             for bus in network.busses:   
                 segment.state.unknowns.network[network.tag].busses      = Conditions()
-                segment.state.residuals.network[network.tag].busses     = Conditions()     
-                # segment.state.lower_bounds.network[network.tag].busses      = Conditions()
-                # segment.state.upper_bounds.network[network.tag].busses     = Conditions()               
+                segment.state.residuals.network[network.tag].busses     = Conditions()                   
                 bus.append_operating_conditions(segment,network) 
 
                 for index,battery_module in  enumerate(bus.battery_modules): 

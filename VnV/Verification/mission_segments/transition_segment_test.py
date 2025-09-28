@@ -280,7 +280,7 @@ def TW_mission_setup(analyses ):
     segment.analyses.extend(analyses.vertical_climb)
     
     segment.altitude                                                 = 40.  * Units.ft  
-    segment.initial_battery_state_of_charge                          = 1.0 
+    segment.initial_battery_conditions.state_of_charge                          = 1.0 
                         
     # define flight dynamics to model              
     segment.flight_dynamics.force_z                                  = True     
@@ -363,9 +363,9 @@ def SR_mission_setup(analyses,vehicle):
     segment.analyses.extend( analyses.vertical_flight )  
     segment.altitude_start                                = 0.0  * Units.ft  
     segment.altitude_end                                  = 200.  * Units.ft   
-    segment.initial_battery_state_of_charge               = 1.0 
+    segment.initial_battery_conditions.state_of_charge    = 1.0 
     segment.climb_rate                                    = 500. * Units['ft/min']   
-    segment.state.numerics.solver.type                              = "root_finder"
+    segment.state.numerics.solver.type                    = "root_finder"
             
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                       = True     

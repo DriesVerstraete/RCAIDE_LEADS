@@ -735,7 +735,7 @@ def mission_setup(analyses):
     segment.altitude_start                             = 0.0  * Units.ft  
     segment.altitude_end                               = 50.  * Units.ft   
     segment.climb_rate                                 = 300. * Units['ft/min'] 
-    segment.initial_battery_state_of_charge            = 1.0 
+    segment.initial_battery_conditions.state_of_charge            = 1.0 
     segment.true_course                                = 0   * Units.degree  
     segment.state.numerics.solver.type = 'root_finder' 
 
@@ -1096,7 +1096,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.altitude_start                             = 0.0  * Units.ft  
     segment.altitude_end                               = hover_altitude   
     segment.climb_rate                                 = 300. * Units['ft/min'] 
-    segment.initial_battery_state_of_charge            = 1.0 
+    segment.initial_battery_conditions.state_of_charge = 1.0 
     segment.true_course                                = 0   * Units.degree # this is the true couse of the starting value  
     segment.state.numerics.solver.type = 'root_finder' 
 

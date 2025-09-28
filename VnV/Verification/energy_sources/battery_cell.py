@@ -217,23 +217,24 @@ def mission_setup(analyses,vehicle,battery_chemistry,current,mAh):
     mission            = RCAIDE.Framework.Mission.Sequential_Segments()
     mission.tag        = 'cell_cycle_test'   
     Segments           = RCAIDE.Framework.Mission.Segments 
-    base_segment       = Segments.Segment()   
+    base_segment       = Segments.Segment()
+    base_segment.state.numerics.solver.type = 'root_finder' 
     time               = 0.8 * (mAh/1000)/current * Units.hrs  
 
     # Charge Segment 
     segment                                 = Segments.Ground.Battery_Recharge(base_segment)      
     segment.analyses.extend(analyses.charge) 
-    segment.cutoff_SOC                      = 1.0  
-    segment.initial_battery_state_of_charge = 0.2  
-    segment.tag                             = 'Recharge' 
+    segment.cutoff_SOC                                 = 1.0  
+    segment.initial_battery_conditions.state_of_charge = 0.2  
+    segment.tag                                        = 'Recharge' 
     mission.append_segment(segment)   
 
          
     segment                                 = Segments.Ground.Battery_Discharge(base_segment) 
     segment.analyses.extend(analyses.discharge)  
-    segment.tag                             = 'Discharge_1' 
-    segment.time                            = time/2  
-    segment.initial_battery_state_of_charge = 1  
+    segment.tag                                        = 'Discharge_1' 
+    segment.time                                       = time/2  
+    segment.initial_battery_conditions.state_of_charge = 1  
     mission.append_segment(segment)
     
     segment                                = Segments.Ground.Battery_Discharge(base_segment) 

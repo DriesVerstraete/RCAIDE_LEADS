@@ -166,10 +166,10 @@ def mission_setup(analyses):
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "cruise" 
     segment.analyses.extend( analyses.base ) 
-    segment.altitude       = 5000  * Units.feet
-    segment.air_speed      = 90 *  Units.mph
-    segment.distance       = 5000  
-    segment.initial_battery_state_of_charge                          = 1.0 
+    segment.altitude                                     = 5000  * Units.feet
+    segment.air_speed                                    = 90 *  Units.mph
+    segment.distance                                     = 5000  
+    segment.initial_battery_conditions.state_of_charge   = 1.0 
                 
     # define flight dynamics to model             
     segment.flight_dynamics.force_x                                  = True  

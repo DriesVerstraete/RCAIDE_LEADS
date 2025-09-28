@@ -153,6 +153,7 @@ class Generic_Battery_Module(Component):
         append_battery_conditions(self,segment,bus)  
         
         return
+    
     def append_unknowns_residuals(self,segment,bus,network):
         append_battery_unknowns_residuals(self,segment,bus,network)  
         return

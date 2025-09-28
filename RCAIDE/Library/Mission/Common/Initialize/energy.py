@@ -68,21 +68,13 @@ def energy(segment):
     --------
     RCAIDE.Framework.Mission.Segments
     """ 
-
-    conditions = segment.state.conditions.energy
+ 
     vehicle    = segment.analyses.energy.vehicle
 
     # loop through battery modules in networks
     for network in vehicle.networks:
         # if network has busses  
-        for bus in network.busses:
-            for fuel_tank in bus.fuel_tanks:
-                if segment.state.initials:
-                    bus_initials       = segment.state.initials.conditions.energy.busses[bus.tag]
-                    fuel_tank_initials = bus_initials.fuel_tanks[fuel_tank.tag] # need to  edit  fuel tanks
-                    conditions.busses[bus.tag].fuel_tanks[fuel_tank.tag].mass[:,0]   = fuel_tank_initials.mass[-1,0]
-                elif vehicle.networks[network.tag].busses[bus.tag].fuel_tanks[fuel_tank.tag].fuel != None:
-                        conditions.busses[bus.tag].fuel_tanks[fuel_tank.tag].mass[:,0]  = vehicle.networks[network.tag].busses[bus.tag].fuel_tanks[fuel_tank.tag].fuel.mass_properties.mass
+        for bus in network.busses: 
             bus.append_segment_conditions(segment)
             for battery_module in  bus.battery_modules:
                 battery_module.append_battery_segment_conditions(segment, bus)
@@ -101,7 +93,6 @@ def energy(segment):
                     
         # if network has fuel lines             
         for fuel_line in  network.fuel_lines:
-            #fuel_line.append_segment_conditions(segment)
             for fuel_tank in fuel_line.fuel_tanks:
                 if segment.state.initials:
                     
