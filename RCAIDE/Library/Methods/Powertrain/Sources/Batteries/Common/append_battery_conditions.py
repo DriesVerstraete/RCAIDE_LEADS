@@ -167,8 +167,8 @@ def append_battery_unknowns_residuals(battery_module,segment,bus,network):
     # temperature unknown and residual 
     segment.state.number_of_network_unknowns  += 1 
     segment.state.number_of_network_residuals += 1
-    segment.state.numerics.network_solver.lower_bounds[battery_module.tag + '_cell_temperature'] = ones_row(1) * 0
-    segment.state.numerics.network_solver.upper_bounds[battery_module.tag + '_cell_temperature'] = ones_row(1) * np.inf
+    segment.state.numerics.network_solver.lower_bounds[battery_module.tag + '_cell_temperature'] = ones_row(1) * 250
+    segment.state.numerics.network_solver.upper_bounds[battery_module.tag + '_cell_temperature'] = ones_row(1) * 400
     if segment.state.initials: 
         battery_initials  = segment.state.initials.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]     
         segment.state.unknowns.network[battery_module.tag + '_cell_temperature'] = ones_row(1) * battery_initials.temperature[-1,0] 
@@ -182,7 +182,7 @@ def append_battery_unknowns_residuals(battery_module,segment,bus,network):
     segment.state.number_of_network_unknowns  += 1 
     segment.state.number_of_network_residuals += 1
     segment.state.numerics.network_solver.lower_bounds[battery_module.tag + '_cell_state_of_charge'] = ones_row(1) * 0
-    segment.state.numerics.network_solver.upper_bounds[battery_module.tag + '_cell_state_of_charge'] = ones_row(1)  
+    segment.state.numerics.network_solver.upper_bounds[battery_module.tag + '_cell_state_of_charge'] = ones_row(1) * 1
     if segment.state.initials: 
         battery_initials  = segment.state.initials.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]     
         segment.state.unknowns.network[battery_module.tag + '_cell_state_of_charge'] = ones_row(1) * battery_initials.cell.state_of_charge[-1,0] 
@@ -190,7 +190,7 @@ def append_battery_unknowns_residuals(battery_module,segment,bus,network):
         segment.state.unknowns.network[battery_module.tag + '_cell_state_of_charge']  = ones_row(1) * segment.initial_battery_conditions.state_of_charge
     else:
         segment.state.unknowns.network[battery_module.tag + '_cell_state_of_charge']  = ones_row(1)  
-    segment.state.residuals.network[battery_module.tag + '_cell_power']               = ones_row(1) * 0 
+    segment.state.residuals.network[battery_module.tag + '_cell_state_of_charge']               = ones_row(1) * 0 
     return
 
     

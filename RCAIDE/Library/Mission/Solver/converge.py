@@ -233,7 +233,7 @@ def add_mission_variables(segment):
         for net_unkn in net_unknown_keys:
             full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
             full_lower_bound_vals[net_unkn] = np.atleast_2d(numerics.network_solver.lower_bounds[net_unkn])
-            full_upper_bound_vals[net_unkn] = np.atleast_2d(numerics.network_solver.lower_bounds[net_unkn])
+            full_upper_bound_vals[net_unkn] = np.atleast_2d(numerics.network_solver.upper_bounds[net_unkn])
   
     # Step 3.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()

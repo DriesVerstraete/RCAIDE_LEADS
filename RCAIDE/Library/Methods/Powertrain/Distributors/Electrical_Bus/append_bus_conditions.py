@@ -73,7 +73,7 @@ def append_bus_conditions(bus,segment,network):
     segment.state.conditions.energy.busses[bus.tag].fuel_mass_flow_rate                 = 0 * ones_row(1) 
 
      # first segment  
-    if 'initial_battery_state_of_charge' in segment:  
+    if segment.initial_battery_conditions.state_of_charge !=  None:
         initial_battery_energy                                                    = segment.initial_battery_conditions.state_of_charge*bus.maximum_energy   
         segment.state.conditions.energy.busses[bus.tag].maximum_initial_energy    = initial_battery_energy
         segment.state.conditions.energy.busses[bus.tag].energy                    = initial_battery_energy* ones_row(1)
@@ -128,8 +128,7 @@ def append_bus_segment_conditions(bus,segment):
     """    
     bus_conditions                          = segment.state.conditions.energy.busses[bus.tag]
     ones_row                                = segment.state.ones_row
-    bus_conditions.power_draw               = 0 * ones_row(1) 
-    bus_conditions.fuel_mass_flow_rate[:,0] = 0
+    bus_conditions.power_draw               = 0 * ones_row(1)  
     
     # Thermal power draw
     if segment.state.initials:

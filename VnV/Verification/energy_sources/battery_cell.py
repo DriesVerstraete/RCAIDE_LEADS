@@ -218,7 +218,8 @@ def mission_setup(analyses,vehicle,battery_chemistry,current,mAh):
     mission.tag        = 'cell_cycle_test'   
     Segments           = RCAIDE.Framework.Mission.Segments 
     base_segment       = Segments.Segment()
-    #base_segment.state.numerics.mission_solver.method = 'root_finder' 
+    base_segment.state.numerics.mission_solver.method = 'root_finder'
+    base_segment.state.numerics.mission_solver.objective =  None
     time               = 0.8 * (mAh/1000)/current * Units.hrs  
 
     # Charge Segment 
@@ -230,18 +231,18 @@ def mission_setup(analyses,vehicle,battery_chemistry,current,mAh):
     mission.append_segment(segment)   
 
          
-    #segment                                 = Segments.Ground.Battery_Discharge(base_segment) 
-    #segment.analyses.extend(analyses.discharge)  
-    #segment.tag                                        = 'Discharge_1' 
-    #segment.time                                       = time  
-    #segment.initial_battery_conditions.state_of_charge = 1  
-    #mission.append_segment(segment)
+    segment                                 = Segments.Ground.Battery_Discharge(base_segment) 
+    segment.analyses.extend(analyses.discharge)  
+    segment.tag                                        = 'Discharge_1' 
+    segment.time                                       = time /2  
+    segment.initial_battery_conditions.state_of_charge = 1  
+    mission.append_segment(segment)
     
-    #segment                                = Segments.Ground.Battery_Discharge(base_segment) 
-    #segment.tag                            = 'Discharge_2'
-    #segment.analyses.extend(analyses.discharge)   
-    #segment.time                           = time/2  
-    #mission.append_segment(segment)        
+    segment                                = Segments.Ground.Battery_Discharge(base_segment) 
+    segment.tag                            = 'Discharge_2'
+    segment.analyses.extend(analyses.discharge)   
+    segment.time                           = time/2  
+    mission.append_segment(segment)        
     
     return mission 
 

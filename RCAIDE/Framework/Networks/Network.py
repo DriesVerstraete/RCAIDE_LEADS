@@ -401,7 +401,7 @@ class Network(Component):
             N/A
         """                   
         segment.state.residuals.mission.network = Residuals()
-        segment.state.conditions.network_residuals         = Residuals()   # Fix late
+        segment.state.conditions.network_residuals        = Residuals()   # Fix late
         segment.state.conditions.network_initials         = Unknowns()   # Fix later
         
         for network in segment.analyses.energy.vehicle.networks:
