@@ -91,18 +91,20 @@ def append_fuel_tank_residual_and_unknowns(fuel_tank, segment, distributor,netwo
     segment.state.number_of_network_residuals += 1
 
     distributor_unknowns   = segment.state.unknowns.network[network.tag].fuel_lines[distributor.tag]
-    distributor_residuals = segment.state.residuals.network[network.tag].fuel_lines[distributor.tag]
+    distributor_residuals  = segment.state.residuals.network[network.tag].fuel_lines[distributor.tag]
 
-    distributor_lower_bounds   = segment.state.lower_bounds.network[network.tag].fuel_lines[distributor.tag]
-    distributor_upper_bounds   = segment.state.upper_bounds.network[network.tag].fuel_lines[distributor.tag]
+    distributor_lower_bounds   = segment.state.unknowns_lower_bounds.network[network.tag].fuel_lines[distributor.tag]
+    distributor_upper_bounds   = segment.state.unknowns_upper_bounds.network[network.tag].fuel_lines[distributor.tag]
 
     distributor_unknowns[fuel_tank.tag] = Unknowns()
     distributor_residuals[fuel_tank.tag] = Residuals()
+
     distributor_unknowns[fuel_tank.tag].mass  = ones_row(1) *fuel_tank.fuel.mass_properties.mass
     distributor_residuals[fuel_tank.tag].mass = ones_row(1)*0
 
     distributor_lower_bounds[fuel_tank.tag] = Conditions()
     distributor_upper_bounds[fuel_tank.tag] = Conditions()
+    
     distributor_lower_bounds[fuel_tank.tag].mass = -np.inf * ones_row(1)
     distributor_upper_bounds[fuel_tank.tag].mass = np.inf * ones_row(1)
 

@@ -34,5 +34,5 @@ def energy(mission):
                     segment.battery_fuel_cell_power_split_ratio = 0.0
             segment.state.conditions.energy.hybrid_power_split_ratio            = segment.hybrid_power_split_ratio * segment.state.ones_row(1)  
             segment.state.conditions.energy.battery_fuel_cell_power_split_ratio = segment.battery_fuel_cell_power_split_ratio * segment.state.ones_row(1)                    
-            network.add_unknowns_and_residuals_to_segment(segment) 
+            network.add_unknowns_and_residuals_to_segment(segment)  # this will be deleted
     return 

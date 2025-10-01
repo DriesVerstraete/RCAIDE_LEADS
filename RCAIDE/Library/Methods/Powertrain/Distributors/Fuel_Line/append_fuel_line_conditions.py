@@ -78,8 +78,8 @@ def append_fuel_line_conditions(fuel_line,segment,network):
     segment.state.unknowns.network[network.tag].fuel_lines[fuel_line.tag] = Unknowns()
     segment.state.residuals.network[network.tag].fuel_lines[fuel_line.tag] = Residuals()
 
-    segment.state.lower_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
-    segment.state.upper_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
+    segment.state.unknowns_lower_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
+    segment.state.unknowns_upper_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
 
     return
 

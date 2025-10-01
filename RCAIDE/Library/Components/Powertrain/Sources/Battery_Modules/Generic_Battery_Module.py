@@ -155,7 +155,21 @@ class Generic_Battery_Module(Component):
         return
     
     def append_unknowns_residuals(self,segment,bus,network):
+
+        """
+        Append battery unknowns and residuals  flight segment
+        
+        Parameters
+        ----------
+        segment : Segment
+            Flight segment containing state conditions
+        bus : Component
+            Electrical bus connected to this battery
+        network: 
+
+        """
         append_battery_unknowns_residuals(self,segment,bus,network)  
+        
         return
 
     def append_battery_segment_conditions(self,segment,bus):

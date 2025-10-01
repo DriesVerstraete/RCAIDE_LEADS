@@ -46,8 +46,7 @@ class Numerics(Conditions):
         self.tag                                = 'numerics' 
         self.number_of_control_points           = 16
         self.discretization_method              = chebyshev_data
-        self.combine_mission_and_network_solver = True
-        
+    
         # mission solver 
         self.mission_solver                     = Conditions()
         self.mission_solver.method              = "optimize" # options: "optimize", "root_finder"

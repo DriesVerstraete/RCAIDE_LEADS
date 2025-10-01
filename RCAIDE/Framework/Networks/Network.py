@@ -401,9 +401,7 @@ class Network(Component):
             N/A
         """                   
         segment.state.residuals.mission.network = Residuals()
-        segment.state.conditions.network_residuals        = Residuals()   # Fix late
-        segment.state.conditions.network_initials         = Unknowns()   # Fix later
-        
+
         for network in segment.analyses.energy.vehicle.networks:
             for propulsor in network.propulsors: 
                 propulsor.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)     

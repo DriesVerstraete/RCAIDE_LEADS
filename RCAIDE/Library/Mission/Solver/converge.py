@@ -176,66 +176,58 @@ def add_mission_variables(segment):
         Properties Used:
         None
     """             
-    # Unpack 
-    numerics        = segment.state.numerics
-    combined_solver = numerics.combine_mission_and_network_solver 
-    SPS             = RCAIDE.Framework.Mission.Segments.Single_Point   
-    GS              = RCAIDE.Framework.Mission.Segments.Ground    
     
     # Step 1: Define Nexus
     nexus                        = Nexus()
-    optimization_problem         = Data()
+    optimization_problem         = Data() 
     
     # Step 2 : Get segment type 
-    ground_seg_flag =  (type(segment) == GS.Landing) or\
-                       (type(segment) == GS.Takeoff) or \
-                       (type(segment) == GS.Ground)  
-    single_pt_seg = (type(segment) == SPS.Set_Speed_Set_Altitude) or\
-                    (type(segment) == SPS.Set_Speed_Set_Altitude_AVL_Trimmed) or \
-                    (type(segment) == SPS.Set_Speed_Set_Altitude_No_Propulsion) or \
-                    (type(segment) == SPS.Set_Speed_Set_Throttle)  
+    ground_seg_flag =  (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Landing) or\
+                       (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Takeoff) or \
+                       (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Ground)  
+    single_pt_seg = (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude) or\
+                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_AVL_Trimmed) or \
+                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_No_Propulsion) or \
+                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle)  
     
-    # Step 2: Determine dimension of solver 
-    input_count   = 0  
+    # Step 2: Optimizer Inputs 
+    # Step 2.1: Extract inputs
+    input_count   = 0
+    unknown_keys  = list(segment.state.unknowns.mission.keys())  
+    unknown_keys.remove('tag') 
+
+    net_unknown_keys  = list(segment.state.unknowns.network.keys())  
+    net_unknown_keys.remove('tag') 
+
     if ground_seg_flag: 
-        n_points      = numerics.number_of_control_points
+        n_points      = segment.state.numerics.number_of_control_points
         len_inputs    = n_points
-        len_residuals = n_points  
+        len_residuals = n_points
     elif single_pt_seg:
         n_points      = 1
-        len_inputs    = segment.state.number_of_mission_unknowns
-        len_residuals = segment.state.number_of_mission_residuals
+        len_inputs    = segment.state.number_of_unknowns
+        len_residuals = segment.state.number_of_residuals
     else:
-        n_points      = numerics.number_of_control_points  
-        len_inputs    = n_points*segment.state.number_of_mission_unknowns  
-        len_residuals = n_points*segment.state.number_of_mission_residuals
-        
-    if combined_solver: 
-        n_points_net  = segment.state.numerics.number_of_control_points      
-        len_inputs    += n_points_net * segment.state.number_of_network_unknowns
-        len_residuals += n_points_net * segment.state.number_of_network_residuals      
-    
-    # Step 3: Design Variables     
-    # Step 3.1: Pack variables for solver      
-    unknown_keys  = list(segment.state.unknowns.mission.keys())  
-    unknown_keys.remove('tag')                
+        n_points      = segment.state.numerics.number_of_control_points  
+        len_inputs    = n_points*segment.state.number_of_mission_unknowns + n_points * segment.state.number_of_network_unknowns
+        len_residuals = n_points*segment.state.number_of_mission_residuals + n_points*segment.state.number_of_network_residuals
+          
+            
     full_unkn_vals        = Data()
     full_upper_bound_vals = Data()
     full_lower_bound_vals = Data()
     for unkn in unknown_keys: 
         full_unkn_vals[unkn]  = segment.state.unknowns.mission[unkn]
         full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_lower_bounds.mission[unkn])
-        full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_upper_bounds.mission[unkn]) 
+        full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_upper_bounds.mission[unkn])
     
-    if combined_solver:
-        net_unknown_keys  = list(segment.state.unknowns.network.keys())  
-        net_unknown_keys.remove('tag')  
-        for net_unkn in net_unknown_keys:
-            full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
-            full_lower_bound_vals[net_unkn] = np.atleast_2d(segment.state.unknowns_lower_bounds.network[net_unkn])
-            full_upper_bound_vals[net_unkn] = np.atleast_2d(segment.state.unknowns_upper_bounds.network[net_unkn])
+
+    for net_unkn in net_unknown_keys:
+        full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
+        full_lower_bound_vals[net_unkn] = segment.state.unknowns_lower_bounds.network[net_unkn]
+        full_upper_bound_vals[net_unkn] = segment.state.unknowns_upper_bounds.network[net_unkn]
   
-    # Step 3.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
+    # Step 2.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
     input_len_strings = np.tile('Variable_', len_inputs)
     input_numbers     = np.linspace(1,len_inputs,len_inputs,dtype=np.int16)
@@ -245,12 +237,12 @@ def add_mission_variables(segment):
     units             = np.broadcast_to(Units.less,(len_inputs,))
     new_inputs        = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None,None])),len_inputs), (-1, 6))
     
-    # Step 3.3: scaling factor for optimizer 
+    # scaling factor for optimizer 
     factor = np.ceil(np.log10(abs(initial_values)))
     factor[np.isinf(factor)] = 0
     scale  = 10 ** (factor)
     
-    # Step 3.4 Add in the inputs 
+    # Step 2.4 Add in the inputs 
     new_inputs[:,0]     = input_names   
     new_inputs[:,1]     = initial_values 
     new_inputs[:,2]     = lower_bounds   
@@ -259,8 +251,8 @@ def add_mission_variables(segment):
     new_inputs[:,5]     = units 
     optimization_problem.inputs = np.array(new_inputs,dtype=object)
     
-    # Step 4: Constraints 
-    # Step 4.1 : Create the equality constraints to the beginning of the constraints all equality constraints are 0, scale 1, and unitless
+    # Step 3: Constraints 
+    # Step 3.1 : Create the equality constraints to the beginning of the constraints all equality constraints are 0, scale 1, and unitless
     new_con = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None])),len_residuals), (-1, 5))  
     con_count       = 0
     con_len_strings = np.tile('Residual_', len_residuals)
@@ -270,7 +262,7 @@ def add_mission_variables(segment):
     zeros           = np.zeros(len_residuals)
     ones            = np.ones(len_residuals)
     
-    # Step 4.2 Add in the new constraints
+    # Step 3.2 Add in the new constraints
     new_con[:,0]    = con_names
     new_con[:,1]    = equals
     new_con[:,2]    = zeros  
@@ -278,8 +270,8 @@ def add_mission_variables(segment):
     new_con[:,4]    = 1*Units.less
     optimization_problem.constraints =  np.array(new_con,dtype=object)            
     
-    # Step 5. Aliases 
-    # Step 5.1: Setup the aliases for the inputs
+    # Step 4. Aliases 
+    # Step 4.1: Setup the aliases for the inputs
     basic_string_con = Data()
     input_string = []
 
@@ -304,7 +296,7 @@ def add_mission_variables(segment):
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string    
     else:  
-        output_numbers = np.arange(n_points, dtype=np.int16) 
+        output_numbers = np.arange(n_points, dtype=np.int16)
 
         def iter_unknown_leaves(node, prefix):
             for key, value in node.items():
@@ -331,7 +323,7 @@ def add_mission_variables(segment):
         input_aliases[:, 0] = input_names
         input_aliases[:, 1] = input_string
 
-    # Step 5.2: Setup the aliases for the residuals
+    # Step 4.2: Setup the aliases for the residuals
     def iter_residual_entries(node, prefix):
         for key, value in node.items():
             if key == "tag":
@@ -357,21 +349,21 @@ def add_mission_variables(segment):
     residual_aliases[:, 0] = residual_names
     residual_aliases[:, 1] = residual_string
     
-    # Step 5.3: Append Aliases
+    # Step 4.3: Append Aliases
     aliases = []
     for ii in range(len_inputs):
         aliases.append(input_aliases[ii].tolist())
     for jj in range(len_residuals):   
         aliases.append(residual_aliases[jj].tolist())
     
-    # Step 6: Objective function
-    if numerics.mission_solver.objective == None:     
+    # Step 5: Objective function
+    if segment.state.numerics.mission_solver.objective == None:     
         aliases.append([ 'nothing'                   , 'postprocess.nothing']) 
         optimization_problem.objective = np.array([ [  'nothing'  ,  1   ,    1*Units.less]  ],dtype=object)            
-    elif numerics.mission_solver.objective == "energy":
+    elif segment.state.numerics.mission_solver.objective == "energy":
         aliases.append([ 'energy_consumed'          , 'postprocess.energy_consumed']) 
         optimization_problem.objective = np.array([ [  'energy_consumed'  ,  1   ,    1*Units.less]  ],dtype=object)            
-    elif numerics.mission_solver.objective == "power":
+    elif segment.state.numerics.mission_solver.objective == "power":
         aliases.append([ 'maximum_power'          , 'postprocess.maximum_power'])
         optimization_problem.objective = np.array([ [  'maximum_power'  ,  1   ,    1*Units.less]  ],dtype=object)   
     else:
@@ -380,22 +372,22 @@ def add_mission_variables(segment):
     # append aliases 
     optimization_problem.aliases = aliases        
     
-    # Step 7: Expand Rows  
+    # Step 6: Expand Rows  
     segment.process.initialize.expand_state(segment)
     
-    # Step 8: Update iteration
+    # Step 7: Update iteration
     input_count = input_count+input_numbers[-1]      
      
-    # Step 9: Append segment
+    # Step 8: Append segment
     nexus.segment = segment
      
-    # Step 10: Append procedure
+    # Step 9: Append procedure
     nexus.procedure = iterate_segment()
      
-    # Step 11: Append post-process
+    # Step 9: Append post-process
     nexus.postprocess = Data()
     
-    # Step 12: Append optimization problem 
+    # Step 10: Append optimization problem 
     nexus.optimization_problem   = optimization_problem
     
     return nexus
