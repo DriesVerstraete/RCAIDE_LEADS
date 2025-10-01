@@ -10,6 +10,7 @@
 from RCAIDE.Framework.Core                       import Units 
 import numpy as np
 from copy import  deepcopy
+from scipy import integrate
  
 # ----------------------------------------------------------------------------------------------------------------------
 # compute_nmc_cell_performance
@@ -277,10 +278,10 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     time = state.numerics.time.control_points 
     t0   = time[0][0]
     tf   = time[-1][0]
-    D    = state.numerics.dimensionless.differentiate
-    I    = state.numerics.time.integrate
+    #D    = state.numerics.dimensionless.differentiate
+    #I    = state.numerics.time.integrate
+    #D_t  = D/(tf - t0) 
     D    = state.numerics.time.differentiate
-    D_t  = D/(tf - t0) 
 
     #  Compute cell temperature
     if HAS is not None:
@@ -291,14 +292,13 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
         R_res    = np.dot(D, T_cell_unkn)[:, 0] -  dT_dt[:, 0]
         R_res[0] =  T_cell_unkn[0] - battery_module_conditions.cell.temperature[0, 0]
         state.residuals.network[battery_module.tag+ '_cell_temperature']    = R_res 
-        print(state.residuals.network[battery_module.tag + '_cell_temperature'] )
+        #print(state.residuals.network[battery_module.tag + '_cell_temperature'] )
         
-        # Compute power residual
-        P_res    =  D_t @ SOC_cell_unkn *E_module_max   - P_module[:, 0]
+        # Compute power residual 
         P_res    = np.dot(D, SOC_cell_unkn *E_module_max )[:, 0] -  P_module[:, 0]
         P_res[0] = SOC_cell_unkn[0] - battery_module_conditions.cell.state_of_charge[0, 0]
         state.residuals.network[battery_module.tag + '_cell_state_of_charge']  = P_res 
-        print(state.residuals.network[battery_module.tag + '_cell_state_of_charge'] )
+        #print(state.residuals.network[battery_module.tag + '_cell_state_of_charge'] )
     
         battery_module_conditions.cell.state_of_charge[1:,0]  = SOC_cell_unkn[1:,0]  
         battery_module_conditions.state_of_charge[1:,0]       = SOC_cell_unkn[1:,0]
@@ -308,8 +308,15 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
         battery_module_conditions.cell.depth_of_discharge[1:,0]      = 1. - SOC_cell_unkn[1:,0]
         battery_module_conditions.cell.depth_of_discharge[1:,0]      = 1 - SOC_cell_unkn[1:,0]  
         battery_module_conditions.cell.energy[1:,0]                  = SOC_cell_unkn[1:,0] *E_module_max /n_total  
-        battery_module_conditions.energy[1:,0]                       = SOC_cell_unkn[1:,0] *E_module_max 
-        #battery_module_conditions.cell.charge_throughput       = battery_module_conditions.cell.charge_throughput[0] +   abs(I_cell)*np.diff(time[:, 0]) /Units.hr        
+        battery_module_conditions.energy[1:,0]                       = SOC_cell_unkn[1:,0] *E_module_max
+        
+        
+
+        Q_prior  = battery_module_conditions.cell.charge_throughput[0] 
+        dt       =  np.diff(state.numerics.time.control_points[:,0])
+        avg_I    =  ( I_cell[:-1, 0] +  I_cell[1:, 0]) / 2
+        Q_Ah     =  np.atleast_2d(np.concatenate(([0.0], np.cumsum(dt*avg_I)))).T/Units.hr     
+        battery_module_conditions.cell.charge_throughput       = Q_prior + Q_Ah    
  
         
     stored_results_flag     = True

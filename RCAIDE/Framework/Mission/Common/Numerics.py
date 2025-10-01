@@ -57,9 +57,7 @@ class Numerics(Conditions):
         self.mission_solver.converged           = None
         self.mission_solver.print_output        = True
         self.mission_solver.max_evaluations     = 200
-        self.mission_solver.step_size           = 1E-8 
-        self.mission_solver.lower_bounds        = Conditions()
-        self.mission_solver.upper_bounds        = Conditions()
+        self.mission_solver.step_size           = 1E-8  
            
         # network solver    
         self.network_solver                     = Conditions()
@@ -68,9 +66,7 @@ class Numerics(Conditions):
         self.network_solver.converged           = None
         self.network_solver.print_output        = True
         self.network_solver.max_evaluations     = 200
-        self.network_solver.step_size           = 1E-8  
-        self.network_solver.lower_bounds        = Conditions()
-        self.network_solver.upper_bounds        = Conditions()
+        self.network_solver.step_size           = 1E-8   
            
         self.dimensionless                      = Conditions()
         self.dimensionless.control_points       = np.empty([0,0])

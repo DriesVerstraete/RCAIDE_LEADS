@@ -50,32 +50,36 @@ class State(Conditions):
             None
         """           
 
-        self.tag                  = 'state'
-        self.initials             = Conditions()
-        self.numerics             = Numerics()
+        self.tag                           = 'state'
+        self.initials                      = Conditions()
+        self.numerics                      = Numerics()
+                 
+        # Unknowns          
+        self.unknowns                      = Conditions()
+        self.unknowns_upper_bounds         = Conditions()   
+        self.unknowns_lower_bounds         = Conditions()
         
-        # Unknowns 
-        self.unknowns             = Conditions()
-        self.unknowns.mission     = Unknowns()
-        self.unknowns.network     = Unknowns()
+        # Mission unknowns  
+        self.number_of_mission_residuals   = 0
+        self.number_of_mission_unknowns    = 0
+        self.unknowns.mission              = Unknowns()
+        self.unknowns_upper_bounds.mission = Unknowns()   
+        self.unknowns_lower_bounds.mission = Unknowns()
+        
+        # Network unknowns  
+        self.number_of_network_residuals = 0
+        self.number_of_network_unknowns  = 0
+        self.unknowns.network              = Unknowns()  
+        self.unknowns_upper_bounds.network = Unknowns()   
+        self.unknowns_lower_bounds.network = Unknowns()      
  
         # Residuals 
         self.residuals            = Conditions()
         self.residuals.mission    = Residuals()
         self.residuals.network    = Residuals()
-
-        ## Bounds
-        #self.lower_bounds         = Conditions()
-        #self.lower_bounds.network = Conditions()
-        #self.upper_bounds         = Conditions()
-        #self.upper_bounds.network = Conditions()
-
+        
         # Conditions
-        self.conditions          = Conditions()
-
-        # Bookkeeping
-        self.number_of_residuals = 0
-        self.number_of_unknowns  = 0
+        self.conditions           = Conditions() 
 
         
     def expand_rows(self,rows,override=False):

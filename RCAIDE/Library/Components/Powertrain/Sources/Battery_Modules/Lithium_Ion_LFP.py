@@ -169,7 +169,7 @@ class Lithium_Ion_LFP(Generic_Battery_Module):
         stored_battery_tag : str
             Identifier for stored results
         """      
-        stored_results_flag, stored_battery_tag =  compute_lfp_cell_performance(self,state,bus,coolant_lines, t_idx,delta_t) 
+        stored_results_flag, stored_battery_tag =  compute_lfp_cell_performance(self,state,bus,coolant_lines) 
                         
         return stored_results_flag, stored_battery_tag
     

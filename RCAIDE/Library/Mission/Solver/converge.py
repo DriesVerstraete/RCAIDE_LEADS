@@ -72,9 +72,9 @@ def converge(segment):
             unknowns = np.concatenate([unknowns, segment.state.unknowns.network.pack_array()])
 
 
-        if segment.state.number_of_unknowns != segment.state.number_of_residuals:
-            raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_unknowns) + \
-                                 ') is not equal to the number of residuals (equations) (' + str(segment.state.number_of_residuals) + '). Either enforce of unknowns '+\
+        if segment.state.number_of_mission_unknowns != segment.state.number_of_mission_residuals:
+            raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_mission_unknowns) + \
+                                 ') is not equal to the number of residuals (equations) (' + str(segment.state.number_of_mission_residuals) + '). Either enforce of unknowns '+\
                                  ' to be equal to the number of residuals (equations) to use fsolve or switch RCAIDE solver type to "optimize" when defining the segment.'+ \
                                  '\n i.e. numerics.mission_solver.method  = "optimize" ') 
         else:
@@ -203,12 +203,12 @@ def add_mission_variables(segment):
         len_residuals = n_points  
     elif single_pt_seg:
         n_points      = 1
-        len_inputs    = segment.state.number_of_unknowns
-        len_residuals = segment.state.number_of_residuals
+        len_inputs    = segment.state.number_of_mission_unknowns
+        len_residuals = segment.state.number_of_mission_residuals
     else:
         n_points      = numerics.number_of_control_points  
-        len_inputs    = n_points*segment.state.number_of_unknowns  
-        len_residuals = n_points*segment.state.number_of_residuals
+        len_inputs    = n_points*segment.state.number_of_mission_unknowns  
+        len_residuals = n_points*segment.state.number_of_mission_residuals
         
     if combined_solver: 
         n_points_net  = segment.state.numerics.number_of_control_points      
@@ -224,16 +224,16 @@ def add_mission_variables(segment):
     full_lower_bound_vals = Data()
     for unkn in unknown_keys: 
         full_unkn_vals[unkn]  = segment.state.unknowns.mission[unkn]
-        full_lower_bound_vals[unkn] = np.atleast_2d(numerics.mission_solver.lower_bounds[unkn])
-        full_upper_bound_vals[unkn] = np.atleast_2d(numerics.mission_solver.upper_bounds[unkn]) 
+        full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_lower_bounds.mission[unkn])
+        full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_upper_bounds.mission[unkn]) 
     
     if combined_solver:
         net_unknown_keys  = list(segment.state.unknowns.network.keys())  
         net_unknown_keys.remove('tag')  
         for net_unkn in net_unknown_keys:
             full_unkn_vals[net_unkn]  = segment.state.unknowns.network[net_unkn]
-            full_lower_bound_vals[net_unkn] = np.atleast_2d(numerics.network_solver.lower_bounds[net_unkn])
-            full_upper_bound_vals[net_unkn] = np.atleast_2d(numerics.network_solver.upper_bounds[net_unkn])
+            full_lower_bound_vals[net_unkn] = np.atleast_2d(segment.state.unknowns_lower_bounds.network[net_unkn])
+            full_upper_bound_vals[net_unkn] = np.atleast_2d(segment.state.unknowns_upper_bounds.network[net_unkn])
   
     # Step 3.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
