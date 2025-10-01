@@ -171,11 +171,14 @@ def append_battery_unknowns_residuals(battery_module,segment,bus,network):
     atmo_data    = atmosphere.compute_values(altitude = alt,temperature_deviation=temp_dev)  
     ones_row    = segment.state.ones_row
     
-    segment.state.number_of_network_unknowns  += 1 
-    segment.state.number_of_network_residuals += 1
+    segment.state.number_of_network_unknowns  += 2 
+    segment.state.number_of_network_residuals += 2
 
     bus_unknowns  = segment.state.unknowns.network[network.tag].busses[bus.tag]
     bus_residuals = segment.state.residuals.network[network.tag].busses[bus.tag]
+
+    bus_lower_bounds  = segment.state.unknowns_lower_bounds.network[network.tag].busses[bus.tag]
+    bus_upper_bounds = segment.state.unknowns_upper_bounds.network[network.tag].busses[bus.tag]
 
     bus_unknowns[battery_module.tag] = Unknowns()
     bus_residuals[battery_module.tag] = Residuals()
@@ -183,21 +186,34 @@ def append_battery_unknowns_residuals(battery_module,segment,bus,network):
     bus_unknowns[battery_module.tag].cell= Unknowns()
     bus_residuals[battery_module.tag].cell = Residuals()
 
-    if 'battery_cell_temperature' in segment:
+    if segment.initial_battery_conditions.cell_temperature is not None:
         cell_temperature  = segment.battery_cell_temperature  
     else:
         cell_temperature                                      = atmo_data.temperature[0,0] 
     bus_unknowns[battery_module.tag].cell.temperature  = ones_row(1) * cell_temperature
     bus_residuals[battery_module.tag].cell.temperature = ones_row(1)* 0
 
-    if 'initial_battery_state_of_charge' in segment:
-        initial_battery_energy                                                   = segment.initial_battery_state_of_charge #*battery_module.maximum_energy   
-        bus_unknowns[battery_module.tag].energy = ones_row(1) * initial_battery_energy
+    if segment.initial_battery_conditions.state_of_charge is not None: 
+        initial_battery_energy                                                   = segment.initial_battery_conditions.state_of_charge
+        bus_unknowns[battery_module.tag].cell.state_of_charge = ones_row(1) * initial_battery_energy
     else:
-        bus_unknowns[battery_module.tag].energy = ones_row(1) * 0
-    bus_residuals[battery_module.tag].energy = ones_row(1)* 0
+        bus_unknowns[battery_module.tag].cell.state_of_charge = ones_row(1) * 0
+    bus_residuals[battery_module.tag].cell.state_of_charge = ones_row(1)* 0
 
+    #=================
+    # Bounds
+
+    bus_lower_bounds[battery_module.tag] = Conditions()
+    bus_upper_bounds[battery_module.tag] = Conditions()
+    bus_lower_bounds[battery_module.tag].cell = Conditions()
+    bus_upper_bounds[battery_module.tag].cell = Conditions()
     
+    bus_lower_bounds[battery_module.tag].cell.temperature = -np.inf * ones_row(1)
+    bus_upper_bounds[battery_module.tag].cell.temperature = np.inf * ones_row(1)
+
+    bus_lower_bounds[battery_module.tag].cell.state_of_charge = -np.inf * ones_row(1)
+    bus_upper_bounds[battery_module.tag].cell.state_of_charge = np.inf * ones_row(1)
+  
 
     return
 

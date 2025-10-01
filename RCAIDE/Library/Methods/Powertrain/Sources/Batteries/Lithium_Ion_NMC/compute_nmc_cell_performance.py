@@ -196,11 +196,11 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     I_cell             = battery_module_conditions.cell.current
                    
     # set temperature unknown 
-    T_cell_unkn                                       = state.unknowns.network[battery_module.tag+ '_cell_temperature'] 
+    T_cell_unkn                                       = state.unknowns.network[network_tag].busses[bus.tag][battery_module.tag].cell.temperature
     T_cell = battery_module_conditions.cell.temperature
     
     # set SOC unknown 
-    SOC_cell_unkn                                         = state.unknowns.network[battery_module.tag+ '_cell_state_of_charge']
+    SOC_cell_unkn                                         = state.unknowns.network[network_tag].busses[bus.tag][battery_module.tag].cell.state_of_charge
     SOC = battery_module_conditions.cell.state_of_charge
     
     # ---------------------------------------------------------------------------------
@@ -292,13 +292,13 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
         dT_dt    = Q_heat_cell/(cell_mass*Cp) 
         R_res    = np.dot(D, T_cell_unkn)[:, 0] -  dT_dt[:, 0]
         R_res[0] =  T_cell_unkn[0] - battery_module_conditions.cell.temperature[0, 0]
-        state.residuals.network[battery_module.tag+ '_cell_temperature']    = R_res 
+        state.residuals.network[network_tag].busses[bus.tag][battery_module.tag].cell.temperature = R_res 
         #print(state.residuals.network[battery_module.tag + '_cell_temperature'] )
         
         # Compute power residual 
         P_res    = np.dot(D, SOC_cell_unkn *E_module_max )[:, 0] -  P_module[:, 0]
         P_res[0] = SOC_cell_unkn[0] - battery_module_conditions.cell.state_of_charge[0, 0]
-        state.residuals.network[battery_module.tag + '_cell_state_of_charge']  = P_res 
+        state.residuals.network[network_tag].busses[bus.tag][battery_module.tag].cell.state_of_charge = P_res 
         #print(state.residuals.network[battery_module.tag + '_cell_state_of_charge'] )
     
         battery_module_conditions.cell.state_of_charge[1:,0]  = SOC_cell_unkn[1:,0]  

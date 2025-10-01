@@ -205,8 +205,8 @@ def add_mission_variables(segment):
         len_residuals = n_points
     elif single_pt_seg:
         n_points      = 1
-        len_inputs    = segment.state.number_of_unknowns
-        len_residuals = segment.state.number_of_residuals
+        len_inputs    = segment.state.number_of_unknowns#fix
+        len_residuals = segment.state.number_of_residuals# fix
     else:
         n_points      = segment.state.numerics.number_of_control_points  
         len_inputs    = n_points*segment.state.number_of_mission_unknowns + n_points * segment.state.number_of_network_unknowns
