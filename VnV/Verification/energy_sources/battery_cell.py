@@ -133,7 +133,7 @@ def lithium_ion_battery_test():
             #assert np.abs((bat_temp_diff)/bat_temp_true[j,i]) < 1e-6
        
             for segment in results.segments.values(): 
-                volts         = segment.conditions.energy.busses['bus'].voltage_under_load[:,0] 
+                volts         = segment.conditions.energy.busses['bus'].battery_modules[battery_chemistry[i]].cell.voltage_under_load[:,0] 
                 SOC           = segment.conditions.energy.busses['bus'].battery_modules[battery_chemistry[i]].cell.state_of_charge[:,0]   
                 cell_temp     = segment.conditions.energy.busses['bus'].battery_modules[battery_chemistry[i]].cell.temperature[:,0]   
                 Amp_Hrs       = segment.conditions.energy.busses['bus'].battery_modules[battery_chemistry[i]].cell.charge_throughput[:,0]                   
@@ -230,12 +230,12 @@ def mission_setup(analyses,vehicle,battery_chemistry,current,mAh):
     mission.append_segment(segment)   
 
          
-    #segment                                 = Segments.Ground.Battery_Discharge(base_segment) 
-    #segment.analyses.extend(analyses.discharge)  
-    #segment.tag                             = 'Discharge_1' 
-    #segment.time                            = time/2  
-    ##segment.initial_battery_conditions.state_of_charge = 1  
-    #mission.append_segment(segment)
+    segment                                 = Segments.Ground.Battery_Discharge(base_segment) 
+    segment.analyses.extend(analyses.discharge)  
+    segment.tag                             = 'Discharge_1' 
+    segment.time                            = time/2  
+    #segment.initial_battery_conditions.state_of_charge = 1  
+    mission.append_segment(segment)
     
     #segment                                = Segments.Ground.Battery_Discharge(base_segment) 
     #segment.tag                            = 'Discharge_2'

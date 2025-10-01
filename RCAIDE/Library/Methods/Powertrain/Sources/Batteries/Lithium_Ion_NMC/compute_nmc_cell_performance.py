@@ -190,7 +190,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     
     Q_heat_module      = battery_module_conditions.heat_energy_generated
     Q_heat_cell        = battery_module_conditions.cell.heat_energy_generated 
-    V_ul_cell          = battery_module_conditions.cell.voltage_under_load
+    #V_ul_cell          = battery_module_conditions.cell.voltage_under_load
     
     I_module           = battery_module_conditions.current 
     I_cell             = battery_module_conditions.cell.current
@@ -264,7 +264,8 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     E_cell          = E_module/n_total  
     
     R_0_module = (R_0_cell / n_parallel) * n_series
-    battery_module_conditions.voltage_under_load        = V_ul_cell*n_series  
+    battery_module_conditions.voltage_under_load        = V_ul_cell*n_series 
+    battery_module_conditions.cell.voltage_under_load   = V_ul_cell 
     battery_module_conditions.internal_resistance       = R_0_module
     battery_module_conditions.cell.internal_resistance  = R_0_cell  
     battery_module_conditions.voltage_open_circuit      = V_oc_module
@@ -309,18 +310,15 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
         battery_module_conditions.cell.depth_of_discharge[1:,0]      = 1 - SOC_cell_unkn[1:,0]  
         battery_module_conditions.cell.energy[1:,0]                  = SOC_cell_unkn[1:,0] *E_module_max /n_total  
         battery_module_conditions.energy[1:,0]                       = SOC_cell_unkn[1:,0] *E_module_max
-        
-        
-
+         
         Q_prior  = battery_module_conditions.cell.charge_throughput[0] 
         dt       =  np.diff(state.numerics.time.control_points[:,0])
         avg_I    =  ( I_cell[:-1, 0] +  I_cell[1:, 0]) / 2
         Q_Ah     =  np.atleast_2d(np.concatenate(([0.0], np.cumsum(dt*avg_I)))).T/Units.hr     
         battery_module_conditions.cell.charge_throughput       = Q_prior + Q_Ah    
- 
         
-    stored_results_flag     = True
-    stored_battery_module_tag     = battery_module.tag  
+    stored_results_flag        = True
+    stored_battery_module_tag  = battery_module.tag  
         
     return stored_results_flag, stored_battery_module_tag
 

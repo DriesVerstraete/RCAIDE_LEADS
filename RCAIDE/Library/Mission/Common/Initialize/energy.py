@@ -79,11 +79,7 @@ def energy(segment):
             for battery_module in  bus.battery_modules:
                 battery_module.append_battery_segment_conditions(segment, bus)
             for coolant_line in  network.coolant_lines:
-                for tag, item in  coolant_line.items(): 
-                    if tag == 'battery_modules':
-                        for battery in item:
-                            for btms in  battery:
-                                btms.append_segment_conditions(segment,coolant_line)
+                for tag, item in  coolant_line.items():  
                     if tag == 'heat_exchangers':
                         for heat_exchanger in  item:
                             heat_exchanger.append_segment_conditions(segment,bus,coolant_line)
@@ -94,8 +90,7 @@ def energy(segment):
         # if network has fuel lines             
         for fuel_line in  network.fuel_lines:
             for fuel_tank in fuel_line.fuel_tanks:
-                if segment.state.initials:
-                    
+                if segment.state.initials: 
                     segment.state.conditions.energy.cumulative_fuel_consumption[:,0] = segment.state.initials.conditions.energy.cumulative_fuel_consumption[-1,0]
                     fuel_tank.append_segment_conditions(segment,fuel_line)
 

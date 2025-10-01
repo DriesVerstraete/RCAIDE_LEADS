@@ -61,13 +61,18 @@ def append_battery_conditions(battery_module,segment,bus):
  
     ones_row  = segment.state.ones_row
 
+    # -----------------------------------------------------------------------------------------  
     # compute ambient conditions
+    # -----------------------------------------------------------------------------------------  
     atmosphere    = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     alt           = -segment.conditions.frames.inertial.position_vector[:,2] 
     if segment.temperature_deviation != None:
         temp_dev = segment.temperature_deviation    
     atmo_data    = atmosphere.compute_values(altitude = alt,temperature_deviation=temp_dev)  
-        
+
+    # -----------------------------------------------------------------------------------------  
+    # initialize data structures 
+    # -----------------------------------------------------------------------------------------          
     bus_results = segment.state.conditions.energy.busses[bus.tag]        
     bus_results.battery_modules[battery_module.tag]          = Conditions() 
     bus_results.battery_modules[battery_module.tag].cell     = Conditions() 
@@ -102,18 +107,21 @@ def append_battery_conditions(battery_module,segment,bus):
     bus_results.battery_modules[battery_module.tag].cell.cycle_in_day               = 0
     bus_results.battery_modules[battery_module.tag].cell.resistance_growth_factor   = 1.
     bus_results.battery_modules[battery_module.tag].cell.capacity_fade_factor       = 1. 
-    
-    # Conditions for recharging battery module
+
+    # -----------------------------------------------------------------------------------------      
+    # Conditions for recharging battery  
+    # -----------------------------------------------------------------------------------------  
     if isinstance(segment,RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge):
         segment.state.conditions.energy.recharging  = True  
     elif type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Battery_Discharge:
         segment.state.conditions.energy.recharging   = False  
     else:
         segment.state.conditions.energy.recharging  = False 
-        
-    # first segment 
-    if segment.initial_battery_conditions.state_of_charge is not None:
-    
+     
+    # -----------------------------------------------------------------------------------------  
+    # initial battery conditions 
+    # -----------------------------------------------------------------------------------------  
+    if segment.initial_battery_conditions.state_of_charge is not None: 
         n_series          = battery_module.electrical_configuration.series
         n_parallel        = battery_module.electrical_configuration.parallel 
         n_total           = n_series*n_parallel
@@ -219,14 +227,15 @@ def append_battery_segment_conditions(battery_module, segment, bus):
         if type(segment) ==  RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge:             
             module_conditions.battery_discharge_flag           = False 
         else:                   
-            module_conditions.battery_discharge_flag           = True      
-            
-        module_conditions.energy[:,0]                     = battery_initials.energy[-1,0] 
+            module_conditions.battery_discharge_flag           = True   
+        module_conditions.energy[:,0]                     = battery_initials.energy[-1,0]
+        module_conditions.temperature[:,0]                = battery_initials.temperature[-1,0]
+        module_conditions.cell.temperature[:,0]           = battery_initials.cell.temperature[-1,0]
         module_conditions.cell.cycle_in_day               = battery_initials.cell.cycle_in_day      
         module_conditions.cell.charge_throughput[:,0]     = battery_initials.cell.charge_throughput[-1,0]
         module_conditions.cell.resistance_growth_factor   = battery_initials.cell.resistance_growth_factor 
-        module_conditions.cell.capacity_fade_factor       = battery_initials.cell.capacity_fade_factor  
-        module_conditions.cell.energy[:,0]                = battery_initials.cell.energy[-1,0]
-    
+        module_conditions.cell.capacity_fade_factor       = battery_initials.cell.capacity_fade_factor 
+        module_conditions.cell.state_of_charge[:,0]       = battery_initials.cell.state_of_charge[-1,0]
+        module_conditions.cell.energy[:,0]                = battery_initials.cell.energy[-1,0] 
 
     return    
