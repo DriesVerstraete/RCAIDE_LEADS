@@ -287,11 +287,10 @@ class Network(Component):
                     
                     # Step 4 : Battery Thermal Management Calculations                    
                     for coolant_line in coolant_lines:
-                        if t_idx != state.numerics.number_of_control_points-1: 
-                            for heat_exchanger in coolant_line.heat_exchangers: 
-                                heat_exchanger.compute_heat_exchanger_performance(state,bus,coolant_line,delta_t[t_idx],t_idx) 
-                            for reservoir in coolant_line.reservoirs:   
-                                reservoir.compute_reservior_coolant_temperature(state,coolant_line,delta_t[t_idx],t_idx)
+                        for heat_exchanger in coolant_line.heat_exchangers: 
+                               heat_exchanger.compute_heat_exchanger_performance(state,bus,coolant_line) 
+                        for reservoir in coolant_line.reservoirs:   
+                            reservoir.compute_reservior_coolant_temperature(state,coolant_line)
                                 
                 # Update total mass flow of system   
                 total_mdot   += conditions.energy.busses[bus.tag].fuel_mass_flow_rate
