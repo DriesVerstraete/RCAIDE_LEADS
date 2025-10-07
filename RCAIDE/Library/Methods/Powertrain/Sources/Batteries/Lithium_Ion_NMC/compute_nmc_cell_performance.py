@@ -213,7 +213,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     
     # Scaled and bounded unknowns
     T_cell_scaled = T_cell_unkn / T_scale
-    SOC_bounded = np.clip(SOC_cell_unkn, 0.01, 0.99)
+    SOC_bounded = np.clip(SOC_cell_unkn, 1e-4, 1.0)
     
     # Check for thermal management system
     HAS = None  
