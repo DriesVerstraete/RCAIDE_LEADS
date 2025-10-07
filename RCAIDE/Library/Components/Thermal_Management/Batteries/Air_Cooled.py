@@ -67,7 +67,7 @@ class Air_Cooled(Component):
         """                 
         self.tag                                  = 'air_cooled_heat_acquisition'
         self.cooling_fluid                        = Air()    
-        self.cooling_fluid.flowspeed              = 0.01                                          
+        self.cooling_fluid.flowspeed_percent      = 0.01                                          
         self.convective_heat_transfer_coefficient = 35.     
         self.heat_transfer_efficiency             = 1.0      
    

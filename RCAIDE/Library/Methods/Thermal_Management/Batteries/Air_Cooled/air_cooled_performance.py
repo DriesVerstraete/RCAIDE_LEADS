@@ -68,7 +68,7 @@ def air_cooled_performance(HAS,battery,_,coolant_line, Q_heat_gen,T_cell,T_scale
         rho_coolant = state.conditions.freestream.density
         Cp_coolant  = HAS.cooling_fluid.compute_cp(state.conditions.freestream.temperature,
                                                    state.conditions.freestream.pressure)
-        V_coolant   = HAS.cooling_fluid.flowspeed  
+        V_coolant   = HAS.cooling_fluid.flowspeed_percent * state.conditions.freestream.velocity
         
         # Chapter 7 pg 437-446 of Fundamentals of heat and mass transfer 
         S_T = battery.geometrtic_configuration.normal_spacing          
@@ -116,7 +116,5 @@ def air_cooled_performance(HAS,battery,_,coolant_line, Q_heat_gen,T_cell,T_scale
     dT_dt_scaled = dT_dt / T_scale
 
     state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].total_heat_removed     = Q_convec*n_total_module
-
-       
-    
+  
     return  dT_dt_scaled
