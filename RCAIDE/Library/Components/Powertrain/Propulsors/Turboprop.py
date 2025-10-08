@@ -117,21 +117,12 @@ class Turboprop(Propulsor):
         self.reference_temperature                      = 288.15
         self.reference_pressure                         = 1.01325*10**5  
     
-    def append_operating_conditions(self,segment,energy_conditions,noise_conditions=None):
+    def append_operating_conditions(self,segment):
         """
         Appends operating conditions to the segment.
         """
-        append_turboprop_conditions(self,segment,energy_conditions,noise_conditions)
-        return
-
-    def unpack_propulsor_unknowns(self,segment):   
+        append_turboprop_conditions(self,segment)
         return 
-
-    def pack_propulsor_residuals(self,segment): 
-        return
-
-    def append_propulsor_unknowns_and_residuals(self,segment): 
-        return    
     
     def compute_performance(self,state,center_of_gravity = [[0, 0, 0]]):
         """

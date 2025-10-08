@@ -105,3 +105,16 @@ class Coolant_Line(Component):
                         self.battery_modules = Container()
                     for battery in item:
                         self.battery_modules[battery.tag] = Container()
+                        
+             
+    def append_operating_conditions(self, segment,network):
+        """
+        Append operating conditions for a flight segment
+        
+        Parameters
+        ----------
+        segment : Segment
+            Flight segment containing operating conditions
+        """ 
+        return
+                        

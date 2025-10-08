@@ -6,9 +6,7 @@
 #  Imports
 # ---------------------------------------------------------------------------------------------------------------------
 # RCAIDE Imports
-import  RCAIDE 
-from RCAIDE.Framework.Core import Data
-from RCAIDE.Framework.Mission.Common                      import Residuals, Unknowns 
+import  RCAIDE
 from RCAIDE.Library.Mission.Common.Unpack_Unknowns.energy import unknowns
 from RCAIDE.Library.Methods.Powertrain.Systems.compute_avionics_power_draw                import compute_avionics_power_draw
 from RCAIDE.Library.Methods.Powertrain.Systems.compute_systems_power_draw                 import compute_systems_power_draw
@@ -379,104 +377,78 @@ class Network(Component):
                         propulsor.pack_propulsor_residuals(segment)   
         return      
     
-    def add_unknowns_and_residuals_to_segment(self, segment):
-        """ This function sets up the information that the mission needs to run a mission segment using this network 
+    #def add_unknowns_and_residuals_to_segment(self, segment):
+        #""" This function sets up the information that the mission needs to run a mission segment using this network 
          
-            Assumptions:
-            None
+            #Assumptions:
+            #None
     
-            Source:
-            N/A
+            #Source:
+            #N/A
     
-            Inputs:
-            segment
-            eestimated_throttles           [-]
-            estimated_propulsor_group_rpms [-]  
+            #Inputs:
+            #segment
+            #eestimated_throttles           [-]
+            #estimated_propulsor_group_rpms [-]  
             
-            Outputs:
-            segment
+            #Outputs:
+            #segment
     
-            Properties Used:
-            N/A
-        """                   
-        segment.state.residuals.mission.network = Residuals()
+            #Properties Used:
+            #N/A
+        #"""                   
+        #segment.state.residuals.mission.network = Residuals()
 
-        for network in segment.analyses.energy.vehicle.networks:
-            for propulsor in network.propulsors: 
-                propulsor.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)     
-    
-            for converter in network.converters: 
-                converter.append_operating_conditions(segment,segment.state.conditions.energy)                 
-    
-            for fuel_line_i, fuel_line in enumerate(network.fuel_lines):
-            #     fuel_line.append_operating_conditions(segment)              
+        #for network in segment.analyses.energy.vehicle.networks: 
+     
+            #for fuel_line_i, fuel_line in enumerate(network.fuel_lines):  
                   
-                # Assign network-specific  residuals, unknowns and results data structures 
-                if fuel_line.active:
-                    for propulsor_group in  fuel_line.assigned_propulsors:
-                        propulsor =  network.propulsors[propulsor_group[0]]
-                        propulsor.append_propulsor_unknowns_and_residuals(segment)
-                         
-                # Assign sub component results data structures  
-            
-                # for fuel_tank in  fuel_line.fuel_tanks: 
-                #     fuel_tank.append_operating_conditions(segment,fuel_line) 
+                ## Assign network-specific  residuals, unknowns and results data structures 
+                #if fuel_line.active:
+                    #for propulsor_group in  fuel_line.assigned_propulsors:
+                        #propulsor =  network.propulsors[propulsor_group[0]]
+                        #propulsor.append_propulsor_unknowns_and_residuals(segment)
+                          
     
-            # ------------------------------------------------------------------------------------------------------            
-            # Create bus results data structure  
-            # ------------------------------------------------------------------------------------------------------     
-            for bus_i, bus in enumerate(network.busses): 
-                # bus.append_operating_conditions(segment)                  
+            ## ------------------------------------------------------------------------------------------------------            
+            ## Create bus results data structure  
+            ## ------------------------------------------------------------------------------------------------------     
+            #for bus_i, bus in enumerate(network.busses): 
+                ## bus.append_operating_conditions(segment)                  
     
-                # ------------------------------------------------------------------------------------------------------
-                # Assign network-specific  residuals, unknowns and results data structures
-                # ------------------------------------------------------------------------------------------------------
-                if bus.active:
-                    for propulsor_group in  bus.assigned_propulsors:
-                        propulsor =  network.propulsors[propulsor_group[0]]
-                        propulsor.append_propulsor_unknowns_and_residuals(segment)
-                        
-                # # ------------------------------------------------------------------------------------------------------
-                # # Assign sub component results data structures
-                # # ------------------------------------------------------------------------------------------------------ 
-                # for battery_module in  bus.battery_modules: 
-                #     battery_module.append_operating_conditions(segment,bus) 
+                ## ------------------------------------------------------------------------------------------------------
+                ## Assign network-specific  residuals, unknowns and results data structures
+                ## ------------------------------------------------------------------------------------------------------
+                #if bus.active:
+                    #for propulsor_group in  bus.assigned_propulsors:
+                        #propulsor =  network.propulsors[propulsor_group[0]]
+                        #propulsor.append_propulsor_unknowns_and_residuals(segment)
+                          
     
-                for fuel_cell_stack in  bus.fuel_cell_stacks: 
-                    fuel_cell_stack.append_operating_conditions(segment,bus)      
-                    
-                # for tag, bus_item in bus.items():  
-                #     if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
-                #         bus_item.append_operating_conditions(segment,bus)
-         
-                # for fuel_tank in  bus.fuel_tanks: 
-                #     fuel_tank.append_operating_conditions(segment,bus)
-                                                    
-    
-            for coolant_line_i, coolant_line in enumerate(network.coolant_lines):  
-                # ------------------------------------------------------------------------------------------------------            
-                # Create coolant_lines results data structure  
-                # ------------------------------------------------------------------------------------------------------
-                segment.state.conditions.energy.coolant_lines[coolant_line.tag] = RCAIDE.Framework.Mission.Common.Conditions()        
+            ##for coolant_line_i, coolant_line in enumerate(network.coolant_lines):  
+                ### ------------------------------------------------------------------------------------------------------            
+                ### Create coolant_lines results data structure  
+                ### ------------------------------------------------------------------------------------------------------
+                ##segment.state.conditions.energy.coolant_lines[coolant_line.tag] = RCAIDE.Framework.Mission.Common.Conditions()        
                 
-                # ------------------------------------------------------------------------------------------------------
-                # Assign network-specific  residuals, unknowns and results data structures
-                # ------------------------------------------------------------------------------------------------------       
-                for battery_module in coolant_line.battery_modules: 
-                    for btms in battery_module:
-                        btms.append_operating_conditions(segment,coolant_line)
+                ### ------------------------------------------------------------------------------------------------------
+                ### Assign network-specific  residuals, unknowns and results data structures
+                ### ------------------------------------------------------------------------------------------------------       
+                ##for battery_module in coolant_line.battery_modules: 
+                    ##for btms in battery_module:
+                        ##btms.append_operating_conditions(segment,coolant_line)
                         
-                for heat_exchanger in coolant_line.heat_exchangers: 
-                    heat_exchanger.append_operating_conditions(segment, coolant_line)
+                ##for heat_exchanger in coolant_line.heat_exchangers: 
+                    ##heat_exchanger.append_operating_conditions(segment, coolant_line)
                         
-                for reservoir in coolant_line.reservoirs: 
-                    reservoir.append_operating_conditions(segment, coolant_line)                           
+                ##for reservoir in coolant_line.reservoirs: 
+                    ##reservoir.append_operating_conditions(segment, coolant_line)                           
     
-        # Ensure the mission knows how to pack and unpack the unknowns and residuals
-        segment.process.iterate.unknowns.mission.network            = self.unpack_unknowns
-        segment.process.iterate.residuals.mission.network           = self.residuals   
+        ## Ensure the mission knows how to pack and unpack the unknowns and residuals
+        #segment.process.iterate.unknowns.mission.network            = self.unpack_unknowns
+        #segment.process.iterate.residuals.mission.network           = self.residuals   
         
-        return segment
+        #return segment
  
 # ----------------------------------------------------------------------
 #  Component Container

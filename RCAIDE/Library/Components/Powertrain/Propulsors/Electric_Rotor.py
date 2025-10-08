@@ -80,11 +80,11 @@ class Electric_Rotor(Propulsor):
         self.electronic_speed_controller   = None  
         self.active_crypgenic_tanks_tanks  = None 
 
-    def append_operating_conditions(self,segment,energy_conditions,noise_conditions=None):
+    def append_operating_conditions(self,segment):
         """
         Appends operating conditions to the segment.
         """            
-        append_electric_rotor_conditions(self,segment,energy_conditions,noise_conditions)
+        append_electric_rotor_conditions(self,segment)
         return
     
     def append_propulsor_unknowns_and_residuals(self,segment):

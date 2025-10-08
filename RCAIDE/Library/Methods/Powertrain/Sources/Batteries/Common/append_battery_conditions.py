@@ -161,7 +161,7 @@ def append_battery_conditions(battery_module,segment,bus):
      
     return 
 
-def append_battery_unknowns_residuals(battery_module,segment,bus,network):
+def append_battery_unknowns_and_residuals(battery_module,segment,bus,network):
     
     # compute ambient conditions
     atmosphere    = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()

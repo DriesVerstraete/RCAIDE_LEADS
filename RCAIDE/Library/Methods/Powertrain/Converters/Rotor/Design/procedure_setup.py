@@ -238,7 +238,7 @@ def run_rotor_hover(nexus):
     conditions.frames.planet.true_course                = np.array([[[1., 0., 0.],[0., 1., 0.],[0., 0.,  1.]]])  
     segment.state.conditions                            = conditions
      
-    rotor.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)
+    rotor.append_operating_conditions(segment)
     
     rotor_conditions                            = segment.state.conditions.energy.converters[rotor.tag]     
     rotor_conditions.omega                      = (atmosphere_conditions.speed_of_sound*rotor.hover.design_tip_mach)/rotor.tip_radius 
@@ -310,7 +310,7 @@ def run_rotor_OEI(nexus):
     conditions.frames.planet.true_course                = np.array([[[1., 0., 0.],[0., 1., 0.],[0., 0.,  1.]]]) 
     segment.state.conditions                            = conditions
      
-    rotor.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)
+    rotor.append_operating_conditions(segment)
                 
     rotor_conditions                            =  segment.state.conditions.energy.converters[rotor.tag]     
     rotor_conditions.omega                      = (atmosphere_conditions.speed_of_sound*rotor.oei.design_tip_mach)/rotor.tip_radius 
@@ -356,7 +356,7 @@ def run_rotor_cruise(nexus):
         conditions.frames.planet.true_course                = np.array([[[1., 0., 0.],[0., 1., 0.],[0., 0.,  1.]]]) 
         segment.state.conditions                            = conditions
           
-        rotor.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)
+        rotor.append_operating_conditions(segment)
             
         rotor_conditions                            =  segment.state.conditions.energy.converters[rotor.tag]     
         rotor_conditions.omega                      = (atmosphere_conditions.speed_of_sound*rotor.cruise.design_tip_mach)/rotor.tip_radius 

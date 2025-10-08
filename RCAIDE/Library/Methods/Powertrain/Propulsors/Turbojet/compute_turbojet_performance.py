@@ -174,8 +174,7 @@ def compute_turbojet_performance(turbojet, state, center_of_gravity=[[0.0, 0.0, 
     RCAIDE.Library.Methods.Powertrain.Propulsors.Turbojet.compute_thrust
     RCAIDE.Library.Methods.Powertrain.Propulsors.Turbojet.reuse_stored_turbojet_data
     """
-    conditions                = state.conditions
-    noise_conditions          = conditions.noise.propulsors[turbojet.tag]  
+    conditions                = state.conditions 
     turbojet_conditions       = conditions.energy.propulsors[turbojet.tag] 
     U0                        = conditions.freestream.velocity
     T                         = conditions.freestream.temperature
@@ -390,11 +389,11 @@ def compute_turbojet_performance(turbojet, state, center_of_gravity=[[0.0, 0.0, 
                 angular_velocity    =  lpc_conditions.omega, 
             )    
 
-    noise_conditions.fan_nozzle             = None 
-    noise_conditions.core_nozzle            = core_nozzle_res
-    noise_conditions.fan                    = lpc_res   
-    stored_results_flag                     = True
-    stored_propulsor_tag                    = turbojet.tag
+    state.conditions.noise.propulsors[turbojet.tag].fan_nozzle    = None 
+    state.conditions.noise.propulsors[turbojet.tag].core_nozzle   = core_nozzle_res
+    state.conditions.noise.propulsors[turbojet.tag].fan           = lpc_res   
+    stored_results_flag                                           = True
+    stored_propulsor_tag                                          = turbojet.tag
     
     power_elec =  0*state.ones_row(1)
     

@@ -18,7 +18,7 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  Operating Test Conditions Set-up
 # ---------------------------------------------------------------------------------------------------------------------- 
-def setup_operating_conditions(component, velocity_range=np.array([10]), altitude=0, angle_of_attack=0, temperature_deviation=0):
+def setup_operating_conditions(component,conditions, velocity_range=np.array([10]), altitude=0, angle_of_attack=0, temperature_deviation=0):
     """
     Sets up operating conditions for single component analysis.
     
@@ -117,8 +117,7 @@ def setup_operating_conditions(component, velocity_range=np.array([10]), altitud
     rho                                               = atmo_data.density          
     a                                                 = atmo_data.speed_of_sound    
     mu                                                = atmo_data.dynamic_viscosity 
-                                                      
-    conditions                                        = Results() 
+                                                       
     conditions.freestream.altitude                    = np.atleast_2d(altitude)
     conditions.freestream.mach_number                 = np.atleast_2d(velocity_range/a)
     conditions.freestream.pressure                    = np.atleast_2d(p)
@@ -131,26 +130,29 @@ def setup_operating_conditions(component, velocity_range=np.array([10]), altitud
     conditions.freestream.R                           = np.atleast_2d(working_fluid.gas_specific_constant)
     conditions.freestream.speed_of_sound              = np.atleast_2d(a)
     conditions.freestream.delta_ISA                   = np.atleast_2d(temperature_deviation)
-    
-    num_ctrl_pts      = len(velocity_range)    
-    conditions._size  = num_ctrl_pts
-    conditions.expand_rows(num_ctrl_pts)
+      
+    conditions._size  = 1
+    conditions.expand_rows(1)
      
     conditions.freestream.velocity                    = np.atleast_2d(velocity_range) 
     conditions.frames.body.inertial_rotations[:, 1]   = angle_of_attack
     conditions.frames.inertial.velocity_vector[:, 0]  = np.atleast_2d(velocity_range)
 
-    # setup conditions   
-    segment                                          = RCAIDE.Framework.Mission.Segments.Segment()
-    segment.sideslip_angle                           = 0 
-    segment.state.conditions                         = conditions    
-    orientations(segment) 
-    segment.state.residuals.mission.network                  = Residuals()
+    ## setup conditions   
+    #segment                                          = RCAIDE.Framework.Mission.Segments.Segment()
+    #segment.sideslip_angle                           = 0 
+    #segment.state.conditions                         = conditions    
+    #orientations(segment)
     
-    # append component-specific operating conditions 
-    component.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)    
-    segment.state.conditions.expand_rows(num_ctrl_pts)              
-    return segment.state
+    #segment.state.residuals.mission.network          = Residuals()
+    
+    ## append component-specific operating conditions 
+    #component.append_operating_conditions(segment)    
+    #segment.state.conditions.expand_rows(num_ctrl_pts)              
+    #return segment.state
+             
+    return conditions
+
  
     
     

@@ -161,11 +161,10 @@ class Turbojet(Propulsor):
         self.areas.wetted                                = 0.0
         self.areas.maximum                               = 0.0
         self.areas.exit                                  = 0.0
-        self.areas.inflow                                = 0.0 
+        self.areas.inflow                                = 0.0
 
-
-    def append_operating_conditions(self,segment,energy_conditions,noise_conditions=None):
-        append_turbojet_conditions(self,segment,energy_conditions,noise_conditions)
+    def append_operating_conditions(self,segment):
+        append_turbojet_conditions(self,segment)
         return
 
     def unpack_propulsor_unknowns(self,segment):   

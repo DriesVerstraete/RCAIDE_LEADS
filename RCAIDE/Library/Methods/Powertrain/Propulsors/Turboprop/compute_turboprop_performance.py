@@ -164,8 +164,7 @@ def compute_turboprop_performance(turboprop, state, center_of_gravity=[[0.0, 0.0
     --------
     RCAIDE.Library.Methods.Powertrain.Propulsors.Turboprop.compute_thrust
     """ 
-    conditions               = state.conditions 
-    noise_conditions         = conditions.noise.propulsors[turboprop.tag]  
+    conditions               = state.conditions
     turboprop_conditions     = conditions.energy.propulsors[turboprop.tag]
     U0                       = conditions.freestream.velocity
     T                        = conditions.freestream.temperature
@@ -322,7 +321,7 @@ def compute_turboprop_performance(turboprop, state, center_of_gravity=[[0.0, 0.0
                 exit_velocity                       = core_nozzle_conditions.outputs.velocity
             )
   
-    noise_conditions.core_nozzle   = core_nozzle_res  
+    conditions.noise.propulsors[turboprop.tag].core_nozzle   = core_nozzle_res  
     
     # Pack results    
     stored_results_flag    = True

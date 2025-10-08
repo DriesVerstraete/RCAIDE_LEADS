@@ -100,7 +100,7 @@ def size_core(turbofan, conditions):
     Pt_ref              = turbofan_conditions.total_pressure_reference
     
     # Compute nondimensional thrust
-    turbofan_conditions.throttle = 1.0
+    turbofan_conditions.throttle = np.array([[1.0]])
     compute_thrust(turbofan,conditions) 
 
     # Compute dimensional mass flow rates

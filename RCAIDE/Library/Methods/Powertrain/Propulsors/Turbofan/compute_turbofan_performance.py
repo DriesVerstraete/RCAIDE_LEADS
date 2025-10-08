@@ -187,8 +187,7 @@ def compute_turbofan_performance(turbofan, state, center_of_gravity=[[0.0, 0.0, 
     --------
     RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan.compute_thurst
     """ 
-    conditions                = state.conditions   
-    noise_conditions          = conditions.noise.propulsors[turbofan.tag] 
+    conditions                = state.conditions    
     turbofan_conditions       = conditions.energy.propulsors[turbofan.tag] 
     U0                        = conditions.freestream.velocity
     T                         = conditions.freestream.temperature
@@ -429,11 +428,11 @@ def compute_turbofan_performance(turbofan, state, center_of_gravity=[[0.0, 0.0, 
                 angular_velocity    = fan_conditions.omega, 
             )
 
-    noise_conditions.fan_nozzle             = fan_nozzle_res
-    noise_conditions.core_nozzle            = core_nozzle_res  
-    noise_conditions.low_pressure_spool     = lpc_res
-    stored_results_flag                     = True
-    stored_propulsor_tag                    = turbofan.tag 
+    state.conditions.noise.propulsors[turbofan.tag].fan_nozzle         = fan_nozzle_res
+    state.conditions.noise.propulsors[turbofan.tag].core_nozzle        = core_nozzle_res  
+    state.conditions.noise.propulsors[turbofan.tag].low_pressure_spool = lpc_res
+    stored_results_flag                                     = True
+    stored_propulsor_tag                                    = turbofan.tag 
     
     return thrust_vector,moment,power,power_elec,stored_results_flag,stored_propulsor_tag 
     

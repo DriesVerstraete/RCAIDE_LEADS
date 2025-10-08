@@ -13,7 +13,7 @@ from RCAIDE.Framework.Mission.Common                      import Conditions
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  append electric rotor network conditions
 # ----------------------------------------------------------------------------------------------------------------------    
-def append_electric_rotor_conditions(propulsor, segment, energy_conditions, noise_conditions):
+def append_electric_rotor_conditions(propulsor, segment):
     """
     Appends data structures arrays for storing electric rotor conditions.
     
@@ -31,16 +31,12 @@ def append_electric_rotor_conditions(propulsor, segment, energy_conditions, nois
                 Segment state
                 - ones_row : function
                     Function to create array of ones with specified length
-    energy_conditions : RCAIDE.Framework.Mission.Common.Conditions
-        Energy conditions container where electric rotor conditions will be stored
-    noise_conditions : RCAIDE.Framework.Mission.Common.Conditions
-        Noise conditions container where electric rotor noise conditions will be stored
     
     Returns
     -------
     None
-        Results are stored in energy_conditions.propulsors[propulsor.tag] and
-        noise_conditions.propulsors[propulsor.tag]
+        Results are stored in segment.state.conditions.energy.propulsors[propulsor.tag] and
+        segment.state.conditions.noise.propulsors[propulsor.tag]
     
     Notes
     -----
@@ -49,7 +45,7 @@ def append_electric_rotor_conditions(propulsor, segment, energy_conditions, nois
     for various performance parameters and recursively calls the append_operating_conditions
     method for each subcomponent of the electric rotor propulsor.
     
-    The function initializes the following parameters in energy_conditions:
+    The function initializes the following parameters in segment.state.conditions.energy:
         - throttle
         - commanded_thrust_vector_angle
         - thrust
@@ -66,16 +62,16 @@ def append_electric_rotor_conditions(propulsor, segment, energy_conditions, nois
     ones_row          = segment.state.ones_row 
     
     # add propulsor conditions              
-    energy_conditions.propulsors[propulsor.tag]                               = Conditions()  
-    energy_conditions.propulsors[propulsor.tag].throttle                      = 0. * ones_row(1)      
-    energy_conditions.propulsors[propulsor.tag].commanded_thrust_vector_angle = 0. * ones_row(1)   
-    energy_conditions.propulsors[propulsor.tag].thrust                        = 0. * ones_row(3) 
-    energy_conditions.propulsors[propulsor.tag].power                         = 0. * ones_row(1) 
-    energy_conditions.propulsors[propulsor.tag].moment                        = 0. * ones_row(3)  
-    noise_conditions.propulsors[propulsor.tag]                                = Conditions() 
+    segment.state.conditions.energy.propulsors[propulsor.tag]                               = Conditions()  
+    segment.state.conditions.energy.propulsors[propulsor.tag].throttle                      = 0. * ones_row(1)      
+    segment.state.conditions.energy.propulsors[propulsor.tag].commanded_thrust_vector_angle = 0. * ones_row(1)   
+    segment.state.conditions.energy.propulsors[propulsor.tag].thrust                        = 0. * ones_row(3) 
+    segment.state.conditions.energy.propulsors[propulsor.tag].power                         = 0. * ones_row(1) 
+    segment.state.conditions.energy.propulsors[propulsor.tag].moment                        = 0. * ones_row(3)  
+    segment.state.conditions.noise.propulsors[propulsor.tag]                                = Conditions() 
        
     # parse propulsor for comoonent and append 
     for tag, item in  propulsor.items(): 
         if issubclass(type(item), RCAIDE.Library.Components.Component):
-            item.append_operating_conditions(segment,energy_conditions,noise_conditions)
+            item.append_operating_conditions(segment)
     return

@@ -124,7 +124,7 @@ def Harmonic_Noise_Validation(PP):
     # Run simulation using different fidelities 
     # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     for fid in  range(len(fidelities)): 
-        rotor.append_operating_conditions(segment, segment.state.conditions.energy,segment.state.conditions.noise)
+        rotor.append_operating_conditions(segment)
         
         # Run BEMT
         segment.state.conditions.expand_rows(ctrl_pts)
@@ -280,7 +280,7 @@ def Broadband_Noise_Validation(PP):
     rotor.number_azimuthal_stations                        = 16
     rotor.use_2d_analysis                                  = True
      
-    rotor.append_operating_conditions(segment, segment.state.conditions.energy,segment.state.conditions.noise)
+    rotor.append_operating_conditions(segment)
     # Run BEMT
     segment.state.conditions.expand_rows(ctrl_pts)
     rotor_conditions             =  segment.state.conditions.energy.converters[rotor.tag]       

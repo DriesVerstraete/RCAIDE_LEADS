@@ -118,7 +118,7 @@ class Nacelle(Component):
         self.differential_pressure    = 0.0    
         self.cowling_airfoil_angle    = 0.0
 
-    def append_operating_conditions(self, segment, energy_conditions, noise_conditions=None): 
+    def append_operating_conditions(self, segment): 
         """
         Placeholder for adding operating conditions to the nacelle.
 
@@ -130,7 +130,7 @@ class Nacelle(Component):
             Propulsion system data
         """
     
-        energy_conditions[self.tag]   = RCAIDE.Framework.Mission.Common.Conditions()         
+        segment.state.conditions.energy[self.tag]   = RCAIDE.Framework.Mission.Common.Conditions()         
         return
 
     def nac_vel_to_body(self):
