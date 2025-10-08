@@ -407,7 +407,7 @@ class Network(Component):
                 #if fuel_line.active:
                     #for propulsor_group in  fuel_line.assigned_propulsors:
                         #propulsor =  network.propulsors[propulsor_group[0]]
-                        #propulsor.append_propulsor_unknowns_and_residuals(segment)
+                        #propulsor.append_unknowns_and_residuals(segment)
                           
     
             ## ------------------------------------------------------------------------------------------------------            
@@ -422,7 +422,7 @@ class Network(Component):
                 #if bus.active:
                     #for propulsor_group in  bus.assigned_propulsors:
                         #propulsor =  network.propulsors[propulsor_group[0]]
-                        #propulsor.append_propulsor_unknowns_and_residuals(segment)
+                        #propulsor.append_unknowns_and_residuals(segment)
                           
     
             ##for coolant_line_i, coolant_line in enumerate(network.coolant_lines):  

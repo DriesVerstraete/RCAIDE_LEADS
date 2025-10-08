@@ -6,7 +6,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports   
-from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
+from RCAIDE.Framework.Mission.Common     import   Conditions
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHODS
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -71,42 +71,6 @@ def append_fuel_line_conditions(fuel_line,segment,network):
     # Check: if all tanks are manual, ratios must sum to ~1
     if not auto_tanks:
         if manual_ratio!=1.0: 
-            raise ValueError(f"Manual flow_split_ratio values sum to {manual_ratio:.3f}, must equal 1.0")
-
-    
-    # Add Conditions for residuals and unknowns
-    segment.state.unknowns.network[network.tag].fuel_lines[fuel_line.tag] = Unknowns()
-    segment.state.residuals.network[network.tag].fuel_lines[fuel_line.tag] = Residuals()
-
-    segment.state.unknowns_lower_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
-    segment.state.unknowns_upper_bounds.network[network.tag].fuel_lines[fuel_line.tag] = Conditions()
+            raise ValueError(f"Manual flow_split_ratio values sum to {manual_ratio:.3f}, must equal 1.0") 
 
     return
-
-# This function is not necessary
-# def append_fuel_line_segment_conditions(fuel_line,segment):
-#     """
-#     Sets the initial fuel line properties at the start of each segment based on the last point from the previous segment.
-    
-#     Parameters
-#     ----------
-#     fuel_line : Fuel Line 
-#         The fuel line component for which conditions are being initialized.
-#     conditions : dict
-#         Dictionary containing conditions from the previous segment.
-#     segment : Segment
-#         The current mission segment in which the bus is operating.
-    
-#     Returns
-#     -------
-#     None 
-    
-#     This ensures continuity of energy states between mission segments. 
-    
-#     See Also
-#     --------
-#     RCAIDE.Library.Methods.Powertrain.Distributors.Fuel_Line.append_fuel_line_conditions 
-#     """     
-#     segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate[:,0]    = 0  #?????????????????????
-
-#     return

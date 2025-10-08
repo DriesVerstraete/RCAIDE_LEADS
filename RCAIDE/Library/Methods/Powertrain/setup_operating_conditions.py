@@ -8,9 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # RCAIDE Imports
-import RCAIDE   
-from RCAIDE.Framework.Mission.Common import Results, Residuals
-from RCAIDE.Library.Mission.Common.Update.orientations import orientations
+import RCAIDE    
 
 # Python package imports
 import numpy as np 
@@ -137,20 +135,7 @@ def setup_operating_conditions(component,conditions, velocity_range=np.array([10
     conditions.freestream.velocity                    = np.atleast_2d(velocity_range) 
     conditions.frames.body.inertial_rotations[:, 1]   = angle_of_attack
     conditions.frames.inertial.velocity_vector[:, 0]  = np.atleast_2d(velocity_range)
-
-    ## setup conditions   
-    #segment                                          = RCAIDE.Framework.Mission.Segments.Segment()
-    #segment.sideslip_angle                           = 0 
-    #segment.state.conditions                         = conditions    
-    #orientations(segment)
-    
-    #segment.state.residuals.mission.network          = Residuals()
-    
-    ## append component-specific operating conditions 
-    #component.append_operating_conditions(segment)    
-    #segment.state.conditions.expand_rows(num_ctrl_pts)              
-    #return segment.state
-             
+ 
     return conditions
 
  

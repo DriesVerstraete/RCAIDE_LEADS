@@ -142,7 +142,16 @@ class Electrical_Bus(Component):
         """
         initialize_bus_properties(self)
         return
-        
+
+    def unpack_propulsor_unknowns(self,segment):   
+        return 
+
+    def pack_propulsor_residuals(self,segment): 
+        return
+
+    def append_unknowns_and_residuals(self,segment,network):
+        return
+    
     def compute_distributor_conditions(self,state):
         """
         Compute electrical conditions during operation

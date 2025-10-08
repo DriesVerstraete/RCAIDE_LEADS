@@ -81,13 +81,16 @@ class Fuel_Tank(Component):
             Connected fuel line component
         """
         append_fuel_tank_conditions(self,segment, fuel_line)  
-        append_fuel_tank_residual_and_unknowns(self,segment, fuel_line,network)  
         return
     
     def compute_tank_properties(self,state,fuel_line,network_tag):
         compute_fuel_tank_properties(self,state,fuel_line,network_tag)
         return
     
-    def append_segment_conditions(self, segment, distributor):
-        append_fuel_tank_segment_conditions(self, segment, distributor)
+    def append_segment_conditions(self, segment, distributor,network):
+        append_fuel_tank_segment_conditions(self, segment, distributor,network)
         return
+
+    def append_unknowns_and_residuals(self,segment,fuel_line,network):
+        append_fuel_tank_unknown_and_residual(self,segment,fuel_line,network)
+        return       

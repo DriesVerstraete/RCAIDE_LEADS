@@ -22,7 +22,14 @@ def set_network_residuals_and_unknowns(mission):
             segment.state.residuals.network[network.tag]                = Conditions()
             segment.state.unknowns_lower_bounds.network[network.tag]    = Conditions()
             segment.state.unknowns_upper_bounds.network[network.tag]    = Conditions()                        
-    
+
+            # ---------------------------------------------------------------------------------------------
+            # Propulsors 
+            # ---------------------------------------------------------------------------------------------
+            for p_i,propulsor in  enumerate(network.propulsors):  
+                if network.identical_propulsors == True and p_i ==0:
+                    propulsor.append_unknowns_and_residuals(segment)
+                    
             # ---------------------------------------------------------------------------------------------            
             # Distributors 
             # ---------------------------------------------------------------------------------------------
@@ -31,18 +38,19 @@ def set_network_residuals_and_unknowns(mission):
                 segment.state.unknowns.network[network.tag].fuel_lines               = Conditions()
                 segment.state.residuals.network[network.tag].fuel_lines              = Conditions()     
                 segment.state.unknowns_lower_bounds.network[network.tag].fuel_lines  = Conditions()
-                segment.state.unknowns_upper_bounds.network[network.tag].fuel_lines  = Conditions()      
+                segment.state.unknowns_upper_bounds.network[network.tag].fuel_lines  = Conditions() 
+                fuel_line.append_unknowns_and_residuals(segment,network)                
         
-                for p_i,propulsor in  enumerate(fuel_line.propulsors):  
-                    if fuel_line.identical_propulsors == True and p_i ==0:
-                        propulsor.append_unknowns_and_residuals(segment)                    
-        
+                for fuel_tank in fuel_line.fuel_tanks:
+                    fuel_tank.append_unknowns_and_residuals(segment,fuel_line,network)                        
+                 
             # Bus 
             for bus in network.busses:   
                 segment.state.unknowns.network[network.tag].busses               = Conditions()
                 segment.state.residuals.network[network.tag].busses              = Conditions()     
                 segment.state.unknowns_lower_bounds.network[network.tag].busses  = Conditions()
-                segment.state.unknowns_upper_bounds.network[network.tag].busses  = Conditions()     
+                segment.state.unknowns_upper_bounds.network[network.tag].busses  = Conditions()
+                bus.append_unknowns_and_residuals(segment,network)                  
 
                 for bat_i,battery_module in  enumerate(bus.battery_modules):  
                     if bus.identical_battery_modules == True and bat_i ==0:
@@ -50,12 +58,7 @@ def set_network_residuals_and_unknowns(mission):
         
                 for fc_i,fuel_cell_stack in  enumerate(bus.fuel_cell_stacks):    
                     if bus.identical_fuel_cell_stacks == True and fc_i ==0:
-                        fuel_cell_stack.append_unknowns_and_residuals(segment,bus,network)        
-                        
-        
-                for p_i,propulsor in  enumerate(bus.propulsors):  
-                    if fuel_line.identical_propulsors == True and p_i ==0:
-                        propulsor.append_unknowns_and_residuals(segment)  
+                        fuel_cell_stack.append_unknowns_and_residuals(segment,bus,network)    
     
             # Coolant Line 
             for coolant_line in network.coolant_lines:   

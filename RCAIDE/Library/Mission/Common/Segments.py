@@ -45,7 +45,7 @@ def sequential_segments(mission):
 
             # do the init/skip dance
             segment.process.initialize.expand_state(segment)
-            #segment.process.initialize.expand_state = RCAIDE.Library.Methods.skip
+            segment.process.initialize.expand_state = RCAIDE.Library.Methods.skip
 
             segment.evaluate()
             segment.state.number_of_mission_residuals = 0

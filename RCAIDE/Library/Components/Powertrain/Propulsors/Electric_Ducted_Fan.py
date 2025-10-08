@@ -83,7 +83,7 @@ class Electric_Ducted_Fan(Propulsor):
             pack_electric_ducted_fan_residuals(self,segment)
         return        
 
-    def append_propulsor_unknowns_and_residuals(self,segment):
+    def append_unknowns_and_residuals(self,segment):
         if type(segment) != RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_No_Propulsion:
             append_electric_ducted_fan_residual_and_unknown(self,segment)
         return 

@@ -85,7 +85,7 @@ def append_hydrogen_fuel_tank_segment_conditions(fuel_tank, segment, distributor
 
     return
 
-def append_liquid_hydrogen_tank_residual_and_unknowns(fuel_tank, segment, distributor,network):
+def append_liquid_hydrogen_tank_unknown_and_residual(fuel_tank, segment, distributor,network):
     ones_row    = segment.state.ones_row
 
     segment.state.number_of_network_unknowns  += 6 

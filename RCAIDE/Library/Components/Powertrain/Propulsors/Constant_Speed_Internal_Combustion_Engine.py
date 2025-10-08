@@ -68,7 +68,7 @@ class Constant_Speed_Internal_Combustion_Engine(Propulsor):
     def pack_propulsor_residuals(self,segment): 
         return        
 
-    def append_propulsor_unknowns_and_residuals(self,segment): 
+    def append_unknowns_and_residuals(self,segment): 
         return
         
     def compute_performance(self,state,center_of_gravity = [[0, 0, 0]]):

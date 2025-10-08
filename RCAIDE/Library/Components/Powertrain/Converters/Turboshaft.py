@@ -137,7 +137,7 @@ class Turboshaft(Converter):
     def pack_propulsor_residuals(self,segment): 
         return      
 
-    def append_propulsor_unknowns_and_residuals(self,segment): 
+    def append_unknowns_and_residuals(self,segment): 
         return
     
     def compute_performance(self,state,converter = None,fuel_line = None,bus = None):

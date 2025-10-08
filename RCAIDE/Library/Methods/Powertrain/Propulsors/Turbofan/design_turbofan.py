@@ -16,10 +16,8 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Turbine            import comp
 from RCAIDE.Library.Methods.Powertrain.Converters.Expansion_Nozzle   import compute_expansion_nozzle_performance 
 from RCAIDE.Library.Methods.Powertrain.Converters.Compression_Nozzle import compute_compression_nozzle_performance
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan           import size_core 
-from RCAIDE.Library.Methods.Powertrain                               import setup_operating_conditions 
-
-from RCAIDE.Framework.Mission.Common import Results, Residuals
-from RCAIDE.Library.Mission.Common.Update.orientations import orientations
+from RCAIDE.Library.Methods.Powertrain                               import setup_operating_conditions  
+from RCAIDE.Library.Mission.Common.Update.orientations               import orientations
 
 # Python package imports
 import numpy as np
@@ -151,6 +149,7 @@ def design_turbofan(turbofan):
         a   = atmo_data.speed_of_sound    
         mu  = atmo_data.dynamic_viscosity           
         U   = a*turbofan.design_mach_number
+        
         # setup conditions
         conditions = RCAIDE.Framework.Mission.Common.Results()
     
@@ -168,7 +167,8 @@ def design_turbofan(turbofan):
         conditions.freestream.speed_of_sound              = np.atleast_1d(a)
         conditions.freestream.velocity                    = np.atleast_1d(U) 
      
-    segment                  = RCAIDE.Framework.Mission.Segments.Segment()  
+    segment                  = RCAIDE.Framework.Mission.Segments.Segment() 
+    segment.sideslip_angle   = 0 
     segment.state.conditions = conditions 
     turbofan.append_operating_conditions(segment)
                     
@@ -332,24 +332,12 @@ def design_turbofan(turbofan):
     size_core(turbofan,conditions) 
     
     # Step 23: Static Sea Level Thrust  
-    atmo_data_sea_level   = atmosphere.compute_values(0.0,0.0)   
-    V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    conditions            = setup_operating_conditions(turbofan,conditions,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)
-     
-    # setup conditions   
-    segment                                          = RCAIDE.Framework.Mission.Segments.Segment()
-    segment.sideslip_angle                           = 0 
-    segment.state.conditions                         = conditions    
+    atmo_data_sea_level               = atmosphere.compute_values(0.0,0.0)   
+    V                                 = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
+    segment.state.conditions          = setup_operating_conditions(turbofan,conditions,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
     orientations(segment)
-    
-    segment.state.residuals.mission.network          = Residuals()
-    
-    # append component-specific operating conditions 
-    #component.append_operating_conditions(segment)    
-    #segment.state.conditions.expand_rows(1)  
-    #segment.state.conditions.energy.propulsors[turbofan.tag].throttle[:,0] = 1.0  
-    sls_T,_,sls_P,_,_,_                          = turbofan.compute_performance(segment.state) 
-    turbofan.sealevel_static_thrust              = sls_T[0][0]
-    turbofan.sealevel_static_power               = sls_P[0][0]
+    sls_T,_,sls_P,_,_,_               = turbofan.compute_performance(segment.state) 
+    turbofan.sealevel_static_thrust   = sls_T[0][0]
+    turbofan.sealevel_static_power    = sls_P[0][0]
      
     return 

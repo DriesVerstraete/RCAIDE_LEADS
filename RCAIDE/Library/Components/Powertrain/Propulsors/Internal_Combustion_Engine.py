@@ -93,7 +93,7 @@ class Internal_Combustion_Engine(Propulsor):
             pack_internal_combustion_engine_residuals(self,segment)
         return
 
-    def append_propulsor_unknowns_and_residuals(self,segment):
+    def append_unknowns_and_residuals(self,segment):
         """
         Appends propulsor unknowns and residuals to the segment.
         """

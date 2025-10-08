@@ -8,8 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------  
 
 # RCAIDE Imports     
-import RCAIDE 
-from RCAIDE.Framework.Mission.Common                                 import Conditions
+import RCAIDE
 from RCAIDE.Library.Methods.Powertrain.Converters.Ram                import compute_ram_performance
 from RCAIDE.Library.Methods.Powertrain.Converters.Combustor          import compute_combustor_performance
 from RCAIDE.Library.Methods.Powertrain.Converters.Compressor         import compute_compressor_performance
@@ -18,6 +17,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Supersonic_Nozzle  import comp
 from RCAIDE.Library.Methods.Powertrain.Converters.Compression_Nozzle import compute_compression_nozzle_performance
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbojet           import size_core  
 from RCAIDE.Library.Methods.Powertrain                               import setup_operating_conditions 
+from RCAIDE.Library.Mission.Common.Update.orientations               import orientations
 
 # Python package imports   
 import numpy as np
@@ -278,13 +278,13 @@ def design_turbojet(turbojet):
     size_core(turbojet,conditions)
     
     # Step 21: Static Sea Level Thrust 
-    atmo_data_sea_level   = atmosphere.compute_values(0.0,0.0)   
-    V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    operating_state       = setup_operating_conditions(turbojet,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
-    operating_state.conditions.energy.propulsors[turbojet.tag].throttle[:,0] = 1.0  
-    sls_T,_,sls_P,_,_,_                          = turbojet.compute_performance(operating_state) 
-    turbojet.sealevel_static_thrust              = sls_T[0][0]
-    turbojet.sealevel_static_power               = sls_P[0][0]
+    atmo_data_sea_level              = atmosphere.compute_values(0.0,0.0)   
+    V                                = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
+    segment.state.conditions         = setup_operating_conditions(turbojet,conditions,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)
+    orientations(segment) 
+    sls_T,_,sls_P,_,_,_              = turbojet.compute_performance(segment.state) 
+    turbojet.sealevel_static_thrust  = sls_T[0][0]
+    turbojet.sealevel_static_power   = sls_P[0][0]
      
     return      
   

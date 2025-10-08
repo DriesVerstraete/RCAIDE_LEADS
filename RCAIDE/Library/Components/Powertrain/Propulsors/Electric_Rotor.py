@@ -87,7 +87,7 @@ class Electric_Rotor(Propulsor):
         append_electric_rotor_conditions(self,segment)
         return
     
-    def append_propulsor_unknowns_and_residuals(self,segment):
+    def append_unknowns_and_residuals(self,segment):
         """
         Appends propulsor unknowns and residuals to the segment.
         """ 

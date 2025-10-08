@@ -173,7 +173,7 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         """
         
         append_liquid_hydrogen_tank_conditions(self,segment, fuel_line)  
-        append_liquid_hydrogen_tank_residual_and_unknowns(self,segment, fuel_line,network)  
+        append_liquid_hydrogen_tank_unknown_and_residual(self,segment, fuel_line,network)  
         return
     
     def compute_tank_properties(self,state,fuel_line,network_tag):

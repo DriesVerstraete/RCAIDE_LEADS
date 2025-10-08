@@ -144,11 +144,13 @@ def design_electric_rotor(electric_rotor, number_of_stations=20, solver_name='SL
     # Static Sea Level Thrust   
     atmosphere            = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976() 
     atmo_data_sea_level   = atmosphere.compute_values(0.0,0.0)   
-    V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    operating_state       = setup_operating_conditions(electric_rotor,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
-    operating_state.conditions.energy.propulsors[electric_rotor.tag].throttle[:,0] = 1.0
-    operating_state.conditions.energy.converters[motor.tag].inputs.current[:,0] =  motor.design_current
-    sls_T,_,sls_P,_,_,_                          = electric_rotor.compute_performance(operating_state) 
+    V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01
+
+    segment = RCAIDE.Framework.Mission.Segments.Segment()   
+    electric_rotor.append_operating_conditions(segment)    
+    segment.state.conditions                     = setup_operating_conditions(electric_rotor,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)   
+    segment.state.conditions.energy.converters[motor.tag].inputs.current[:,0]    = motor.design_current
+    sls_T,_,sls_P,_,_,_                          = electric_rotor.compute_performance(segment.state) 
     electric_rotor.sealevel_static_thrust        = sls_T[0][0]
     electric_rotor.sealevel_static_power         = sls_P[0][0]
      

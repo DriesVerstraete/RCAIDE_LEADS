@@ -38,16 +38,14 @@ def energy(mission):
             # ---------------------------------------------------------------------------------------------
             # Propulsors 
             # ---------------------------------------------------------------------------------------------
-            #for p_i,propulsor in  enumerate(network.propulsors): 
-                #propulsor.append_operating_conditions(segment)
-                #if network.identical_propulsors == True and p_i ==0:
-                #propulsor.append_unknowns_and_residuals(segment)
+            for p_i,propulsor in  enumerate(network.propulsors): 
+                propulsor.append_operating_conditions(segment)
         
             # ---------------------------------------------------------------------------------------------
             # Converters 
             # ---------------------------------------------------------------------------------------------    
             for converter in network.converters: 
-                converter.append_operating_conditions(segment)                           
+                converter.append_operating_conditions(segment,network)                           
         
             # ---------------------------------------------------------------------------------------------            
             # Distributors 
@@ -57,10 +55,7 @@ def energy(mission):
                 fuel_line.append_operating_conditions(segment,network) 
         
                 for fuel_tank in fuel_line.fuel_tanks:
-                    fuel_tank.append_operating_conditions(segment,fuel_line,network) 
-        
-                for p_i,propulsor in  enumerate(fuel_line.propulsors): 
-                    propulsor.append_operating_conditions(segment)                  
+                    fuel_tank.append_operating_conditions(segment,fuel_line,network)             
         
             # Bus 
             for bus in network.busses:   
@@ -75,17 +70,14 @@ def energy(mission):
                 for tag, bus_item in bus.items():  
                     if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
                         bus_item.append_operating_conditions(segment,bus,network)
-        
-                for p_i,propulsor in  enumerate(bus.propulsors): 
-                    bus.append_operating_conditions(segment)
-        
+                        
             # Coolant Line 
             for coolant_line in network.coolant_lines:
                 coolant_line.append_operating_conditions(segment,network)       
         
                 for battery_module in coolant_line.battery_modules: 
                     for btms in battery_module:
-                        btms.append_operating_conditions(segment,coolant_line)
+                        btms.append_operating_conditions(segment,coolant_line,network)
         
                 for heat_exchanger in coolant_line.heat_exchangers: 
                     heat_exchanger.append_operating_conditions(segment,coolant_line,network)

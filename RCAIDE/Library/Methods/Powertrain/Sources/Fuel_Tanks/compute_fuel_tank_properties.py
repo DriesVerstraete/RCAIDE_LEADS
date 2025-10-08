@@ -8,8 +8,6 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports
 import RCAIDE
-from RCAIDE.Library.Mission.Common.Unpack_Unknowns.energy import unknowns
-import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -23,9 +21,8 @@ def compute_fuel_tank_properties(tank,state,distributor,network_tag):
     elif  type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line: 
         distributor_conditions = state.conditions.energy.fuel_lines[distributor.tag]         
     
-    tank_conditions = distributor_conditions.fuel_tanks[tank.tag]      
-   
-    mass_unknowns =  state.unknowns.network[network_tag].fuel_lines[distributor.tag][tank.tag].mass[:,0]
+    tank_conditions = distributor_conditions.fuel_tanks[tank.tag]   
+    mass_unknowns   =  state.unknowns.network[network_tag].fuel_lines[distributor.tag].fuel_tanks[tank.tag].mass[:,0]
 
     t0  = state.numerics.time.control_points[0][0]
     tf = state.numerics.time.control_points[-1][0]

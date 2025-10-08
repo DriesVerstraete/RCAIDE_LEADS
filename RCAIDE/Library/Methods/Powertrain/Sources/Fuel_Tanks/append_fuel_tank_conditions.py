@@ -8,7 +8,6 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports
 import  RCAIDE
-from RCAIDE.Framework.Core import Data
 from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
 
 import numpy as np
@@ -16,7 +15,7 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
-def append_fuel_tank_conditions(tank, segment, distributor):
+def append_fuel_tank_conditions(tank, segment, distributor, network):
     """
     Appends initial conditions for fuel tank component during later mission analysis.
     
@@ -62,13 +61,12 @@ def append_fuel_tank_conditions(tank, segment, distributor):
     distributor_conditions.fuel_tanks[tank.tag].mass                      = tank.fuel.mass_properties.mass * ones_row(1) 
     distributor_conditions.fuel_tanks[tank.tag].mass_flow_rate            = 0 * ones_row(1)  
     distributor_conditions.fuel_tanks[tank.tag].surface_temperature       = 0 * ones_row(1) 
-    distributor_conditions.fuel_tanks[tank.tag].secondary_fuel_flow_rate  = tank.secondary_fuel_flow_rate * ones_row(1) 
-
-         
+    distributor_conditions.fuel_tanks[tank.tag].secondary_fuel_flow_rate  = tank.secondary_fuel_flow_rate * ones_row(1)
+     
     return 
 
 
-def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor): 
+def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor, network): 
 
     if type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Electrical_Bus: 
         distributor_conditions = segment.state.conditions.energy.busses[distributor.tag]
@@ -79,13 +77,12 @@ def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor):
         if type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Electrical_Bus: 
             distributor_initials = segment.state.initials.conditions.energy.busses[distributor.tag]
         elif  type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line: 
-         distributor_initials = segment.state.initials.conditions.energy.fuel_lines[distributor.tag]
-            
-        distributor_conditions.fuel_tanks[fuel_tank.tag].mass[:,0]                     = distributor_initials.fuel_tanks[fuel_tank.tag].mass[-1,0]
+            distributor_initials = segment.state.initials.conditions.energy.fuel_lines[distributor.tag] 
+        distributor_conditions.fuel_tanks[fuel_tank.tag].mass[:,0]  = distributor_initials.fuel_tanks[fuel_tank.tag].mass[-1,0]
     return
 
     
-def append_fuel_tank_residual_and_unknowns(fuel_tank, segment, distributor,network):
+def append_fuel_tank_unknown_and_residual(fuel_tank, segment, distributor,network):
     ones_row    = segment.state.ones_row
     segment.state.number_of_network_unknowns  += 1 
     segment.state.number_of_network_residuals += 1

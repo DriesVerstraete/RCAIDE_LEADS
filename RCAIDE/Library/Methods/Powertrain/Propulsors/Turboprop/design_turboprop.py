@@ -20,6 +20,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Turboprop                   im
 from RCAIDE.Library.Methods.Powertrain                                        import setup_operating_conditions 
 from RCAIDE.Library.Methods.Powertrain.Converters.Motor                       import design_optimal_motor 
 from RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.Common   import compute_motor_weight
+from RCAIDE.Library.Mission.Common.Update.orientations                        import orientations
 
 # Python package imports   
 import numpy                                                                as np
@@ -254,13 +255,12 @@ def design_turboprop(turboprop):
     size_core(turboprop,conditions)
     
     # Step 26: Static Sea Level Thrust   
-    atmo_data_sea_level   = atmosphere.compute_values(0.0,0.0)   
-    V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    operating_state       = setup_operating_conditions(turboprop,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
-    operating_state.conditions.energy.propulsors[turboprop.tag].throttle[:,0] = 1.0  
-    sls_T,_,sls_P,_,_,_                           = turboprop.compute_performance(operating_state) 
-    turboprop.sealevel_static_thrust              = sls_T[0][0]
-    turboprop.sealevel_static_power               = sls_P[0][0]
+    atmo_data_sea_level                = atmosphere.compute_values(0.0,0.0)   
+    V                                  = atmo_data_sea_level.speed_of_sound[0][0]*0.01    
+    segment.state.conditions           = setup_operating_conditions(turboprop,conditions,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
+    sls_T,_,sls_P,_,_,_                = turboprop.compute_performance(segment.state) 
+    turboprop.sealevel_static_thrust   = sls_T[0][0]
+    turboprop.sealevel_static_power    = sls_P[0][0]    
     
     turboprop.design_thrust_specific_fuel_consumption = turboprop_conditions.thrust_specific_fuel_consumption  
     turboprop.design_non_dimensional_thrust           = turboprop_conditions.non_dimensional_thrust            
@@ -269,19 +269,7 @@ def design_turboprop(turboprop):
     turboprop.design_specific_power                   = turboprop_conditions.specific_power                    
     turboprop.design_power_specific_fuel_consumption  = turboprop_conditions.power_specific_fuel_consumption   
     turboprop.design_thermal_efficiency               = turboprop_conditions.thermal_efficiency                
-    turboprop.design_propulsive_efficiency            = turboprop_conditions.propulsive_efficiency
-    
-    if compressor.motor != None: 
-        V                     = turboprop.design_freestream_velocity
-        operating_state       = setup_operating_conditions(turboprop,velocity_range=np.array([V]), altitude = turboprop.design_altitude, angle_of_attack=0, temperature_deviation=0)  
-        operating_state.conditions.energy.propulsors[turboprop.tag].throttle[:,0] = 1.0  
-        T,_,P,_,_,_           = turboprop.compute_performance(operating_state)
-        
-        motor                         = compressor.motor 
-        motor.design_torque           = P[0][0] /compressor.design_angular_velocity   
-        motor.design_angular_velocity = compressor.design_angular_velocity
-        motor.mass_properties.mass    = compute_motor_weight(motor) 
-        design_optimal_motor(motor)
+    turboprop.design_propulsive_efficiency            = turboprop_conditions.propulsive_efficiency 
     
     return      
   
