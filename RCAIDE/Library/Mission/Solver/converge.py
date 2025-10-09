@@ -220,7 +220,7 @@ def add_mission_variables(segment):
         full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_lower_bounds.mission[unkn])
         full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_upper_bounds.mission[unkn])    
     
-    if segment.state.numerics.network_solver.method is None:
+    if segment.state.numerics.network_solver.method is None and (single_pt_seg != True):
         for unkn in net_unknown_keys: 
             full_unkn_vals[unkn]        = segment.state.unknowns.network[unkn]
             full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_lower_bounds.network[unkn])
@@ -295,13 +295,9 @@ def add_mission_variables(segment):
         
     elif single_pt_seg:  
         for unkn in unknown_keys:
-            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str))) 
-        if segment.state.numerics.network_solver.method is None:
-            for unkn in net_unknown_keys:  
-                basic_string_con[unkn] = np.tile('segment.state.unknowns.network.'+unkn+'[', n_points)
-                input_string_network.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
-            input_string = np.hstack((np.ravel(input_string),np.ravel(input_string_network)))  
+            basic_string_con[unkn] = np.tile('segment.state.unknowns.mission.'+unkn+'[', n_points)
+            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
+        input_string       = np.ravel(input_string)   
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
         input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
