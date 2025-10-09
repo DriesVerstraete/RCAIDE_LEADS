@@ -82,7 +82,7 @@ class Airfoil(Component):
 
     def append_operating_conditions(self, segment): 
         """
-        Placeholder for adding operating conditions to the airfoil.
+        Placeholder for adding operating conditions of the airfoil.
 
         Parameters
         ----------

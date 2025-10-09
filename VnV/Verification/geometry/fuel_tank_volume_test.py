@@ -31,10 +31,11 @@ from Boeing_737  import vehicle_setup as B737_vehicle_setup
 def main():
     integral_fuel_tank_volume_test()
     non_integral_fuel_tank_volume_test()
-    return 
+    return
+
 def integral_fuel_tank_volume_test():
 
-    fuel_volume_true = [19.363771803419546,33.40339556790803]
+    fuel_volume_true = [19.363771803419546,38.2338699410805]
     vehicle = B737_vehicle_setup()
 
     fuel_line = vehicle.networks.fuel.fuel_lines.fuel_line
@@ -119,7 +120,7 @@ def integral_fuel_tank_volume_test():
 
 def non_integral_fuel_tank_volume_test():
 
-    fuel_volume_true = 354.70463689887043
+    fuel_volume_true = 332.1897838974284
     
     vehicle = BWB_vehicle_setup()
 
@@ -140,7 +141,7 @@ def non_integral_fuel_tank_volume_test():
     fuel_tank_1.tag                             = 'H2_Fuel_Tank_1' 
     fuel_tank_1.fuel                            = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()  
     fuel_tank_1.material                        = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_1.insulation_material             = RCAIDE.Library.Attributes.Materials.Vacuum_Gap_Multilayer_Insulation()
+    fuel_tank_1.insulation_material             = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_1.fuel.gravimetric_efficiency     = 0.5
     fuel_tank_1.wall_thickness                  = 2*Units.inches
     fuel_line.fuel_tanks.append(fuel_tank_1)
@@ -171,7 +172,7 @@ def non_integral_fuel_tank_volume_test():
     fuel_tank_3.tag                             = 'H2_Fuel_Tank_3' 
     fuel_tank_3.fuel                            = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
     fuel_tank_3.material                        = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_3.insulation_material             = RCAIDE.Library.Attributes.Materials.Vacuum_Gap_Multilayer_Insulation()
+    fuel_tank_3.insulation_material             = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_3.fuel.gravimetric_efficiency     = 0.5
     fuel_tank_3.wall_thickness                  = 2*Units.inches
     fuel_line.fuel_tanks.append(fuel_tank_3)
@@ -181,9 +182,9 @@ def non_integral_fuel_tank_volume_test():
     fuel_tank_4.tag                           = 'H2_Fuel_Tank_4' 
     fuel_tank_4.fuel                          = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()   
     fuel_tank_4.material                      = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_4.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Gap_Multilayer_Insulation()
+    fuel_tank_4.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_4.fuel.gravimetric_efficiency   = 0.5
-    fuel_tank_4.symmetric                     = False
+    fuel_tank_4.xz_plane_symmetric            = False
     fuel_tank_4.orientation_euler_angles      = [0,0,np.pi/2]
     fuel_tank_4.bwb_aft_tank                  = True
     fuel_tank_4.aft_tank_start_root_chord     = 0.6
@@ -198,9 +199,9 @@ def non_integral_fuel_tank_volume_test():
     fuel_tank_4a.tag                           = 'H2_Fuel_Tank_4a' 
     fuel_tank_4a.fuel                          = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()   
     fuel_tank_4a.material                      = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_4a.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Gap_Multilayer_Insulation()
+    fuel_tank_4a.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_4a.fuel.gravimetric_efficiency   = 0.5
-    fuel_tank_4a.symmetric                     = False
+    fuel_tank_4a.xz_plane_symmetric            = False
     fuel_tank_4a.orientation_euler_angles      = [0,0,np.pi/2]
     fuel_tank_4a.bwb_aft_tank                  = True
     fuel_tank_4a.aft_tank_start_root_chord     = 0.6
@@ -214,9 +215,9 @@ def non_integral_fuel_tank_volume_test():
     fuel_tank_5.tag                           = 'H2_Fuel_Tank_5' 
     fuel_tank_5.fuel                          = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()   
     fuel_tank_5.material                      = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_5.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Gap_Multilayer_Insulation()
+    fuel_tank_5.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_5.fuel.gravimetric_efficiency   = 0.5
-    fuel_tank_5.symmetric                     = False
+    fuel_tank_5.xz_plane_symmetric            = False
     fuel_tank_5.orientation_euler_angles      = [0,0,np.pi/2]
     fuel_tank_5.bwb_aft_tank                  = True
     fuel_tank_5.aft_tank_start_root_chord     = 0.4
@@ -233,7 +234,7 @@ def non_integral_fuel_tank_volume_test():
     fuel_tank_6.tag                             = 'H2_Fuel_Tank_6' 
     fuel_tank_6.fuel                            = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()  
     fuel_tank_6.material                        = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_6.insulation_material             = RCAIDE.Library.Attributes.Materials.Vacuum_Gap_Multilayer_Insulation()
+    fuel_tank_6.insulation_material             = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_6.fuel.gravimetric_efficiency     = 0.5
     fuel_tank_6.wall_thickness                  = 2*Units.inches
     fuel_tank_6.fuel.mass_properties.mass       = 0.1
@@ -247,8 +248,7 @@ def non_integral_fuel_tank_volume_test():
     
     error = (fuel_volume_true- mission.segments.cruise.analyses.geometry.vehicle.volume_properties.fuel)/fuel_volume_true
     
-    assert(abs(error)<5e-2)
-    plot_3d_vehicle(vehicle,plot_tank_geometry=True)
+    assert(abs(error)<5e-2) 
 
     return
 
@@ -308,7 +308,7 @@ def mission_setup(analyses):
 
     Segments = RCAIDE.Framework.Mission.Segments 
     base_segment = Segments.Segment() 
-    base_segment.state.numerics.number_of_control_points = 10 
+    base_segment.state.numerics.number_of_control_points = 16
   
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "cruise" 

@@ -32,8 +32,14 @@ class Wing(Component):
     origin : ndarray
         3D coordinates [x, y, z] defining wing's reference point, defaults to [0.0, 0.0, 0.0]
         
-    symmetric : bool
-        Flag indicating if wing is symmetric about x-z plane, defaults to True
+    xz_plane_symmetric : bool
+        Flag indicating if wing is xz_plane_symmetric about x-z plane, defaults to True
+        
+    yz_plane_symmetric : bool
+        Flag indicating if wing is yz_plane_symmetric about y-z plane, defaults to True
+        
+    xy_plane_symmetric : bool
+        Flag indicating if wing is xz_plane_symmetric about x-y plane, defaults to True
         
     vertical : bool
         Flag indicating if wing is vertically oriented, defaults to False
@@ -162,7 +168,9 @@ class Wing(Component):
         self.tag                                    = 'wing'
         self.origin                                 = np.array([[0.0,0.0,0.0]])
                                                     
-        self.symmetric                              = True
+        self.xz_plane_symmetric                     = True
+        self.yz_plane_symmetric                     = False
+        self.xy_plane_symmetric                     = False
         self.vertical                               = False
         self.t_tail                                 = False 
         self.taper                                  = 0.0
@@ -175,7 +183,8 @@ class Wing(Component):
              
         self.fuel_tank                              = Data()      
         self.fuel_tank.percent_chord_start_location = 0.1  
-        self.fuel_tank.percent_chord_end_location   = 0.6     
+        self.fuel_tank.percent_chord_end_location   = 0.6
+        self.fuel_tank.percent_span_location        = 0.0
         self.has_fuel_tank                          = False
              
         self.spans                                  = Data()
@@ -272,14 +281,12 @@ class Wing(Component):
 
         return
     
-    def compute_moment_of_inertia(self, mass, center_of_gravity=[[0, 0, 0]], fuel_flag=False): 
+    def compute_moment_of_inertia(self, center_of_gravity=[[0, 0, 0]], fuel_flag=False): 
         """
         Computes the moment of inertia tensor for the wing.
 
         Parameters
-        ----------
-        mass : float
-            Wing mass
+        ---------- 
         center_of_gravity : list, optional
             Reference point coordinates, defaults to [[0, 0, 0]]
         fuel_flag : bool, optional
@@ -290,6 +297,7 @@ class Wing(Component):
         ndarray
             3x3 moment of inertia tensor
         """
+        mass= self.mass_properties.mass 
         I = compute_wing_moment_of_inertia(self, mass, center_of_gravity, fuel_flag) 
         return I   
     

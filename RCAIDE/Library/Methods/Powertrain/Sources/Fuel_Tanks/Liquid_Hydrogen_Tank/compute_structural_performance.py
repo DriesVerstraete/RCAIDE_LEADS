@@ -64,7 +64,7 @@ def compute_structural_performance(fuel_tank):
     P_external = fuel_tank.design_external_pressure
 
     # Initial fuel volume guess
-    if fuel_tank.symmetric:
+    if fuel_tank.xz_plane_symmetric:
         V_guess = deepcopy(fuel_tank.volume_properties.gross_volume  * 0.45)
     else:
         V_guess = deepcopy(fuel_tank.volume_properties.gross_volume * 0.75)
@@ -74,7 +74,7 @@ def compute_structural_performance(fuel_tank):
     error     = 1e2
     alpha     = 0.5
     iteration = 0
-    max_iter  = 1000
+    max_iter  = 10000
 
     while abs(error) > tol and iteration < max_iter:
         # Compute internal tank geometry
@@ -106,7 +106,7 @@ def compute_structural_performance(fuel_tank):
     fuel_tank.inner_length                   = L_inner
     fuel_tank.wall_thickness                 = (fuel_tank.outer_diameter - fuel_tank.inner_diameter) / 2   
     
-    if fuel_tank.symmetric:
+    if fuel_tank.xz_plane_symmetric:
         fuel_tank.volume_properties.net_volume      *= 2
         fuel_tank.fuel.volume_properties.net_volume *= 2
     
@@ -114,7 +114,7 @@ def compute_structural_performance(fuel_tank):
     
     V_material = fuel_tank.volume_properties.gross_volume - fuel_tank.volume_properties.net_volume
     
-    fuel_tank.mass_properties.mass = V_material * fuel_tank.material.density  # Structural Mass of the tank
+    fuel_tank.mass_properties.structural_mass = V_material * fuel_tank.material.density  # Structural Mass of the tank
 
     return
 

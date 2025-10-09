@@ -170,7 +170,6 @@ class Turbofan(Propulsor):
         self.reference_temperature                      = 288.15
         self.reference_pressure                         = 1.01325*10**5 
         self.mass_flow_rate_design                      = 0.0
-
         self.emission_indices                           = Data()  
         self.emission_indices.NOx                       = None
         self.emission_indices.CO2                       = None
@@ -183,7 +182,7 @@ class Turbofan(Propulsor):
     
     def append_operating_conditions(self,segment):
         """
-        Appends operating conditions to the segment.
+        Appends operating conditions of the segment.
         """
         append_turbofan_conditions(self,segment)
         return

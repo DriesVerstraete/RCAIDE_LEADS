@@ -32,7 +32,7 @@ def vehicle_setup(new_regression=True):
     vehicle.mass_properties.operating_empty     = 735.
     vehicle.mass_properties.max_takeoff         = 735.
     vehicle.mass_properties.center_of_gravity   = [[ 2.0144,   0.  ,  0.]] 
-    vehicle.passengers                          = 0
+    vehicle.number_of_passengers                = 0
     vehicle.flight_envelope.ultimate_load       = 5.7
     vehicle.flight_envelope.positive_limit_load = 3.     
 
@@ -62,7 +62,7 @@ def vehicle_setup(new_regression=True):
     wing.origin                                 = [[0.1,  0.0 , 0.0]]  
     wing.aerodynamic_center                     = [0., 0., 0.]     
     wing.winglet_fraction                       = 0.0 
-    wing.symmetric                              = True
+    wing.xz_plane_symmetric                     = True
     
     ospath                                      = os.path.abspath(__file__) 
     separator                                   = os.path.sep
@@ -95,7 +95,7 @@ def vehicle_setup(new_regression=True):
     wing.origin                                 = [[ 5.138, 0.0  ,  1.323 ]]  # for images 1.54
     wing.aerodynamic_center                     = [0., 0., 0.]     
     wing.winglet_fraction                       = 0.0  
-    wing.symmetric                              = True  
+    wing.xz_plane_symmetric                     = True  
     vehicle.reference_area                      = 2*wing.areas.reference 
     wing.append_airfoil(airfoil)
 
@@ -111,15 +111,15 @@ def vehicle_setup(new_regression=True):
     fuselage.tag                                = 'fuselage' 
 
     # define cabin
-    cabin                                             = RCAIDE.Library.Components.Fuselages.Cabins.Cabin() 
-    economy_class                                     = RCAIDE.Library.Components.Fuselages.Cabins.Classes.Economy() 
-    economy_class.number_of_seats_abrest              = 2
-    economy_class.number_of_rows                      = 3
-    economy_class.galley_lavatory_percent_x_locations = []  
-    economy_class.emergency_exit_percent_x_locations  = []      
-    economy_class.type_A_exit_percent_x_locations     = [] 
-    cabin.append_cabin_class(economy_class)
-    fuselage.append_cabin(cabin)
+    # cabin                                             = RCAIDE.Library.Components.Fuselages.Cabins.Cabin() 
+    # economy_class                                     = RCAIDE.Library.Components.Fuselages.Cabins.Classes.Economy() 
+    # economy_class.number_of_seats_abrest              = 2
+    # economy_class.number_of_rows                      = 3
+    # economy_class.galley_lavatory_percent_x_locations = []  
+    # economy_class.emergency_exit_percent_x_locations  = []      
+    # economy_class.type_A_exit_percent_x_locations     = [] 
+    # cabin.append_cabin_class(economy_class)
+    # fuselage.append_cabin(cabin)
        
     fuselage.fineness.nose                      = 1.5 
     fuselage.fineness.tail                      = 4.0 
@@ -311,11 +311,11 @@ def vehicle_setup(new_regression=True):
      
             
     if new_regression:
-        design_electric_rotor(prop_rotor_propulsor,print_iterations=True)
+        design_electric_rotor(prop_rotor_propulsor)
         save_propulsor(prop_rotor_propulsor, os.path.join(test_dir, 'vahana_tilt_rotor_propulsor.res'))
     else:
         regression_prop_rotor_propulsor = deepcopy(prop_rotor_propulsor)        
-        design_electric_rotor(regression_prop_rotor_propulsor, iterations=2,print_iterations=True)
+        design_electric_rotor(regression_prop_rotor_propulsor, iterations=2)
         loaded_propulsor = load_propulsor(os.path.join(test_dir, 'vahana_tilt_rotor_propulsor.res'))  
         for key,item in prop_rotor_propulsor.rotor.items(): 
             prop_rotor_propulsor.rotor[key] = loaded_propulsor.rotor[key] 

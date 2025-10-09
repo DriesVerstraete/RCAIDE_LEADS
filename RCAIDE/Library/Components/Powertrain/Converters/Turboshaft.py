@@ -126,7 +126,7 @@ class Turboshaft(Converter):
 
     def append_operating_conditions(self): 
         """
-        Appends operating conditions to the segment.
+        Appends operating conditions of the segment.
         """  
         append_turboshaft_conditions(self,segment) 
         return

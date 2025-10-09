@@ -6,13 +6,13 @@
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
-# -----------------------------------------------------------------------------------------------------------------------Common
+# ----------------------------------------------------------------------------------------------------------------------- 
    
-from .aerodynamics               import aerodynamics
-from .geometry                   import geometry
-from .stability                  import stability
-from .energy                     import energy
-from .emissions                  import emissions
-from .mass_properties            import mass_properties
-from .set_residuals_and_unknowns import set_residuals_and_unknowns
+from .aerodynamics                       import aerodynamics
+from .geometry                           import geometry, geometry_preprocess_routine
+from .stability                          import stability
+from .energy                             import energy
+from .emissions                          import emissions
+from .mass_properties                    import mass_properties
+from .set_residuals_and_unknowns         import set_residuals_and_unknowns
 from .set_network_residuals_and_unknowns import set_network_residuals_and_unknowns

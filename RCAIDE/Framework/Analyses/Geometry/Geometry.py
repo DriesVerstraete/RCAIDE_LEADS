@@ -39,10 +39,10 @@ class Geometry(Analysis):
         
         self.tag                                 = 'geometry'
         self.vehicle                             = None
-        self.settings                            = Data()
-        self.settings.update_fuselage_properties = False
+        self.settings                            = Data() 
         self.settings.overwrite_reference        = True 
         self.settings.update_fuel_volume         = False
+        self.settings.unique_geometry            = True
 
         
         
