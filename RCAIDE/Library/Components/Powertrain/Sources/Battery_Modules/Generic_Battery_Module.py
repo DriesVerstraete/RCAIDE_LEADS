@@ -173,7 +173,7 @@ class Generic_Battery_Module(Component):
         
         return
 
-    def append_battery_segment_conditions(self,segment,bus):
+    def append_segment_conditions(self,segment,bus):
         """
         Append segment-specific battery conditions
         

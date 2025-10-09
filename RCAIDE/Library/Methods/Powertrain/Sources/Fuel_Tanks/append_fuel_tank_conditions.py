@@ -66,7 +66,7 @@ def append_fuel_tank_conditions(tank, segment, distributor, network):
     return 
 
 
-def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor, network): 
+def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor): 
 
     if type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Electrical_Bus: 
         distributor_conditions = segment.state.conditions.energy.busses[distributor.tag]

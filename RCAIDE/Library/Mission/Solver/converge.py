@@ -205,8 +205,8 @@ def add_mission_variables(segment):
         len_residuals = n_points
     elif single_pt_seg:
         n_points      = 1
-        len_inputs    = segment.state.number_of_unknowns 
-        len_residuals = segment.state.number_of_residuals 
+        len_inputs    = segment.state.number_of_mission_unknowns 
+        len_residuals = segment.state.number_of_mission_residuals 
     else:
         n_points      = segment.state.numerics.number_of_control_points  
         len_inputs    = n_points * segment.state.number_of_mission_unknowns   
@@ -275,19 +275,18 @@ def add_mission_variables(segment):
     # Step 4.1: Setup the aliases for the inputs
     basic_string_con = Data()
     input_string = []
+    input_string_network = []
 
     if ground_seg_flag:       
         output_numbers = np.linspace(0,n_points-2,n_points-1,dtype=np.int16)
         basic_string_con[unknown_keys[1]] = np.tile('segment.state.unknowns.mission.'+unknown_keys[1]+'[', n_points-1)
-        input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],np.array(output_numbers).astype(str))) 
-        
+        input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],np.array(output_numbers).astype(str)))  
         output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
         if segment.state.numerics.network_solver.method is None:
             for unkn in net_unknown_keys:  
                 basic_string_con[unkn] = np.tile('segment.state.unknowns.network.'+unkn+'[', n_points)
-                input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))        
-        
-        input_string        = np.array(input_string[0])
+                input_string_network.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))   
+            input_string = np.hstack((input_string[0],np.ravel(input_string_network))) 
         input_string        = np.core.defchararray.add(input_string, np.tile(']',len_inputs-1))
         input_aliases       = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0]  = input_names
@@ -297,14 +296,12 @@ def add_mission_variables(segment):
     elif single_pt_seg:  
         for unkn in unknown_keys:
             basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
-    
+            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str))) 
         if segment.state.numerics.network_solver.method is None:
             for unkn in net_unknown_keys:  
                 basic_string_con[unkn] = np.tile('segment.state.unknowns.network.'+unkn+'[', n_points)
-                input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
-                
-        input_string       = np.ravel(input_string)
+                input_string_network.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
+            input_string = np.hstack((np.ravel(input_string),np.ravel(input_string_network)))  
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
         input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
@@ -318,9 +315,8 @@ def add_mission_variables(segment):
         if segment.state.numerics.network_solver.method is None:
             for unkn in net_unknown_keys:
                 basic_string_con[unkn] = np.tile('segment.state.unknowns.network.'+unkn+'[', n_points)
-                input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
-            
-        input_string       = np.ravel(input_string)
+                input_string_network.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
+            input_string = np.hstack((np.ravel(input_string),np.ravel(input_string_network)))        
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
         input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names

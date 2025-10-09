@@ -77,7 +77,7 @@ def energy(segment):
         for bus in network.busses: 
             bus.append_segment_conditions(segment)
             for battery_module in  bus.battery_modules:
-                battery_module.append_battery_segment_conditions(segment, bus)
+                battery_module.append_segment_conditions(segment, bus)
             for coolant_line in  network.coolant_lines:
                 for tag, item in  coolant_line.items():  
                     if tag == 'heat_exchangers':
@@ -94,6 +94,6 @@ def energy(segment):
                     segment.state.conditions.energy.cumulative_fuel_consumption[:,0] = segment.state.initials.conditions.energy.cumulative_fuel_consumption[-1,0]
                     fuel_tank.append_segment_conditions(segment,fuel_line)
 
-                elif  vehicle.networks[network.tag].fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].fuel != None:
+                elif vehicle.networks[network.tag].fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].fuel != None:
                     segment.state.conditions.energy.cumulative_fuel_consumption[:,0] = 0
                    
