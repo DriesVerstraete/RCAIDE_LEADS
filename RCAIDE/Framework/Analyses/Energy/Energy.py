@@ -63,11 +63,12 @@ class Energy(Analysis):
 
         # Unpack Residuals
         residual_keys = list(state.residuals.network.keys())
-        netowrk_res = Data()
+        residual_keys.remove('tag')  
+        network_res = Data()
         full_ures_vals = Data()
         for res in residual_keys:
-            netowrk_res[res] = state.residuals.network[res]
-            full_ures_vals[res] = netowrk_res[res] 
+            network_res[res] = state.residuals.network[res]
+            full_ures_vals[res] = network_res[res] 
 
         return  full_ures_vals.pack_array()
     
