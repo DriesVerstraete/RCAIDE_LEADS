@@ -106,7 +106,8 @@ def main():
     curved_cruise_CL   = results.segments.curved_cruise.conditions.aerodynamics.coefficients.lift.total[2][0] 
     descent_throttle_2 = results.segments.descent_2.conditions.energy.propulsors['propulsor_1'].throttle[3][0]
     single_pt_CL_1     = results.segments.single_point_1.conditions.aerodynamics.coefficients.lift.total[0][0]
-    single_pt_CL_2     = results.segments.single_point_2.conditions.aerodynamics.coefficients.lift.total[0][0]     
+    single_pt_CL_2     = results.segments.single_point_2.conditions.aerodynamics.coefficients.lift.total[0][0]   
+    single_pt_CL_3     = results.segments.single_point_3.conditions.aerodynamics.coefficients.lift.total[0][0]       
     cruise_4_CL        = results.segments.cruise_4.conditions.aerodynamics.coefficients.lift.total[2][0]  
     cruise_5_CL        = results.segments.cruise_5.conditions.aerodynamics.coefficients.lift.total[2][0] 
     cruise_6_CL        = results.segments.cruise_6.conditions.aerodynamics.coefficients.lift.total[2][0]    
@@ -121,7 +122,7 @@ def main():
         data = [takeoff_thrust, climb_throttle_1,   climb_throttle_2,   climb_throttle_3,   climb_throttle_4,   climb_throttle_5,  
                 climb_throttle_6,   climb_throttle_7,   climb_throttle_8,   climb_throttle_9,   climb_10_CL,
                 cruise_CL_1,  cruise_CL_2,   descent_throttle_1,  curved_cruise_CL, descent_throttle_2,
-                single_pt_CL_1,     single_pt_CL_2,     cruise_4_CL,   cruise_5_CL, cruise_6_CL,cruise_7_CL,cruise_8_CL, 
+                single_pt_CL_1,     single_pt_CL_2,     single_pt_CL_3,     cruise_4_CL,   cruise_5_CL, cruise_6_CL,cruise_7_CL,cruise_8_CL, 
                 descent_throttle_3,  landing_thrust]
         for val in data:
             print(val)
@@ -145,6 +146,7 @@ def main():
     descent_throttle_2_truth = 0.0953304919587239
     single_pt_CL_1_truth     = 0.2431576350892687
     single_pt_CL_2_truth     = 0.000985931045135052
+    single_pt_CL_3_truth     = 0
     cruise_4_CL_truth        = 0.49545859420869354
     cruise_5_CL_truth        = 0.49545424239968217
     cruise_6_CL_truth        = 0.335713214390458
