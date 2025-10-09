@@ -4,14 +4,9 @@
 # Created:  Jul 2023, M. Clarke
 
 # ----------------------------------------------------------------------------------------------------------------------
-#  IMPORT
-# ----------------------------------------------------------------------------------------------------------------------  
-from RCAIDE.Framework.Mission.Common import Conditions, Residuals, Unknowns
-# ----------------------------------------------------------------------------------------------------------------------
 #  set_residuals_and_unknowns
 # ----------------------------------------------------------------------------------------------------------------------  
 def set_network_residuals_and_unknowns(mission):
-     
      
     for segment in mission.segments: 
         segment.state.number_of_network_unknowns   = 0 
@@ -34,7 +29,7 @@ def set_network_residuals_and_unknowns(mission):
                 fuel_line.append_unknowns_and_residuals(segment,network)                
          
                 for fuel_tank in fuel_line.fuel_tanks:
-                    fuel_tank.append_unknowns_and_residuals(segment,fuel_line,network)                        
+                    fuel_tank.append_unknowns_and_residuals(segment,fuel_line)                        
                  
             # Bus 
             for bus in network.busses:    
@@ -50,5 +45,4 @@ def set_network_residuals_and_unknowns(mission):
     
             # Ensure the mission knows how to pack and unpack the unknowns and residuals
             segment.process.iterate.unknowns.mission.network   = network.unpack_unknowns 
-            segment.process.iterate.residuals.mission.network  = network.residuals 
-                                        
+            segment.process.iterate.residuals.mission.network  = network.residuals

@@ -25,15 +25,13 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
     T_g = state.unknowns.network[fuel_tank.tag + '_ullage_temperature']
     T_l = state.unknowns.network[fuel_tank.tag + '_liquid_temperature']
     V_g = state.unknowns.network[fuel_tank.tag + '_ullage_volume']
-    V_l = state.unknowns.network[fuel_tank.tag + '_liquid_volume']
-    
+    V_l = state.unknowns.network[fuel_tank.tag + '_liquid_volume'] 
 
-    flow_split_ratio  = fuel_tank.flow_split_ratio
+    fuel_flow_split_ratio  = fuel_tank.fuel_selector_valve.fuel_flow_split_ratio 
+    if fuel_tank.xz_plane_symmetric:
+        fuel_flow_split_ratio  /=2
 
-    if fuel_tank.symmetric:
-        flow_split_ratio  = fuel_tank.flow_split_ratio/2
-
-    tank_conditions.mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * flow_split_ratio    
+    tank_conditions.mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * fuel_flow_split_ratio    
     
     m_dot_l_out =  tank_conditions.mass_flow_rate  
     m_dot_g_out =  tank_conditions.vent_rate
@@ -43,13 +41,10 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
 
 
     # --- Interface saturation temperature ---
-    T_int = PropsSI("T", "P", P, "Q", 1, "Hydrogen")  # [K]
-
-
+    T_int = PropsSI("T", "P", P, "Q", 1, "Hydrogen")  # [K]  
     
     # --- Geometry placeholders ---
-    L_int,A_int= compute_interface_geometric_properties(fuel_tank, V_l[:,0])
-
+    L_int,A_int= compute_interface_geometric_properties(fuel_tank, V_l[:,0]) 
 
     # Liquid properties
     k_liq = PropsSI("L", "T", T_l, "Q", 0, "Hydrogen")   # thermal conductivity [W/m-K]
@@ -134,7 +129,7 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
     tank_conditions.vent_rate                = m_dot_g_out
     tank_conditions.boil_off_rate[:,0]       = m_dot_bo
     
-    if fuel_tank.symmetric:
+    if fuel_tank.xz_plane_symmetric:
         symmetric_tag = fuel_tank.tag  + "_symmetric"
         distributor_conditions.fuel_tanks[symmetric_tag] = deepcopy(distributor_conditions.fuel_tanks[fuel_tank.tag])
 

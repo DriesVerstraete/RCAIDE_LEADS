@@ -94,19 +94,22 @@ def compute_thermal_performance(fuel_tank):
 
     # Recompute net tank volume based on the updated thickness
     r_in   = (fuel_tank.outer_diameter -  2 * (fuel_tank.wall_thickness+fuel_tank.insulation_thickness)) / 2
-    l_in = fuel_tank.aspect_ratio * fuel_tank.inner_diameter
+    l_in   = fuel_tank.aspect_ratio * fuel_tank.inner_diameter
 
     fuel_tank.inner_length = l_in - fuel_tank.inner_diameter
-    tank_volume_i = np.pi * ( r_in** 2) * (fuel_tank.inner_length )  +  4 / 3 * np.pi * ( r_in** 3) 
-    fuel_volume = (1 - fuel_tank.ullage_volume_fraction)  * tank_volume_i
+    tank_volume_i          = np.pi * ( r_in** 2) * (fuel_tank.inner_length )  +  4 / 3 * np.pi * ( r_in** 3) 
+    fuel_volume            = (1 - fuel_tank.ullage.volume_fraction)  * tank_volume_i
+    ullage_volume          = fuel_tank.ullage.volume_fraction  * tank_volume_i
+    ullage_mass            = ullage_volume * fuel_tank.ullage.density 
     
     if fuel_tank.xz_plane_symmetric:
         tank_volume_i *= 2 
         fuel_volume   *=2
 
-    fuel_tank.volume_properties.net_volume      =tank_volume_i
-    fuel_tank.fuel.volume_properties.net_volume =deepcopy(fuel_volume)
-    fuel_tank.fuel.mass_properties.mass         =deepcopy(fuel_tank.fuel.volume_properties.net_volume *  fuel_tank.fuel.density)
+    fuel_tank.volume_properties.net_volume      = tank_volume_i
+    fuel_tank.fuel.volume_properties.net_volume = deepcopy(fuel_volume)
+    fuel_tank.fuel.mass_properties.mass         = deepcopy(fuel_tank.fuel.volume_properties.net_volume *  fuel_tank.fuel.density)
+    fuel_tank.ullage.mass_properties.mass       = ullage_mass
 
     return 
 

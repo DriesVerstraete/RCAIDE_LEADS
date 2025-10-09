@@ -78,7 +78,7 @@ def compute_structural_performance(fuel_tank):
 
     while abs(error) > tol and iteration < max_iter:
         # Compute internal tank geometry
-        V_total = V_guess / (1 - fuel_tank.ullage_volume_fraction)  
+        V_total = V_guess / (1 - fuel_tank.ullage.volume_fraction)  
         r_inner = ( V_total/(2*np.pi*(fuel_tank.aspect_ratio-1/3)) )**(1/3)
         L_inner = (2 * r_inner * fuel_tank.aspect_ratio)-2*r_inner
 
@@ -110,10 +110,8 @@ def compute_structural_performance(fuel_tank):
         fuel_tank.volume_properties.net_volume      *= 2
         fuel_tank.fuel.volume_properties.net_volume *= 2
     
-    fuel_tank.fuel.mass_properties.mass =  fuel_tank.fuel.volume_properties.net_volume *  fuel_tank.fuel.density
-    
-    V_material = fuel_tank.volume_properties.gross_volume - fuel_tank.volume_properties.net_volume
-    
+    fuel_tank.fuel.mass_properties.mass       =  fuel_tank.fuel.volume_properties.net_volume *  fuel_tank.fuel.density 
+    V_material                                = fuel_tank.volume_properties.gross_volume - fuel_tank.volume_properties.net_volume 
     fuel_tank.mass_properties.structural_mass = V_material * fuel_tank.material.density  # Structural Mass of the tank
 
     return

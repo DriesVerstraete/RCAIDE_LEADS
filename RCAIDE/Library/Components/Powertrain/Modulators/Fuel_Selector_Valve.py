@@ -1,4 +1,4 @@
-# RCAIDE/Library/Components/Powertrain/Modulators/Fuel_Selector.py
+# RCAIDE/Library/Components/Powertrain/Modulators/Fuel_Selector_Valve.py
 #  
 # Created:  Mar 2024, M. Clarke 
 
@@ -10,23 +10,23 @@
 from RCAIDE.Library.Components import Component
  
 # ----------------------------------------------------------------------------------------------------------------------
-#  Fuel_Selector
+#  Fuel_Selector_Valve
 # ----------------------------------------------------------------------------------------------------------------------  
-class Fuel_Selector(Component):
+class Fuel_Selector_Valve(Component):
     """
     Class for managing fuel flow control between tanks and engines
     
     Attributes
     ----------
     tag : str
-        Identifier for the fuel selector (default: 'fuel_selector')
+        Identifier for the fuel selector (default: 'Fuel_Selector_Valve')
         
     efficiency : float
         Fuel transfer efficiency through the selector (default: 0.0)
 
     Notes
     -----
-    The Fuel Selector controls fuel routing between multiple fuel tanks and engines,
+    The Fuel Selector Valve controls fuel routing between multiple fuel tanks and engines,
     managing fuel distribution and tank selection during aircraft operation.
 
     See Also
@@ -47,6 +47,6 @@ class Fuel_Selector(Component):
         should be set to an appropriate value based on the specific system configuration.
         """         
 
-        self.tag              = 'fuel_selector'  
-        self.efficiency       = 0.0       
+        self.tag                   = 'fuel_selector_valve' 
+        self.fuel_flow_split_ratio = 0.0       
      

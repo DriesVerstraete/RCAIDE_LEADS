@@ -58,19 +58,15 @@ def append_fuel_line_conditions(fuel_line,segment,network):
     segment.state.conditions.energy.fuel_lines[fuel_line.tag].energy                              = 0 * ones_row(1)  
     segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate                 = 0 * ones_row(1)  
     segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_tanks                          = Conditions() 
+
+
     
-
-    manual_ratio = sum(t.flow_split_ratio or 0 for t in fuel_line.fuel_tanks)
-    auto_tanks   = [t for t in fuel_line.fuel_tanks if t.flow_split_ratio is None]
-    total_auto_mass = sum(t.fuel.mass_properties.mass for t in auto_tanks)
-    remaining_ratio = max(0.0, 1.0 - manual_ratio)
-
-    for t in auto_tanks:
-        t.flow_split_ratio = (t.fuel.mass_properties.mass / total_auto_mass) * remaining_ratio if total_auto_mass else remaining_ratio / len(auto_tanks)
-
-    # Check: if all tanks are manual, ratios must sum to ~1
-    if not auto_tanks:
-        if manual_ratio!=1.0: 
-            raise ValueError(f"Manual flow_split_ratio values sum to {manual_ratio:.3f}, must equal 1.0") 
-
+    m_total = 0
+    for fuel_tank in fuel_line.fuel_tanks:
+        m_total += fuel_tank.fuel.mass_properties.mass
+    
+    for fuel_tank in fuel_line.fuel_tanks: 
+        if fuel_tank.fuel_selector_valve.fuel_flow_split_ratio == 0: 
+            fuel_tank.fuel_selector_valve.fuel_flow_split_ratio = (fuel_tank.fuel.mass_properties.mass / m_total)  
+ 
     return

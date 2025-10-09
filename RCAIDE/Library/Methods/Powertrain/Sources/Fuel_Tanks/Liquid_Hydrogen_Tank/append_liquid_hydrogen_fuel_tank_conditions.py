@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports
 import  RCAIDE
-from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
+from RCAIDE.Framework.Mission.Common     import   Conditions
 
 from copy import deepcopy
 
@@ -30,30 +30,28 @@ def append_liquid_hydrogen_tank_conditions(tank, segment, distributor):
     RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks 
     """
     ones_row    = segment.state.ones_row
-
-    #if tank.symmetric: # revisit later after things are working 
-        #tank.fuel.mass_properties.mass *= 0.5
-        #tank.ullage.mass_properties.mass *= 0.5
-        #tank.fuel.volume_properties.gross_volume *= 0.5
-        #tank.fuel.volume_properties.net_volume *= 0.5 
+    
+    div = 1
+    if tank.xz_plane_symmetric:
+        div = 2
     
     distributor_conditions = segment.state.conditions.energy.fuel_lines[distributor.tag] 
     distributor_conditions.fuel_tanks[tank.tag]                           = Conditions()  
     distributor_conditions.fuel_tanks[tank.tag].mass_flow_rate            = ones_row(1) * 0
     distributor_conditions.fuel_tanks[tank.tag].boil_off_rate             = ones_row(1) * 0
-    distributor_conditions.fuel_tanks[tank.tag].vent_rate                 = ones_row(1) * tank.vent_rate
-    distributor_conditions.fuel_tanks[tank.tag].ullage_mass               = ones_row(1) * tank.ullage.mass_properties.mass
-    distributor_conditions.fuel_tanks[tank.tag].mass                      = ones_row(1) * tank.fuel.mass_properties.mass
-    distributor_conditions.fuel_tanks[tank.tag].ullage_temperature        = ones_row(1) * tank.ullage_temperature
-    distributor_conditions.fuel_tanks[tank.tag].liquid_temperature        = ones_row(1) * tank.liquid_temperature
-    distributor_conditions.fuel_tanks[tank.tag].ullage_volume             = ones_row(1) * (tank.fuel.volume_properties.gross_volume -  tank.fuel.volume_properties.net_volume)
-    distributor_conditions.fuel_tanks[tank.tag].liquid_volume             = ones_row(1) * tank.fuel.volume_properties.net_volume
+    distributor_conditions.fuel_tanks[tank.tag].vent_rate                 = ones_row(1) * tank.vent_rate 
+    distributor_conditions.fuel_tanks[tank.tag].ullage_mass               = ones_row(1) * tank.ullage.mass_properties.mass/ div
+    distributor_conditions.fuel_tanks[tank.tag].mass                      = ones_row(1) * tank.fuel.mass_properties.mass/ div
+    distributor_conditions.fuel_tanks[tank.tag].ullage_temperature        = ones_row(1) * tank.ullage.temperature
+    distributor_conditions.fuel_tanks[tank.tag].liquid_temperature        = ones_row(1) * tank.fuel.temperature
+    distributor_conditions.fuel_tanks[tank.tag].ullage_volume             = ones_row(1) * (tank.fuel.volume_properties.gross_volume -  tank.fuel.volume_properties.net_volume)/ div
+    distributor_conditions.fuel_tanks[tank.tag].liquid_volume             = ones_row(1) * tank.fuel.volume_properties.net_volume/ div
     distributor_conditions.fuel_tanks[tank.tag].pressure                  = ones_row(1) * 0
-    distributor_conditions.fuel_tanks[tank.tag].secondary_fuel_flow_rate  = tank.secondary_fuel_flow_rate * ones_row(1) 
+    distributor_conditions.fuel_tanks[tank.tag].secondary_mass_flow_rate  = tank.secondary_mass_flow_rate * ones_row(1) 
      
-    if tank.symmetric:
-        next_tag = tank.tag + "_symmetric"
-        distributor_conditions.fuel_tanks[next_tag] = deepcopy(distributor_conditions.fuel_tanks[tank.tag])
+    #if tank.xz_plane_symmetric:
+        #next_tag = tank.tag + "_symmetric"
+        #distributor_conditions.fuel_tanks[next_tag] = deepcopy(distributor_conditions.fuel_tanks[tank.tag])
 
     return 
 

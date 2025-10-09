@@ -10,8 +10,8 @@
 
 # RCAIDE imports 
 from RCAIDE.Library.Components          import Component
-from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks  import *
-from RCAIDE.Library.Mission.Common.Unpack_Unknowns.energy import unknowns 
+from RCAIDE.Library.Components.Powertrain.Modulators import Fuel_Selector_Valve
+from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks  import * 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Fuel Tank
@@ -23,10 +23,7 @@ class Fuel_Tank(Component):
     Attributes
     ----------
     tag : str
-        Identifier for the fuel tank (default: 'fuel_tank')
-        
-    fuel_selector_ratio : float
-        Ratio of fuel flow allocation (default: 1.0)
+        Identifier for the fuel tank (default: 'fuel_tank') 
         
     mass_properties.empty_mass : float
         Mass of empty tank structure [kg] (default: 0.0)
@@ -57,15 +54,17 @@ class Fuel_Tank(Component):
         """          
         self.tag                                   = 'fuel_tank'  
         self.fuel                                  = None
-        self.secondary_fuel_flow_rate              = 0.0
-        self.flow_split_ratio                      = None
+        self.secondary_mass_flow_rate              = 0.0
+        self.fuel_selector_valve                   = Fuel_Selector_Valve()
         self.wall_clearance                        = 0.0
-        self.wall_thickness                        = 0.0
-        self.symmetric                             = True
+        self.wall_thickness                        = 1E-3
+        self.xz_plane_symmetric                    = True
         self.wing_tag                              = None
         self.fuselage_tag                          = None
         self.inner_length                          = 0.0
-        self.outer_length                          = 0.0
+        self.outer_length                          = 0.0 
+        self.outer_width                           = 0.0
+        self.outer_height                          = 0.0
         self.inner_diameter                        = 0.0
         self.outer_diameter                        = 0.0
  
@@ -83,14 +82,6 @@ class Fuel_Tank(Component):
         append_fuel_tank_conditions(self,segment, fuel_line)  
         return
     
-    def compute_tank_properties(self,state,fuel_line,network_tag):
-        compute_fuel_tank_properties(self,state,fuel_line,network_tag)
+    def compute_tank_properties(self,state,fuel_line):
+        compute_fuel_tank_properties(self,state,fuel_line)
         return
-    
-    def append_segment_conditions(self, segment, distributor):
-        append_fuel_tank_segment_conditions(self, segment, distributor)
-        return
-
-    def append_unknowns_and_residuals(self,segment,fuel_line,network):
-        append_fuel_tank_unknown_and_residual(self,segment,fuel_line,network)
-        return       

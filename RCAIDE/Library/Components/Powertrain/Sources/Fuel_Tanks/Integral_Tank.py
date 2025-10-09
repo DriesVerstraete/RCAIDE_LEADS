@@ -26,9 +26,6 @@ class Integral_Tank(Fuel_Tank):
     tag : str
         Identifier for the fuel tank (default: 'wing_fuel_tank')
         
-    fuel_selector_ratio : float
-        Ratio of fuel flow allocation (default: 1.0)
-        
     mass_properties.empty_mass : float
         Mass of empty tank structure [kg] (default: 0.0)
         

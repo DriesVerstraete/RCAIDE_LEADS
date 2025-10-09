@@ -13,6 +13,6 @@ electronic speed controllers for electric motors, fuel selectors for fuel system
 # ----------------------------------------------------------------------------------------------------------------------
  
 from .Electronic_Speed_Controller                  import Electronic_Speed_Controller
-from .Fuel_Selector                                import Fuel_Selector
+from .Fuel_Selector_Valve                          import Fuel_Selector_Valve
 
 

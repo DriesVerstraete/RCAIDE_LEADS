@@ -41,7 +41,7 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         ISA deviation at design altitude [°C] (default: 0).  
     acceptable_heat_leak : float
         Maximum allowable heat leak into the tank [W] (default: 20).  
-    ullage_volume_fraction : float
+    ullage.volume_fraction : float
         Fraction of total tank volume reserved for ullage (default: 0.07).  
     design_external_pressure : float
         External design pressure [Pa] (default: 0).  
@@ -93,24 +93,22 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         -------
         None  
         """
-        self.tag                      = 'Liquid_Hydrogen_Tank'
-        self.material                 = None
-        self.insulation_material      = None
-        self.design_inlet_temperature = 20
-        self.design_altitiude         = 0
-        self.acceptable_heat_leak     = 20
-        self.design_altitude          = 30000 * Units.ft
-        self.design_isa_deviation     = 0
-        self.ullage_volume_fraction   = 0.07
-        self.design_external_pressure = 0 
-        self.ullage_temperature        = 25 #K
-        self.liquid_temperature        = 20 #K
+        self.tag                       = 'Liquid_Hydrogen_Tank'
+        self.material                  = None
+        self.insulation_material       = None
+        self.design_inlet_temperature  = 20
+        self.design_altitiude          = 0
+        self.acceptable_heat_leak      = 20
+        self.design_altitude           = 30000 * Units.ft
+        self.design_isa_deviation      = 0
+        self.design_external_pressure  = 0 
         self.vent_rate                 = 0
-        self.fuel                      = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()
-        # fix this later on
-        self.ullage                    = Data()
-        self.ullage.density            = 2.5
-        self.ullage.mass_properties    = RCAIDE.Framework.Core.Data()
+        self.fuel                      = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen() 
+        self.fuel.temperature          = 20 # Kelvin
+        self.ullage                    = RCAIDE.Library.Attributes.Gases.Liquid_Hydrogen_Ullage()
+        self.ullage.density            = 2.5 
+        self.ullage.temperature        = 25 # Kelvin
+        self.ullage.volume_fraction    = 0.07
         
 
     def compute_volume(self, wings, fuselages):
@@ -183,6 +181,6 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         append_hydrogen_fuel_tank_segment_conditions(self,segment,distributor)
         return
     
-    def append_unknowns_and_residualss(self,segment, fuel_line):     
-        append_liquid_hydrogen_tank_unknown_and_residual(self,segment, fuel_line)
+    def append_unknowns_and_residuals(self,segment):     
+        append_liquid_hydrogen_tank_unknown_and_residual(self,segment)
         return
