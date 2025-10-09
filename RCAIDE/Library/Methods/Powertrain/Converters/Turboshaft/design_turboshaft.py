@@ -292,7 +292,7 @@ def design_turboshaft(turboshaft):
     # Step 26: Static Sea Level Thrust   
     atmo_data_sea_level                 = atmosphere.compute_values(0.0,0.0)   
     V                                   = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    segment.state.conditions            = setup_operating_conditions(turboshaft,conditions,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
+    segment.state.conditions            = setup_operating_conditions(turboshaft,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
     orientations(segment) 
     sls_P,_,_                           = turboshaft.compute_performance(segment.state)  
     turboshaft.sealevel_static_power    = sls_P[0][0]     

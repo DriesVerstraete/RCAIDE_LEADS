@@ -8,14 +8,14 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports
 import  RCAIDE
-from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
+from RCAIDE.Framework.Mission.Common     import   Conditions 
 
 import numpy as np
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
-def append_fuel_tank_conditions(tank, segment, distributor, network):
+def append_fuel_tank_conditions(tank, segment, distributor):
     """
     Appends initial conditions for fuel tank component during later mission analysis.
     

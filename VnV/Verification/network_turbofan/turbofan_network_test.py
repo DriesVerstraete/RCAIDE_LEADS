@@ -175,6 +175,7 @@ def main():
     error.descent_throttle_2 = np.max((np.abs(descent_throttle_2   - descent_throttle_2_truth))/descent_throttle_2_truth)
     error.single_pt_CL_1     = np.max((np.abs(single_pt_CL_1       - single_pt_CL_1_truth ))/single_pt_CL_1_truth)     
     error.single_pt_CL_2     = np.max((np.abs(single_pt_CL_2       - single_pt_CL_2_truth ))/single_pt_CL_2_truth)  
+    error.single_pt_CL_3     = np.max((np.abs(single_pt_CL_3       - single_pt_CL_3_truth ))/single_pt_CL_3_truth)   
     error.cruise_4_CL        = np.max((np.abs(cruise_4_CL         - cruise_4_CL_truth))/cruise_4_CL_truth)      
     error.cruise_5_CL        = np.max((np.abs(cruise_5_CL         - cruise_5_CL_truth))/cruise_5_CL_truth)   
     error.cruise_6_CL        = np.max((np.abs(cruise_6_CL         - cruise_6_CL_truth ))/cruise_6_CL_truth)      

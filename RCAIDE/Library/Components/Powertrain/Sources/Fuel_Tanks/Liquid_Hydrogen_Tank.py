@@ -17,7 +17,7 @@ from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.a
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_liquid_hydrogen_tank_performance    import compute_liquid_hydrogen_tank_performance
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_structural_performance              import compute_structural_performance
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_thermal_performance                 import compute_thermal_performance
-
+from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.append_liquid_hydrogen_tank_unknown_and_residual import append_liquid_hydrogen_tank_unknown_and_residual
 # ----------------------------------------------------------------------------------------------------------------------
 #  Liquid Hydrogen Tank
 # ---------------------------------------------------------------------------------------------------------------------    
@@ -160,7 +160,8 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
                     compute_structural_performance(self)
                     compute_thermal_performance(self)
         return
-    def append_operating_conditions(self,segment,fuel_line,network):  
+    
+    def append_operating_conditions(self,segment,fuel_line):  
         """
         Append fuel tank operating conditions for a flight segment
         
@@ -170,16 +171,18 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
             Flight segment containing state conditions
         fuel_line : Component
         Connected fuel line component
-        """
-        
-        append_liquid_hydrogen_tank_conditions(self,segment, fuel_line)  
-        append_liquid_hydrogen_tank_unknown_and_residual(self,segment, fuel_line,network)  
+        """ 
+        append_liquid_hydrogen_tank_conditions(self,segment, fuel_line)   
         return
     
-    def compute_tank_properties(self,state,fuel_line,network_tag):
-        compute_liquid_hydrogen_tank_performance(self,state,fuel_line,network_tag)
+    def compute_tank_properties(self,state,fuel_line):
+        compute_liquid_hydrogen_tank_performance(self,state,fuel_line)
         return
 
     def append_segment_conditions(self, segment, distributor):
         append_hydrogen_fuel_tank_segment_conditions(self,segment,distributor)
-        return 
+        return
+    
+    def append_unknowns_and_residualss(self,segment, fuel_line):     
+        append_liquid_hydrogen_tank_unknown_and_residual(self,segment, fuel_line)
+        return

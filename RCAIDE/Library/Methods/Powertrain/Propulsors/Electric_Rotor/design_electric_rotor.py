@@ -104,8 +104,8 @@ def design_electric_rotor(electric_rotor, number_of_stations=20, solver_name='SL
     RCAIDE.Library.Methods.Powertrain.Converters.Motor.design_optimal_motor
     RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.Common.compute_motor_weight
     RCAIDE.Library.Methods.Powertrain.setup_operating_conditions
-    """
-
+    """ 
+        
     if electric_rotor.electronic_speed_controller == None: 
         raise AssertionError("Electric Speed Controller not defined on propulsor")
     
@@ -148,7 +148,7 @@ def design_electric_rotor(electric_rotor, number_of_stations=20, solver_name='SL
 
     segment = RCAIDE.Framework.Mission.Segments.Segment()   
     electric_rotor.append_operating_conditions(segment)    
-    segment.state.conditions                     = setup_operating_conditions(electric_rotor,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)   
+    segment.state.conditions                     = setup_operating_conditions(electric_rotor, velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)   
     segment.state.conditions.energy.converters[motor.tag].inputs.current[:,0]    = motor.design_current
     sls_T,_,sls_P,_,_,_                          = electric_rotor.compute_performance(segment.state) 
     electric_rotor.sealevel_static_thrust        = sls_T[0][0]

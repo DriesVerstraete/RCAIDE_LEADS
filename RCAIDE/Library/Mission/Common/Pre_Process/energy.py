@@ -55,7 +55,7 @@ def energy(mission):
                 fuel_line.append_operating_conditions(segment,network) 
         
                 for fuel_tank in fuel_line.fuel_tanks:
-                    fuel_tank.append_operating_conditions(segment,fuel_line,network)             
+                    fuel_tank.append_operating_conditions(segment,fuel_line)             
         
             # Bus 
             for bus in network.busses:   

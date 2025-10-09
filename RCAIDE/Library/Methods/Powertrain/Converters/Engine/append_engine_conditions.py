@@ -7,7 +7,7 @@ from RCAIDE.Framework.Mission.Common     import   Conditions
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  append_engine_conditions
 # ----------------------------------------------------------------------------------------------------------------------    
-def append_engine_conditions(engine): 
+def append_engine_conditions(engine, segment): 
     """
     Initializes and appends engine operating conditions to the propulsor conditions data structure.
     
@@ -34,6 +34,7 @@ def append_engine_conditions(engine):
     segment.state.conditions.energy.converters[engine.tag]                      = Conditions() 
     segment.state.conditions.energy.converters[engine.tag].inputs               = Conditions()
     segment.state.conditions.energy.converters[engine.tag].outputs              = Conditions()
+    segment.state.conditions.energy.converters[engine.tag].torque               = 0 * ones_row(1)   
     segment.state.conditions.energy.converters[engine.tag].omega                = engine.rated_speed * ones_row(1)   
     
     return 

@@ -257,7 +257,7 @@ def design_turboprop(turboprop):
     # Step 26: Static Sea Level Thrust   
     atmo_data_sea_level                = atmosphere.compute_values(0.0,0.0)   
     V                                  = atmo_data_sea_level.speed_of_sound[0][0]*0.01    
-    segment.state.conditions           = setup_operating_conditions(turboprop,conditions,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
+    segment.state.conditions           = setup_operating_conditions(turboprop,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
     sls_T,_,sls_P,_,_,_                = turboprop.compute_performance(segment.state) 
     turboprop.sealevel_static_thrust   = sls_T[0][0]
     turboprop.sealevel_static_power    = sls_P[0][0]    

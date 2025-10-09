@@ -286,7 +286,7 @@ class Network(Component):
                     # Step 4 : Battery Thermal Management Calculations                    
                     for coolant_line in coolant_lines:
                         for heat_exchanger in coolant_line.heat_exchangers: 
-                               heat_exchanger.compute_heat_exchanger_performance(state,bus,coolant_line) 
+                            heat_exchanger.compute_heat_exchanger_performance(state,bus,coolant_line) 
                         for reservoir in coolant_line.reservoirs:   
                             reservoir.compute_reservior_coolant_temperature(state,coolant_line)
                                 
@@ -376,80 +376,7 @@ class Network(Component):
                         propulsor =  network.propulsors[propulsor_group[0]]
                         propulsor.pack_propulsor_residuals(segment)   
         return      
-    
-    #def add_unknowns_and_residuals_to_segment(self, segment):
-        #""" This function sets up the information that the mission needs to run a mission segment using this network 
-         
-            #Assumptions:
-            #None
-    
-            #Source:
-            #N/A
-    
-            #Inputs:
-            #segment
-            #eestimated_throttles           [-]
-            #estimated_propulsor_group_rpms [-]  
-            
-            #Outputs:
-            #segment
-    
-            #Properties Used:
-            #N/A
-        #"""                   
-        #segment.state.residuals.mission.network = Residuals()
-
-        #for network in segment.analyses.energy.vehicle.networks: 
      
-            #for fuel_line_i, fuel_line in enumerate(network.fuel_lines):  
-                  
-                ## Assign network-specific  residuals, unknowns and results data structures 
-                #if fuel_line.active:
-                    #for propulsor_group in  fuel_line.assigned_propulsors:
-                        #propulsor =  network.propulsors[propulsor_group[0]]
-                        #propulsor.append_unknowns_and_residuals(segment)
-                          
-    
-            ## ------------------------------------------------------------------------------------------------------            
-            ## Create bus results data structure  
-            ## ------------------------------------------------------------------------------------------------------     
-            #for bus_i, bus in enumerate(network.busses): 
-                ## bus.append_operating_conditions(segment)                  
-    
-                ## ------------------------------------------------------------------------------------------------------
-                ## Assign network-specific  residuals, unknowns and results data structures
-                ## ------------------------------------------------------------------------------------------------------
-                #if bus.active:
-                    #for propulsor_group in  bus.assigned_propulsors:
-                        #propulsor =  network.propulsors[propulsor_group[0]]
-                        #propulsor.append_unknowns_and_residuals(segment)
-                          
-    
-            ##for coolant_line_i, coolant_line in enumerate(network.coolant_lines):  
-                ### ------------------------------------------------------------------------------------------------------            
-                ### Create coolant_lines results data structure  
-                ### ------------------------------------------------------------------------------------------------------
-                ##segment.state.conditions.energy.coolant_lines[coolant_line.tag] = RCAIDE.Framework.Mission.Common.Conditions()        
-                
-                ### ------------------------------------------------------------------------------------------------------
-                ### Assign network-specific  residuals, unknowns and results data structures
-                ### ------------------------------------------------------------------------------------------------------       
-                ##for battery_module in coolant_line.battery_modules: 
-                    ##for btms in battery_module:
-                        ##btms.append_operating_conditions(segment,coolant_line)
-                        
-                ##for heat_exchanger in coolant_line.heat_exchangers: 
-                    ##heat_exchanger.append_operating_conditions(segment, coolant_line)
-                        
-                ##for reservoir in coolant_line.reservoirs: 
-                    ##reservoir.append_operating_conditions(segment, coolant_line)                           
-    
-        ## Ensure the mission knows how to pack and unpack the unknowns and residuals
-        #segment.process.iterate.unknowns.mission.network            = self.unpack_unknowns
-        #segment.process.iterate.residuals.mission.network           = self.residuals   
-        
-        #return segment
- 
 # ----------------------------------------------------------------------
 #  Component Container
 # ---------------------------------------------------------------------- 

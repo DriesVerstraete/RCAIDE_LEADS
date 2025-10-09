@@ -280,7 +280,7 @@ def design_turbojet(turbojet):
     # Step 21: Static Sea Level Thrust 
     atmo_data_sea_level              = atmosphere.compute_values(0.0,0.0)   
     V                                = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    segment.state.conditions         = setup_operating_conditions(turbojet,conditions,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)
+    segment.state.conditions         = setup_operating_conditions(turbojet,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)
     orientations(segment) 
     sls_T,_,sls_P,_,_,_              = turbojet.compute_performance(segment.state) 
     turbojet.sealevel_static_thrust  = sls_T[0][0]

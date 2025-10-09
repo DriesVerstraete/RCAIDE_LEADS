@@ -15,20 +15,17 @@ from scipy.optimize import brentq
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
-def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network_tag):
+def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
 
-    distributor_conditions = state.conditions.energy.fuel_lines[distributor.tag]         
-
-    tank_conditions = distributor_conditions.fuel_tanks[fuel_tank.tag] 
-    tank_unknowns = state.unknowns.network[network_tag].fuel_lines[distributor.tag][fuel_tank.tag]
-    tank_residuals = state.residuals.network[network_tag].fuel_lines[distributor.tag][fuel_tank.tag]
+    distributor_conditions = state.conditions.energy.fuel_lines[distributor.tag]          
+    tank_conditions       = distributor_conditions.fuel_tanks[fuel_tank.tag]   
     
-    m_g = tank_unknowns.ullage_mass
-    m_l = tank_unknowns.liquid_mass
-    T_g = tank_unknowns.ullage_temperature
-    T_l = tank_unknowns.liquid_temperature
-    V_g = tank_unknowns.ullage_volume
-    V_l = tank_unknowns.liquid_volume
+    m_g = state.unknowns.network[fuel_tank.tag + '_ullage_mass']
+    m_l = state.unknowns.network[fuel_tank.tag + '_liquid_mass']
+    T_g = state.unknowns.network[fuel_tank.tag + '_ullage_temperature']
+    T_l = state.unknowns.network[fuel_tank.tag + '_liquid_temperature']
+    V_g = state.unknowns.network[fuel_tank.tag + '_ullage_volume']
+    V_l = state.unknowns.network[fuel_tank.tag + '_liquid_volume']
     
 
     flow_split_ratio  = fuel_tank.flow_split_ratio
@@ -112,42 +109,31 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor,network
     # --- Energy balances ---
     dT_g = (-Q_g_i + Q_e_g - P*dV_g + dm_g*(h_g - u_g)) / (m_g[:,0]*cp_g + 1e-9)
     dT_l = (-Q_l_i + Q_e_l- P*(dV_l) + dm_l*(h_l - u_l)) / (m_l[:,0]*cp_liq + 1e-9)
+ 
+    D = state.numerics.time.differentiate
 
+    state.residuals.network[fuel_tank.tag + '_ullage_mass']           = np.dot(D, m_g)[:, 0] - dm_g[:, 0]
+    state.residuals.network[fuel_tank.tag + '_ullage_mass'][0]        = m_g[0] -  tank_conditions.ullage_mass[0] 
+    state.residuals.network[fuel_tank.tag + '_liquid_mass']           = np.dot(D, m_l)[:, 0] - dm_l[:, 0]
+    state.residuals.network[fuel_tank.tag + '_liquid_mass'][0]        = m_l[0] - tank_conditions.mass[0] 
+    state.residuals.network[fuel_tank.tag + '_ullage_temperature']    = np.dot(D, T_g)[:, 0] - dT_g[:, 0]
+    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][0] = T_g[0] - tank_conditions.ullage_temperature[0,0] 
+    state.residuals.network[fuel_tank.tag + '_liquid_temperature']    = np.dot(D, T_l)[:, 0] - dT_l[:, 0]
+    state.residuals.network[fuel_tank.tag + '_liquid_temperature'][0] = T_l[0] - tank_conditions.liquid_temperature[0,0] 
+    state.residuals.network[fuel_tank.tag + '_ullage_volume']         = np.dot(D, V_g)[:, 0] - dV_g[:, 0]
+    state.residuals.network[fuel_tank.tag + '_ullage_volume'][0]      = V_g[0] - tank_conditions.ullage_volume[0,0] 
+    state.residuals.network[fuel_tank.tag + '_liquid_volume']         = np.dot(D, V_l)[:, 0] - dV_l[:, 0]
+    state.residuals.network[fuel_tank.tag + '_liquid_volume'][0]      = V_l[0] - tank_conditions.liquid_volume[0,0] 
 
-    t0  = state.numerics.time.control_points[0][0]
-    tf = state.numerics.time.control_points[-1][0]
-    D = state.numerics.dimensionless.differentiate
-    D_t = D/(tf - t0) 
-
-
-    tank_residuals.ullage_mass = D_t @ m_g[:,0] - dm_g
-    tank_residuals.ullage_mass[0] = m_g[0] -  tank_conditions.ullage_mass[0]
-
-    tank_residuals.liquid_mass = D_t @ m_l[:,0] - dm_l
-    tank_residuals.liquid_mass[0] = m_l[0] - tank_conditions.mass[0]
-
-    tank_residuals.ullage_temperature = D_t @ T_g[:,0] - dT_g
-    tank_residuals.ullage_temperature[0] = T_g[0] - tank_conditions.ullage_temperature[0,0]
-    
-    tank_residuals.liquid_temperature = D_t @ T_l[:,0] - dT_l
-    tank_residuals.liquid_temperature[0] = T_l[0] - tank_conditions.liquid_temperature[0,0]
-    
-    tank_residuals.ullage_volume = D_t @ V_g[:,0] - dV_g
-    tank_residuals.ullage_volume[0] = V_g[0] - tank_conditions.ullage_volume[0,0]
-    
-    tank_residuals.liquid_volume = D_t @ V_l[:,0] - dV_l
-    tank_residuals.liquid_volume[0] = V_l[0] - tank_conditions.liquid_volume[0,0]
-
-
-    tank_conditions.ullage_mass[1:,0]        = tank_unknowns.ullage_mass[1:,0]
-    tank_conditions.mass[1:,0]               = tank_unknowns.liquid_mass[1:,0]
-    tank_conditions.ullage_temperature[1:,0] = tank_unknowns.ullage_temperature[1:,0]
-    tank_conditions.liquid_temperature[1:,0] = tank_unknowns.liquid_temperature[1:,0]
-    tank_conditions.ullage_volume[1:,0]      = tank_unknowns.ullage_volume[1:,0]
-    tank_conditions.liquid_volume[1:,0]      = tank_unknowns.liquid_volume[1:,0]
+    tank_conditions.ullage_mass[1:,0]        = state.unknowns.network[fuel_tank.tag + '_ullage_mass'][1:,0]
+    tank_conditions.mass[1:,0]               = state.unknowns.network[fuel_tank.tag + '_liquid_mass'][1:,0]
+    tank_conditions.ullage_temperature[1:,0] = state.unknowns.network[fuel_tank.tag + '_ullage_temperature'][1:,0]
+    tank_conditions.liquid_temperature[1:,0] = state.unknowns.network[fuel_tank.tag + '_liquid_temperature'][1:,0]
+    tank_conditions.ullage_volume[1:,0]      = state.unknowns.network[fuel_tank.tag + '_ullage_volume'][1:,0]
+    tank_conditions.liquid_volume[1:,0]      = state.unknowns.network[fuel_tank.tag + '_liquid_volume'][1:,0]
     tank_conditions.vent_rate                = m_dot_g_out
     tank_conditions.boil_off_rate[:,0]       = m_dot_bo
-    print(tank_unknowns.ullage_temperature[:,0])
+    
     if fuel_tank.symmetric:
         symmetric_tag = fuel_tank.tag  + "_symmetric"
         distributor_conditions.fuel_tanks[symmetric_tag] = deepcopy(distributor_conditions.fuel_tanks[fuel_tank.tag])

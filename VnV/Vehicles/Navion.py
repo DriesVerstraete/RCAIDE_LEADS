@@ -326,30 +326,33 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    ice_prop                                   = RCAIDE.Library.Components.Powertrain.Propulsors.Internal_Combustion_Engine()      
+    ice_prop                                   = RCAIDE.Library.Components.Powertrain.Propulsors.Internal_Combustion_Engine() 
+    ice_prop.sealevel_static_thrust            = 2500 # N
+    ice_prop.design_power                      =  .64 * 180. * Units.horsepower
+    ice_prop.design_freestream_velocity        =   119.   * Units.knots
+    ice_prop.design_altitude                   = 12000. * Units.feet 
+    ice_prop.working_fluid                     = RCAIDE.Library.Attributes.Gases.Air()     
                                                      
     # Engine                     
-    engine                                     = RCAIDE.Library.Components.Powertrain.Converters.Engine()
-
+    engine                                     = RCAIDE.Library.Components.Powertrain.Converters.Engine() 
     engine.sea_level_power                     = 185. * Units.horsepower 
     engine.rated_speed                         = 2300. * Units.rpm 
     engine.power_specific_fuel_consumption     = 0.01  * Units['lb/hp/hr']
     ice_prop.engine                            = engine 
-    ice_prop.sealevel_static_thrust            = 2500 # N
      
     # Propeller 
-    prop                                    = RCAIDE.Library.Components.Powertrain.Converters.Propeller()
-    prop.tag                                = 'propeller'
-    prop.number_of_blades                   = 2.0
-    prop.tip_radius                         = 76./2. * Units.inches
-    prop.hub_radius                         = 8.     * Units.inches
-    prop.cruise.design_freestream_velocity  = 119.   * Units.knots
-    prop.cruise.design_angular_velocity     = 2650.  * Units.rpm
-    prop.cruise.design_Cl                   = 0.8
-    prop.cruise.design_altitude             = 12000. * Units.feet
-    prop.cruise.design_power                = .64 * 180. * Units.horsepower
-    prop.variable_pitch                     = True    
-    ice_prop.propeller                      = prop
+    prop                                       = RCAIDE.Library.Components.Powertrain.Converters.Propeller()
+    prop.tag                                   = 'propeller'
+    prop.number_of_blades                      = 2.0
+    prop.tip_radius                            = 76./2. * Units.inches
+    prop.hub_radius                            = 8.     * Units.inches
+    prop.cruise.design_freestream_velocity     = ice_prop.design_freestream_velocity
+    prop.cruise.design_angular_velocity        = 2650.  * Units.rpm
+    prop.cruise.design_Cl                      = 0.8
+    prop.cruise.design_altitude                = ice_prop.design_altitude
+    prop.cruise.design_power                   = ice_prop.design_power
+    prop.variable_pitch                        = True    
+    ice_prop.propeller                         = prop
 
     # design propeller ICE  
     design_internal_combustion_engine(ice_prop)

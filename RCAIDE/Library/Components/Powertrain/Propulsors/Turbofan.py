@@ -162,11 +162,13 @@ class Turbofan(Propulsor):
         self.bypass_ratio                               = 0.0 
         self.design_isa_deviation                       = 0.0
         self.design_altitude                            = 0.0
+        self.design_thrust                              = 0.0  
+        self.design_mach_number                         = None 
+        self.design_freestream_velocity                 = None        
         self.specific_fuel_consumption_reduction_factor = 0.0 
         self.compressor_nondimensional_massflow         = 0.0
         self.reference_temperature                      = 288.15
         self.reference_pressure                         = 1.01325*10**5 
-        self.design_thrust                              = 0.0
         self.mass_flow_rate_design                      = 0.0
 
         self.emission_indices                           = Data()  
