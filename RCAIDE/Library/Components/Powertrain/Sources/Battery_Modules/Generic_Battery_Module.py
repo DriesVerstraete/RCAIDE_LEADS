@@ -11,6 +11,7 @@
 from RCAIDE.Framework.Core        import Data
 from RCAIDE.Library.Components    import Component   
 from RCAIDE.Library.Methods.Powertrain.Sources.Batteries.Common.append_battery_conditions import *
+from RCAIDE.Library.Methods.Powertrain.Sources.Batteries.Common.append_battery_unknown_and_residual import append_battery_unknown_and_residual
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Battery
@@ -168,7 +169,7 @@ class Generic_Battery_Module(Component):
         network: 
 
         """
-        append_battery_unknowns_and_residuals(self,segment,bus,network)  
+        append_battery_unknown_and_residual(self,segment,bus,network)  
         
         return
 

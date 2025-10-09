@@ -7,9 +7,6 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports
-import  RCAIDE
-from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
-
 import numpy as np
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -21,22 +18,10 @@ def append_fuel_tank_unknown_and_residual(fuel_tank, segment, distributor,networ
     segment.state.number_of_network_residuals += 1
     
     # unknown 
-    tank_unknowns   = segment.state.unknowns.network[network.tag].fuel_lines[distributor.tag].fuel_tanks  = Unknowns() 
-    tank_residuals  = segment.state.residuals.network[network.tag].fuel_lines[distributor.tag].fuel_tanks = Residuals()
-    distributor_lower_bounds   = segment.state.unknowns_lower_bounds.network[network.tag].fuel_lines[distributor.tag].fuel_tanks = Conditions()
-    distributor_upper_bounds   = segment.state.unknowns_upper_bounds.network[network.tag].fuel_lines[distributor.tag].fuel_tanks = Conditions() 
-    tank_unknowns[fuel_tank.tag].mass  = ones_row(1) *fuel_tank.fuel.mass_properties.mass
-    
-    # residual 
-    tank_residuals[fuel_tank.tag].mass = ones_row(1)*0
-
-    # lower bound 
-    distributor_lower_bounds[fuel_tank.tag]      = Conditions()
-    distributor_lower_bounds[fuel_tank.tag].mass = -np.inf * ones_row(1)
-     
-    # upper bound 
-    distributor_upper_bounds[fuel_tank.tag]      = Conditions() 
-    distributor_upper_bounds[fuel_tank.tag].mass = np.inf * ones_row(1)
+    segment.state.unknowns.network[fuel_tank.tag + '_mass']              = ones_row(1) *fuel_tank.fuel.mass_properties.mass 
+    segment.state.residuals.network[fuel_tank.tag + '_mass']             = ones_row(1)*0 
+    segment.state.unknowns_lower_bounds.network[fuel_tank.tag + '_mass'] = -np.inf * ones_row(1) 
+    segment.state.unknowns_upper_bounds.network[fuel_tank.tag + '_mass'] = np.inf * ones_row(1)
 
     return
     

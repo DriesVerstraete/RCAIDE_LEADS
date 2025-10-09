@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------  
-from RCAIDE.Framework.Mission.Common import Conditions
+from RCAIDE.Framework.Mission.Common import Conditions, Residuals, Unknowns
 # ----------------------------------------------------------------------------------------------------------------------
 #  set_residuals_and_unknowns
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -17,11 +17,7 @@ def set_network_residuals_and_unknowns(mission):
         segment.state.number_of_network_unknowns   = 0 
         segment.state.number_of_network_residuals  = 0
         networks = segment.analyses.energy.vehicle.networks
-        for network in networks:
-            segment.state.unknowns.network[network.tag]                 = Conditions()
-            segment.state.residuals.network[network.tag]                = Conditions()
-            segment.state.unknowns_lower_bounds.network[network.tag]    = Conditions()
-            segment.state.unknowns_upper_bounds.network[network.tag]    = Conditions()                        
+        for network in networks:                        
 
             # ---------------------------------------------------------------------------------------------
             # Propulsors 
@@ -34,22 +30,14 @@ def set_network_residuals_and_unknowns(mission):
             # Distributors 
             # ---------------------------------------------------------------------------------------------
             # Fuel Line 
-            for fuel_line in network.fuel_lines:   
-                segment.state.unknowns.network[network.tag].fuel_lines               = Conditions()
-                segment.state.residuals.network[network.tag].fuel_lines              = Conditions()     
-                segment.state.unknowns_lower_bounds.network[network.tag].fuel_lines  = Conditions()
-                segment.state.unknowns_upper_bounds.network[network.tag].fuel_lines  = Conditions() 
+            for fuel_line in network.fuel_lines:                 
                 fuel_line.append_unknowns_and_residuals(segment,network)                
-        
+         
                 for fuel_tank in fuel_line.fuel_tanks:
                     fuel_tank.append_unknowns_and_residuals(segment,fuel_line,network)                        
                  
             # Bus 
-            for bus in network.busses:   
-                segment.state.unknowns.network[network.tag].busses               = Conditions()
-                segment.state.residuals.network[network.tag].busses              = Conditions()     
-                segment.state.unknowns_lower_bounds.network[network.tag].busses  = Conditions()
-                segment.state.unknowns_upper_bounds.network[network.tag].busses  = Conditions()
+            for bus in network.busses:    
                 bus.append_unknowns_and_residuals(segment,network)                  
 
                 for bat_i,battery_module in  enumerate(bus.battery_modules):  
@@ -60,13 +48,6 @@ def set_network_residuals_and_unknowns(mission):
                     if bus.identical_fuel_cell_stacks == True and fc_i ==0:
                         fuel_cell_stack.append_unknowns_and_residuals(segment,bus,network)    
     
-            # Coolant Line 
-            for coolant_line in network.coolant_lines:   
-                segment.state.unknowns.network[network.tag].coolant_lines               = Conditions()
-                segment.state.residuals.network[network.tag].coolant_lines              = Conditions()     
-                segment.state.unknowns_lower_bounds.network[network.tag].coolant_lines  = Conditions()
-                segment.state.unknowns_upper_bounds.network[network.tag].coolant_lines  = Conditions()   
-            
             # Ensure the mission knows how to pack and unpack the unknowns and residuals
             segment.process.iterate.unknowns.mission.network   = network.unpack_unknowns 
             segment.process.iterate.residuals.mission.network  = network.residuals 

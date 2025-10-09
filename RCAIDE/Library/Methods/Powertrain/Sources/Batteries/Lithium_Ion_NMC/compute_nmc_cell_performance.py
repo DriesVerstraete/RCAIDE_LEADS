@@ -196,8 +196,8 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     I_cell             = battery_module_conditions.cell.current
                    
     # set temperature unknown 
-    T_cell_unkn = state.unknowns.network[network_tag].busses[bus.tag][battery_module.tag].cell.temperature
-    SOC_cell_unkn = state.unknowns.network[network_tag].busses[bus.tag][battery_module.tag].cell.state_of_charge
+    T_cell_unkn   = state.unknowns.network[battery_module.tag +  '_cell_temperature']
+    SOC_cell_unkn = state.unknowns.network[battery_module.tag + '_cell_state_of_charge']
     
     # ---------------------------------------------------------------------------------
     # Electrical configuration

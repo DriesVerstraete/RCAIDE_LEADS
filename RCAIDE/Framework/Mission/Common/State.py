@@ -77,7 +77,7 @@ class State(Conditions):
         self.residuals            = Conditions()
         self.residuals.mission    = Residuals()
         self.residuals.network    = Residuals()
-        
+             
         # Conditions
         self.conditions           = Conditions() 
 
