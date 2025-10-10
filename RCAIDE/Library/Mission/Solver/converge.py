@@ -199,6 +199,9 @@ def add_mission_variables(segment):
     net_unknown_keys  = list(segment.state.unknowns.network.keys())  
     net_unknown_keys.remove('tag') 
 
+    residual_keys  = list(segment.state.residuals.mission.keys())  
+    residual_keys.remove('tag') 
+
     if ground_seg_flag: 
         n_points      = segment.state.numerics.number_of_control_points
         len_inputs    = n_points
@@ -225,8 +228,8 @@ def add_mission_variables(segment):
             full_unkn_vals[unkn]        = segment.state.unknowns.network[unkn]
             full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_lower_bounds.network[unkn])
             full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.unknowns_upper_bounds.network[unkn]) 
-            len_inputs                  += n_points * segment.state.number_of_network_unknowns
-            len_residuals               += n_points * segment.state.number_of_network_residuals            
+        len_inputs                  += n_points * segment.state.number_of_network_unknowns
+        len_residuals               += n_points * segment.state.number_of_network_residuals            
 
     # Step 2.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
@@ -319,12 +322,23 @@ def add_mission_variables(segment):
         input_aliases[:,1] = input_string
     
     # Step 4.2: Setup the aliases for the residuals
-    basic_string_res      = np.tile('segment.state.residuals.pack_array()[', len_residuals)
-    residual_string       = np.core.defchararray.add(basic_string_res,np.array(con_numbers-1).astype(str))
-    residual_string       = np.core.defchararray.add(residual_string, np.tile(']',len_residuals))
-    residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
-    residual_aliases[:,0] = con_names
-    residual_aliases[:,1] = residual_string
+    basic_string_con = Data()
+    input_string = []
+    input_string_network = []
+    output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
+    for unkn in residual_keys:
+        basic_string_con[unkn] = np.tile('segment.state.residuals.mission.'+unkn+'[', n_points)
+        input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
+    
+    if segment.state.numerics.network_solver.method is None:
+        for unkn in net_unknown_keys:
+            basic_string_con[unkn] = np.tile('segment.state.residuals.network.'+unkn+'[', n_points)
+            input_string_network.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
+        input_string = np.hstack((np.ravel(input_string),np.ravel(input_string_network)))        
+    input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
+    residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+    residual_aliases[:,0] = input_names
+    residual_aliases[:,1] = input_string
         
     # Step 4.3: Append Aliases
     aliases = []

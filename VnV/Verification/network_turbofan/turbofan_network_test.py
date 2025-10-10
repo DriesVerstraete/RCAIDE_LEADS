@@ -199,8 +199,8 @@ def base_analysis(vehicle):
     analyses.append(aerodynamics)
   
     #  Energy
-    energy                                           = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle                                   = vehicle 
+    energy             = RCAIDE.Framework.Analyses.Energy.Energy()
+    energy.vehicle     = vehicle 
     analyses.append(energy)
  
     #  Planet Analysis
