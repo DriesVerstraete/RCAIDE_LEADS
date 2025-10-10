@@ -109,14 +109,19 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
 
     state.residuals.network[fuel_tank.tag + '_ullage_mass']           = np.dot(D, m_g)[:, 0] - dm_g[:, 0]
     state.residuals.network[fuel_tank.tag + '_ullage_mass'][0]        = m_g[0] -  tank_conditions.ullage_mass[0] 
+
     state.residuals.network[fuel_tank.tag + '_liquid_mass']           = np.dot(D, m_l)[:, 0] - dm_l[:, 0]
     state.residuals.network[fuel_tank.tag + '_liquid_mass'][0]        = m_l[0] - tank_conditions.mass[0] 
+
     state.residuals.network[fuel_tank.tag + '_ullage_temperature']    = np.dot(D, T_g)[:, 0] - dT_g[:, 0]
     state.residuals.network[fuel_tank.tag + '_ullage_temperature'][0] = T_g[0] - tank_conditions.ullage_temperature[0,0] 
+
     state.residuals.network[fuel_tank.tag + '_liquid_temperature']    = np.dot(D, T_l)[:, 0] - dT_l[:, 0]
     state.residuals.network[fuel_tank.tag + '_liquid_temperature'][0] = T_l[0] - tank_conditions.liquid_temperature[0,0] 
+
     state.residuals.network[fuel_tank.tag + '_ullage_volume']         = np.dot(D, V_g)[:, 0] - dV_g[:, 0]
     state.residuals.network[fuel_tank.tag + '_ullage_volume'][0]      = V_g[0] - tank_conditions.ullage_volume[0,0] 
+    
     state.residuals.network[fuel_tank.tag + '_liquid_volume']         = np.dot(D, V_l)[:, 0] - dV_l[:, 0]
     state.residuals.network[fuel_tank.tag + '_liquid_volume'][0]      = V_l[0] - tank_conditions.liquid_volume[0,0] 
 

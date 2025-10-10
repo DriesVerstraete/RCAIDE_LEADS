@@ -29,7 +29,7 @@ def set_network_residuals_and_unknowns(mission):
                 fuel_line.append_unknowns_and_residuals(segment,network)                
          
                 for fuel_tank in fuel_line.fuel_tanks:
-                    fuel_tank.append_unknowns_and_residuals(segment,fuel_line)                        
+                    fuel_tank.append_unknowns_and_residuals(segment)                        
                  
             # Bus 
             for bus in network.busses:    
@@ -43,6 +43,6 @@ def set_network_residuals_and_unknowns(mission):
                     if bus.identical_fuel_cell_stacks == True and fc_i ==0:
                         fuel_cell_stack.append_unknowns_and_residuals(segment,bus,network)    
     
-            # Ensure the mission knows how to pack and unpack the unknowns and residuals
-            segment.process.iterate.unknowns.mission.network   = network.unpack_unknowns 
-            segment.process.iterate.residuals.mission.network  = network.residuals
+            # # Ensure the mission knows how to pack and unpack the unknowns and residuals
+            # segment.process.iterate.unknowns.mission.network   = network.unpack_unknowns 
+            # segment.process.iterate.residuals.mission.network  = network.residuals

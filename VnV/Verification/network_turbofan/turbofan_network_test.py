@@ -181,7 +181,8 @@ def base_analysis(vehicle):
     #  geometry
     geometry = RCAIDE.Framework.Analyses.Geometry.Geometry()
     geometry.vehicle = vehicle
-    geometry.settings.overwrite_reference        = False
+    geometry.settings.overwrite_reference  = False
+    geometry.settings.update_fuel_volume   = True
     analyses.append(geometry)
 
     # ------------------------------------------------------------------

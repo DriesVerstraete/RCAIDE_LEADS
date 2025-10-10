@@ -13,7 +13,7 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
-def compute_fuel_tank_properties(tank,state,distributor,network_tag):
+def compute_fuel_tank_properties(tank,state,distributor):
     '''
     UPDATE HEADER 
     ''' 

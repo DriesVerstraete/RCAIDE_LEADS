@@ -12,7 +12,7 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
-def append_fuel_tank_unknown_and_residual(fuel_tank, segment, distributor,network):
+def append_fuel_tank_unknown_and_residual(fuel_tank, segment):
     ones_row    = segment.state.ones_row
     segment.state.number_of_network_unknowns  += 1 
     segment.state.number_of_network_residuals += 1

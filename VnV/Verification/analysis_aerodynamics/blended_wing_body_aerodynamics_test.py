@@ -77,6 +77,7 @@ def base_analysis(vehicle):
     geometry.vehicle = vehicle
     geometry.settings.update_fuselage_properties = True
     geometry.settings.update_fuel_volume         = True
+    geometry.settings.unique_geometry            = False
     analyses.append(geometry)
     
 
@@ -131,7 +132,7 @@ def mission_setup(analyses):
   
     Segments = RCAIDE.Framework.Mission.Segments 
     base_segment = Segments.Segment() 
- 
+    base_segment.state.numerics.mission_solver.method = 'root_finder'
 
     # ------------------------------------------------------------------    
     #   Cruise Segment: Constant Speed Constant Altitude
