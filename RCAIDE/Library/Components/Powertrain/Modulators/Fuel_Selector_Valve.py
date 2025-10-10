@@ -48,5 +48,5 @@ class Fuel_Selector_Valve(Component):
         """         
 
         self.tag                   = 'fuel_selector_valve' 
-        self.fuel_flow_split_ratio = 0.0       
+        self.fuel_flow_split_ratio = None      
      

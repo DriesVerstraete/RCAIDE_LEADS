@@ -44,5 +44,5 @@ def set_network_residuals_and_unknowns(mission):
                         fuel_cell_stack.append_unknowns_and_residuals(segment,bus,network)    
     
             # # Ensure the mission knows how to pack and unpack the unknowns and residuals
-            # segment.process.iterate.unknowns.mission.network   = network.unpack_unknowns 
-            # segment.process.iterate.residuals.mission.network  = network.residuals
+            segment.process.iterate.unknowns.mission.network   = network.unpack_unknowns 
+            segment.process.iterate.residuals.mission.network  = network.residuals

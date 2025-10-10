@@ -13,5 +13,4 @@ RCAIDE.Library.Methods.Powertrain.Distributors
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-from .append_fuel_line_conditions           import append_fuel_line_conditions
-from .append_fuel_line_unknown_and_residual import append_fuel_line_unknown_and_residual
+from .append_fuel_line_conditions     import * 

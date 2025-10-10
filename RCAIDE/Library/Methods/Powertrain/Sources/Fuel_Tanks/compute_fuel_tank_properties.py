@@ -33,7 +33,7 @@ def compute_fuel_tank_properties(tank,state,distributor):
         R                               = np.dot(D,mass_unknowns)[:, 0] - dm_l[:, 0]
         R[0]                            = mass_unknowns[0] - tank_conditions.mass[0, 0]
     
-        state.residuals.network[tank.tag + '_mass'] = R
+        state.residuals.network[tank.tag + '_mass'][:,0] = R
         tank_conditions.mass[1:, 0]                 = mass_unknowns[1:, 0]
 
     return 

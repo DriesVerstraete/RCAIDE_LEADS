@@ -87,7 +87,7 @@ def energy(segment):
                         for reservoir in  item:
                             reservoir.append_segment_conditions(segment, coolant_line)
                     
-        # if network has fuel lines             
+        # if network has fuel lines                 
         for fuel_line in  network.fuel_lines:
             for fuel_tank in fuel_line.fuel_tanks:
                 if segment.state.initials: 
