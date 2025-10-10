@@ -326,6 +326,9 @@ def add_mission_variables(segment):
     input_string = []
     input_string_network = []
     output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
+    input_len_strings = np.tile('Residual_', len_inputs)
+    input_numbers     = np.linspace(1,len_inputs,len_inputs,dtype=np.int16)
+    input_names       = np.core.defchararray.add(input_len_strings,np.array(input_numbers+input_count).astype(str))
     for unkn in residual_keys:
         basic_string_con[unkn] = np.tile('segment.state.residuals.mission.'+unkn+'[', n_points)
         input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
