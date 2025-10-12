@@ -16,8 +16,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Turbine            import comp
 from RCAIDE.Library.Methods.Powertrain.Converters.Expansion_Nozzle   import compute_expansion_nozzle_performance 
 from RCAIDE.Library.Methods.Powertrain.Converters.Compression_Nozzle import compute_compression_nozzle_performance
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan           import size_core 
-from RCAIDE.Library.Methods.Powertrain                               import setup_operating_conditions  
-from RCAIDE.Library.Mission.Common.Update.orientations               import orientations
+from RCAIDE.Library.Methods.Powertrain                               import setup_operating_conditions   
 
 # Python package imports
 import numpy as np

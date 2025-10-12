@@ -105,7 +105,7 @@ def vehicle_setup():
     wing.dynamic_pressure_ratio  = 1.0
      
     cabin         = RCAIDE.Library.Components.Fuselages.Cabins.Cabin()
-    cabin.offset_x = 2.5
+    cabin.origin  = [[2.5, 0, 0]]
     business_class = RCAIDE.Library.Components.Fuselages.Cabins.Classes.Business() 
     business_class.number_of_seats_abrest              = 4
     business_class.number_of_rows                      = 4
