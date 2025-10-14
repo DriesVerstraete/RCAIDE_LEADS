@@ -146,8 +146,8 @@ def flight_dynamics(segment):
     if ground_seg_flag:
         vf = segment.velocity_end
         if vf == 0.0: vf = 0.01 
-        segment.state.residuals.mission.force_x[:,0] = FT_i[1:,0]/m[1:,0] - a_i[1:,0] 
         segment.state.residuals.mission.final_velocity_error = (v[-1,0] - vf)
+        segment.state.residuals.mission.force_x[:,0] = FT_i[1:,0]/m[1:,0] - a_i[1:,0] 
     else: 
         if segment.flight_dynamics.force_x: 
             segment.state.residuals.mission.force_x[:,0] = FT_w[:,0]/m[:,0] - a_w[:,0]  

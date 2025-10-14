@@ -150,7 +150,7 @@ def mission_setup(analyses):
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment() 
-    base_segment.state.numerics.mission_solver.method = 'optimize' 
+    base_segment.state.numerics.mission_solver.type = 'optimize' 
     
 
     beta_cruise = analyses.low_speed_transition.energy.vehicle.networks.electric.propulsors.prop_rotor_propulsor_1.rotor.cruise.design_blade_pitch_command

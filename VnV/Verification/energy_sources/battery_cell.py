@@ -217,7 +217,7 @@ def mission_setup(analyses,vehicle,battery_chemistry,current,mAh):
     mission.tag        = 'cell_cycle_test'   
     Segments           = RCAIDE.Framework.Mission.Segments 
     base_segment       = Segments.Segment()
-    base_segment.state.numerics.mission_solver.method   = "optimize" # options: "optimize", "root_finder"
+    base_segment.state.numerics.mission_solver.type   = "optimize" # options: "optimize", "root_finder"
     time               = 0.8 * (mAh/1000)/current * Units.hrs  
 
     # Charge Segment 

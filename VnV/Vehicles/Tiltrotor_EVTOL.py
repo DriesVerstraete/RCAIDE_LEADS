@@ -721,7 +721,7 @@ def mission_setup(analyses):
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment() 
-    base_segment.state.numerics.mission_solver.method = 'optimize' 
+    base_segment.state.numerics.mission_solver.type = 'optimize' 
     
 
     beta_cruise = analyses.low_speed_transition.energy.vehicle.networks.electric.propulsors.prop_rotor_propulsor_1.rotor.cruise.design_blade_pitch_command
@@ -737,7 +737,7 @@ def mission_setup(analyses):
     segment.climb_rate                                 = 300. * Units['ft/min'] 
     segment.initial_battery_conditions.state_of_charge            = 1.0 
     segment.true_course                                = 0   * Units.degree  
-    segment.state.numerics.mission_solver.method = 'root_finder' 
+    segment.state.numerics.mission_solver.type = 'root_finder' 
 
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                    = True 
@@ -760,7 +760,7 @@ def mission_setup(analyses):
     segment.air_speed_end                                 = 35 * Units['mph']     
     segment.acceleration                                  = 1
     segment.true_course                                   = 0 * Units.degree
-    segment.state.numerics.mission_solver.method                    = 'root_finder'
+    segment.state.numerics.mission_solver.type                    = 'root_finder'
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -784,7 +784,7 @@ def mission_setup(analyses):
     segment.air_speed_end            = 100 * Units['mph']   
     segment.altitude_end             = 500.0 * Units.ft
     segment.true_course              = 0 * Units.degree 
-    segment.state.numerics.mission_solver.method = 'root_finder' 
+    segment.state.numerics.mission_solver.type = 'root_finder' 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -809,7 +809,7 @@ def mission_setup(analyses):
     segment.true_course = 0 * Units.degree     
     segment.turn_angle  = 90 * Units.degree
     segment.altitude    = 500 * Units.feet
-    segment.state.numerics.mission_solver.method = 'optimize'
+    segment.state.numerics.mission_solver.type = 'optimize'
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -872,7 +872,7 @@ def mission_setup(analyses):
     segment.air_speed_end             = 170.  * Units['mph']   
     segment.altitude_end              = 1000.0 * Units.ft 
     segment.true_course               = 90 * Units.degree  
-    segment.state.numerics.mission_solver.method = 'root_finder' 
+    segment.state.numerics.mission_solver.type = 'root_finder' 
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -897,7 +897,7 @@ def mission_setup(analyses):
     segment.air_speed                = 170.  * Units['mph']   
     segment.distance                 = 160*Units.nmi
     segment.true_course              = 90 * Units.degree  
-    segment.state.numerics.mission_solver.method = 'root_finder'  
+    segment.state.numerics.mission_solver.type = 'root_finder'  
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -945,7 +945,7 @@ def mission_setup(analyses):
     segment.true_course = 90 * Units.degree     
     segment.turn_angle  = 90 * Units.degree
     segment.altitude    = 500 * Units.feet
-    segment.state.numerics.mission_solver.method = 'optimize' 
+    segment.state.numerics.mission_solver.type = 'optimize' 
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -1009,7 +1009,7 @@ def mission_setup(analyses):
     segment.acceleration               = -1.0
     segment.true_course                = 0 * Units.degree  
     segment.altitude                   = 50.0 * Units.ft
-    segment.state.numerics.mission_solver.method = 'optimize' 
+    segment.state.numerics.mission_solver.type = 'optimize' 
  
     segment.state.numerics.mission_solver.step_size                 = 1E-2 
     segment.state.numerics.mission_solver.tolerance        = 1E-6 
@@ -1044,7 +1044,7 @@ def mission_setup(analyses):
     segment.altitude_end                                            = 0.   * Units.ft  
     segment.descent_rate                                            = 300. * Units['ft/min'] 
     segment.true_course                                             = 180 * Units.degree  
-    segment.state.numerics.mission_solver.method = 'root_finder' 
+    segment.state.numerics.mission_solver.type = 'root_finder' 
                   
     # define flight dynamics to model              
     segment.flight_dynamics.force_z                                  = True     
@@ -1071,7 +1071,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
     base_segment.state.numerics.number_of_control_points    = number_of_cpts
-    base_segment.state.numerics.mission_solver.method = 'optimize' 
+    base_segment.state.numerics.mission_solver.type = 'optimize' 
     
     # ------------------------------------------------------------------
     #   Mission Constants
@@ -1098,7 +1098,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.climb_rate                                 = 300. * Units['ft/min'] 
     segment.initial_battery_conditions.state_of_charge = 1.0 
     segment.true_course                                = 0   * Units.degree # this is the true couse of the starting value  
-    segment.state.numerics.mission_solver.method = 'root_finder' 
+    segment.state.numerics.mission_solver.type = 'root_finder' 
 
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                    = True 
@@ -1121,7 +1121,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.air_speed_end                                 = transition_speed    
     segment.acceleration                                  = 1.0
     segment.true_course                                   = dep_heading  
-    segment.state.numerics.mission_solver.method = 'optimize' 
+    segment.state.numerics.mission_solver.type = 'optimize' 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1145,7 +1145,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.air_speed_end            = (pattern_speed - transition_speed)/2 + transition_speed
     segment.altitude_end             = (pattern_altitude - hover_altitude)/2 + hover_altitude
     segment.true_course              = dep_heading
-    segment.state.numerics.mission_solver.method = 'optimize'
+    segment.state.numerics.mission_solver.type = 'optimize'
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1169,7 +1169,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.air_speed_end            = pattern_speed
     segment.altitude_end             = pattern_altitude
     segment.true_course              = dep_heading
-    segment.state.numerics.mission_solver.method = 'optimize'
+    segment.state.numerics.mission_solver.type = 'optimize'
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1194,7 +1194,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.true_course = dep_heading + (90 * Units.degree)
     segment.turn_angle  = dep_sector
     segment.altitude    = pattern_altitude
-    segment.state.numerics.mission_solver.method = 'optimize'
+    segment.state.numerics.mission_solver.type = 'optimize'
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -1222,7 +1222,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.air_speed_end             = cruise_speed
     segment.altitude_end              = cruise_altitude
     segment.true_course               = path_heading    
-    segment.state.numerics.mission_solver.method = 'root_finder'
+    segment.state.numerics.mission_solver.type = 'root_finder'
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1246,7 +1246,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.air_speed                = cruise_speed
     segment.distance                 = level_cruise_distance
     segment.true_course              = path_heading
-    segment.state.numerics.mission_solver.method = 'root_finder' 
+    segment.state.numerics.mission_solver.type = 'root_finder' 
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1271,7 +1271,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.altitude_start           = cruise_altitude
     segment.altitude_end             = pattern_altitude
     segment.true_course              = path_heading
-    segment.state.numerics.mission_solver.method = 'optimize' 
+    segment.state.numerics.mission_solver.type = 'optimize' 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1297,7 +1297,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.true_course = path_heading - (90 *Units.degrees)  
     segment.turn_angle  = app_sector
     segment.altitude    = pattern_altitude
-    segment.state.numerics.mission_solver.method = 'optimize' 
+    segment.state.numerics.mission_solver.type = 'optimize' 
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -1327,7 +1327,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.altitude_end             = (pattern_altitude - hover_altitude)/2 + hover_altitude
     segment.altitude_start           = pattern_altitude
     segment.true_course              = app_heading
-    segment.state.numerics.mission_solver.method = 'optimize' 
+    segment.state.numerics.mission_solver.type = 'optimize' 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1351,7 +1351,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.air_speed_end            = transition_speed   
     segment.altitude_end             = hover_altitude
     segment.true_course              = app_heading
-    segment.state.numerics.mission_solver.method = 'optimize' 
+    segment.state.numerics.mission_solver.type = 'optimize' 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1396,7 +1396,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=4000*Units.ft, ra
     segment.altitude_end                                            = 0.   * Units.ft  
     segment.descent_rate                                            = 300. * Units['ft/min'] 
     segment.true_course                                             = app_heading
-    segment.state.numerics.mission_solver.method                              = 'root_finder'
+    segment.state.numerics.mission_solver.type                              = 'root_finder'
 
     # define flight dynamics to model              
     segment.flight_dynamics.force_z                                  = True     

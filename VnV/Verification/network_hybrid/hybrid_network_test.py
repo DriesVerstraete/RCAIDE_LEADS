@@ -213,7 +213,7 @@ def mission_setup(analyses,solver_type,solver_objective):
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
-    base_segment.state.numerics.mission_solver.method       = solver_type
+    base_segment.state.numerics.mission_solver.type       = solver_type
     base_segment.state.numerics.mission_solver.objective  = solver_objective  
         
     # ------------------------------------------------------------------

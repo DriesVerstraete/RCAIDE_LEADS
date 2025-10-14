@@ -49,8 +49,8 @@ class Numerics(Conditions):
     
         # mission solver 
         self.mission_solver                     = Conditions()
-        self.mission_solver.method              = "optimize" # options: "optimize", "root_finder"
-        self.mission_solver.algorithm           = "SLSQP"    
+        self.mission_solver.type                = "optimize" # options: "optimize", "root_finder"
+        self.mission_solver.method              = "SLSQP"    
         self.mission_solver.objective           = "energy"   # options: # None, energy , power 
         self.mission_solver.tolerance           = 1E-6     
         self.mission_solver.converged           = None
@@ -60,7 +60,7 @@ class Numerics(Conditions):
            
         # network solver    
         self.network_solver                     = Conditions()
-        self.network_solver.method              = None 
+        self.network_solver.type                = None 
         self.network_solver.tolerance           = 1E-6     
         self.network_solver.converged           = None
         self.network_solver.print_output        = True

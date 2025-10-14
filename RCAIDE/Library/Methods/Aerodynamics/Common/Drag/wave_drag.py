@@ -149,9 +149,9 @@ def wave_drag(state,settings,geometry):
     CD_wave        = CD_wave_lift + CD_wave_volume 
 
     # Save drag breakdown 
-    conditions.aerodynamics.coefficients.drag.wave = Data(total  = CD_wave, 
-                                                          lift   = CD_wave_lift,
-                                                          volume = CD_wave_volume,)  
+    conditions.aerodynamics.coefficients.drag.wave = Data(total  = CD_wave*  (1 -  settings.drag_reduction_factors.wave_drag), 
+                                                          lift   = CD_wave_lift*  (1 -  settings.drag_reduction_factors.wave_drag),
+                                                          volume = CD_wave_volume*  (1 -  settings.drag_reduction_factors.wave_drag),)  
         
     return
 
