@@ -70,33 +70,27 @@ def compute_bus_conditions(bus, state):
      
     if len(bus.battery_modules) != 0: 
         if bus.battery_module_electric_configuration == 'Series':
-            bm_conditions                               = [bus_conditions.battery_modules[bm.tag] for bm in bus.battery_modules]
+            bm_conditions                         = [bus_conditions.battery_modules[bm.tag] for bm in bus.battery_modules]
             bus_conditions.voltage_open_circuit   = sum(bm.voltage_open_circuit  for bm in bm_conditions)
             bus_conditions.voltage_under_load     = sum(bm.voltage_under_load  for bm in bm_conditions)
             bus_conditions.heat_energy_generated  = sum(bm.heat_energy_generated  for bm in bm_conditions)
             bus_conditions.efficiency             = (bus_conditions.power_draw *phi  + bus_conditions.heat_energy_generated )/(bus_conditions.power_draw *phi )
            
-            bm_conditions                              = [bus_conditions.battery_modules[bm.tag] for bm in bus.battery_modules]
-            bus_conditions.temperature         = sum(bm.temperature  for bm in bm_conditions)/ len(bus.battery_modules)
-            bus_conditions.energy              = sum(bm.energy  for bm in bm_conditions)
-            bus_conditions.state_of_charge     = bm_conditions[-1].state_of_charge 
+            bm_conditions                         = [bus_conditions.battery_modules[bm.tag] for bm in bus.battery_modules]
+            bus_conditions.temperature            = sum(bm.temperature  for bm in bm_conditions)/ len(bus.battery_modules)
+            bus_conditions.energy                 = sum(bm.energy  for bm in bm_conditions)
+            bus_conditions.state_of_charge        = bm_conditions[-1].state_of_charge 
     
         elif bus.battery_module_electric_configuration == 'Parallel':
-            bm_conditions                               = [bus_conditions.battery_modules[bm.tag] for bm in bus.battery_modules]
+            bm_conditions                         = [bus_conditions.battery_modules[bm.tag] for bm in bus.battery_modules]
             bus_conditions.heat_energy_generated  = sum(bm.heat_energy_generated  for bm in bm_conditions)
             bus_conditions.voltage_open_circuit   = bm_conditions[-1].voltage_open_circuit 
             bus_conditions.voltage_under_load     = bm_conditions[-1].voltage_under_load              
             bus_conditions.efficiency             = (bus_conditions.power_draw *phi  +  bus_conditions.heat_energy_generated )/(bus_conditions.power_draw *phi )
 
             bus_conditions.heat_energy_generated  = sum(bm.heat_energy_generated  for bm in bm_conditions)
-            bus_conditions.temperature          = sum(bm.temperature  for bm in bm_conditions)/len(bus.battery_modules)
-            bus_conditions.energy               = sum(bm.energy  for bm in bm_conditions)
-            bus_conditions.state_of_charge      = bm_conditions[-1].cell.state_of_charge 
-        
-
-    # Handle fully charged state
-    #if state.conditions.energy.recharging and np.float16(bus_conditions.state_of_charge ) == 1:
-        #bus_conditions.charging_current  = 0
-        #bus_conditions.power_draw        = 0
-        #bus_conditions.current_draw      = 0
+            bus_conditions.temperature            = sum(bm.temperature  for bm in bm_conditions)/len(bus.battery_modules)
+            bus_conditions.energy                 = sum(bm.energy  for bm in bm_conditions)
+            bus_conditions.state_of_charge        = bm_conditions[-1].cell.state_of_charge
+            
     return

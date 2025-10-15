@@ -239,14 +239,12 @@ class Network(Component):
                     
         # 3.2 Electric Sources 
         for bus in  busses:
-            if bus.active: 
-                    
-                stored_results_flag       = False
-                stored_battery_cell_tag   = None
-                
+            if bus.active:  
                 # ------------------------------------------------------------------------------------------------------------------- 
                 # 3.1 Batteries
-                # -------------------------------------------------------------------------------------------------------------------                
+                # -------------------------------------------------------------------------------------------------------------------       
+                stored_results_flag       = False
+                stored_battery_cell_tag   = None         
                 for battery_module in  bus.battery_modules:                   
                     if bus.identical_battery_modules == False:
                         # run analysis  
@@ -259,25 +257,25 @@ class Network(Component):
                             # use previous battery results 
                             battery_module.reuse_stored_data(state,bus,stored_results_flag, stored_battery_cell_tag)
                     
-                    # # ------------------------------------------------------------------------------------------------------------------- 
-                    # # 3.2 Fuel Cell Stacks
-                    # # ------------------------------------------------------------------------------------------------------------------- 
-                    # stored_results_flag       = False   
-                    # stored_fuel_cell_tag      = None                  
-                    # for fuel_cell_stack in  bus.fuel_cell_stacks:                   
-                    #     if bus.identical_fuel_cell_stacks == False:
-                    #         # run analysis  
-                    #         stored_results_flag, stored_fuel_cell_tag =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                    #     else:             
-                    #         if stored_results_flag == False: 
-                    #             # run battery analysis 
-                    #             stored_results_flag, stored_fuel_cell_tag  =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                    #         else:
-                    #             # use previous battery results 
-                    #             fuel_cell_stack.reuse_stored_data(state,bus,stored_results_flag, stored_fuel_cell_tag)
-                             
-                    #     # compute mass flow rate                    
-                    #     conditions.energy.busses[bus.tag].fuel_mass_flow_rate[t_idx]  = state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag].H2_mass_flow_rate[t_idx]      
+                # ------------------------------------------------------------------------------------------------------------------- 
+                # 3.2 Fuel Cell Stacks
+                # ------------------------------------------------------------------------------------------------------------------- 
+                stored_results_flag       = False   
+                stored_fuel_cell_tag      = None                  
+                for fuel_cell_stack in  bus.fuel_cell_stacks:                   
+                    if bus.identical_fuel_cell_stacks == False:
+                        # run analysis  
+                        stored_results_flag, stored_fuel_cell_tag =  fuel_cell_stack.energy_calc(state,bus,coolant_lines)
+                    else:             
+                        if stored_results_flag == False: 
+                            # run battery analysis 
+                            stored_results_flag, stored_fuel_cell_tag  =  fuel_cell_stack.energy_calc(state,bus,coolant_lines)
+                        else:
+                            # use previous battery results 
+                            fuel_cell_stack.reuse_stored_data(state,bus,stored_results_flag, stored_fuel_cell_tag)
+                         
+                    # compute mass flow rate                    
+                    conditions.energy.busses[bus.tag].fuel_mass_flow_rate = state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag].H2_mass_flow_rate    
                           
                        
                     # Step 3: Compute bus properties          

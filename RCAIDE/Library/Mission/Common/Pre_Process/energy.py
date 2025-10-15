@@ -32,8 +32,7 @@ def energy(mission):
                     segment.hybrid_power_split_ratio = 1.0  
                     segment.battery_fuel_cell_power_split_ratio = 0.0
             segment.state.conditions.energy.hybrid_power_split_ratio            = segment.hybrid_power_split_ratio * segment.state.ones_row(1)  
-            segment.state.conditions.energy.battery_fuel_cell_power_split_ratio = segment.battery_fuel_cell_power_split_ratio * segment.state.ones_row(1)                    
-            
+            segment.state.conditions.energy.battery_fuel_cell_power_split_ratio = segment.battery_fuel_cell_power_split_ratio * segment.state.ones_row(1)  
         
             # ---------------------------------------------------------------------------------------------
             # Propulsors 
@@ -59,17 +58,17 @@ def energy(mission):
         
             # Bus 
             for bus in network.busses:   
-                bus.append_operating_conditions(segment,network) 
+                bus.append_operating_conditions(segment) 
         
                 for bat_i,battery_module in  enumerate(bus.battery_modules): 
                     battery_module.append_operating_conditions(segment,bus)  
         
                 for fc_i,fuel_cell_stack in  enumerate(bus.fuel_cell_stacks): 
-                    fuel_cell_stack.append_operating_conditions(segment,bus,network)                                
+                    fuel_cell_stack.append_operating_conditions(segment, bus)                                
         
                 for tag, bus_item in bus.items():  
                     if issubclass(type(bus_item), RCAIDE.Library.Components.Component):
-                        bus_item.append_operating_conditions(segment,bus,network)
+                        bus_item.append_operating_conditions(segment,bus)
                         
             # Coolant Line 
             for coolant_line in network.coolant_lines:

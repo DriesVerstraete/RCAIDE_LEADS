@@ -37,11 +37,11 @@ def set_network_residuals_and_unknowns(mission):
 
                 for bat_i,battery_module in  enumerate(bus.battery_modules):  
                     if bus.identical_battery_modules == True and bat_i ==0:
-                        battery_module.append_unknowns_and_residuals(segment,bus,network) 
+                        battery_module.append_unknowns_and_residuals(segment) 
         
                 for fc_i,fuel_cell_stack in  enumerate(bus.fuel_cell_stacks):    
                     if bus.identical_fuel_cell_stacks == True and fc_i ==0:
-                        fuel_cell_stack.append_unknowns_and_residuals(segment,bus,network)    
+                        fuel_cell_stack.append_unknowns_and_residuals(segment)    
     
             # # Ensure the mission knows how to pack and unpack the unknowns and residuals
             segment.process.iterate.unknowns.mission.network   = network.unpack_unknowns 

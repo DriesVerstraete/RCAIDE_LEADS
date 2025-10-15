@@ -17,9 +17,7 @@ RCAIDE.Library.Methods.Powertrain.Converters.Fuel_Cells.Common
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
-# ---------------------------------------------------------------------------------------------------------------------- 
-from .compute_voltage                import compute_voltage
-from .compute_power                  import compute_power
-from .compute_power_difference       import compute_power_difference
-from .append_fuel_cell_conditions    import append_fuel_cell_conditions
-from .compute_fuel_cell_performance  import compute_fuel_cell_performance
+# ----------------------------------------------------------------------------------------------------------------------  
+from .append_fuel_cell_conditions    import * 
+from .compute_fuel_cell_performance  import *
+

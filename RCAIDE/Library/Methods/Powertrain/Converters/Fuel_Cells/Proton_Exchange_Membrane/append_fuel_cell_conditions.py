@@ -92,9 +92,7 @@ def append_fuel_cell_conditions(fuel_cell_stack,segment,bus):
 
     # Conditions for recharging fuel_cell         
     if type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Battery_Discharge:
-        segment.state.conditions.energy.recharging   = False     
-        segment.state.unknowns.mission['recharge']           = 0* ones_row(1)  
-        segment.state.residuals.mission['recharge']          = 0* ones_row(1)
+        segment.state.conditions.energy.recharging  = False      
     else:
         segment.state.conditions.energy.recharging  = False            
     
@@ -129,8 +127,7 @@ def append_fuel_cell_segment_conditions(fuel_cell_stack, bus, conditions, segmen
 def reuse_stored_fuel_cell_data(fuel_cell_stack,state,bus,stored_results_flag, stored_fuel_cell_stack_tag):
     '''
     Reuses results from one propulsor for identical fuel cells 
-    '''
-   
+    ''' 
     state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag] = deepcopy(state.conditions.energy.busses[bus.tag].fuel_cell_stacks[stored_fuel_cell_stack_tag])
      
     return

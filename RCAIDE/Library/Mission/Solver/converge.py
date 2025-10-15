@@ -360,8 +360,8 @@ def add_mission_variables(segment):
                 basic_string_con[res] = np.tile('segment.state.residuals.network.'+res+'[', n_points)
                 input_string_network.append(np.core.defchararray.add(basic_string_con[res],np.array(output_numbers).astype(str)))   
             input_string = np.hstack((input_string[0],np.ravel(input_string_network))) 
-        input_string        = np.core.defchararray.add(input_string, np.tile(']',len_inputs-1))
-        residual_aliases       = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+        input_string        = np.core.defchararray.add(input_string, np.tile(']',len_residuals-1))
+        residual_aliases       = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
         residual_aliases[:,0]  = con_names
         residual_aliases[0,1]  = 'segment.state.residuals.mission.'+residual_keys[1] 
         residual_aliases[1:,1] = input_string 
@@ -371,15 +371,15 @@ def add_mission_variables(segment):
             basic_string_con[res] = np.tile('segment.state.residuals.mission.'+res+'[', n_points)
             input_string.append(np.core.defchararray.add(basic_string_con[res],np.array([0]).astype(str)))
         input_string       = np.ravel(input_string)   
-        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
-        residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_residuals))
+        residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
         residual_aliases[:,0] = con_names
         residual_aliases[:,1] = input_string    
 
     else:
         output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
-        input_len_strings = np.tile('Residual_', len_inputs)
-        input_numbers     = np.linspace(1,len_inputs,len_inputs,dtype=np.int16)
+        input_len_strings = np.tile('Residual_', len_residuals)
+        input_numbers     = np.linspace(1,len_residuals,len_residuals,dtype=np.int16)
         input_names       = np.core.defchararray.add(input_len_strings,np.array(input_numbers+input_count).astype(str))
         for res in residual_keys:
             basic_string_con[res] = np.tile('segment.state.residuals.mission.'+res+'[', n_points)
@@ -390,8 +390,8 @@ def add_mission_variables(segment):
                 basic_string_con[res] = np.tile('segment.state.residuals.network.'+res+'[', n_points)
                 input_string_network.append(np.core.defchararray.add(basic_string_con[res],np.array(output_numbers).astype(str)))
             input_string = np.hstack((np.ravel(input_string),np.ravel(input_string_network)))        
-        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
-        residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_residuals))
+        residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
         residual_aliases[:,0] = input_names
         residual_aliases[:,1] = input_string
         

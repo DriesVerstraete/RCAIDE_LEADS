@@ -13,6 +13,7 @@ from RCAIDE.Library.Components                                 import Component
 from RCAIDE.Library.Attributes.Gases                           import Air  
 from RCAIDE.Library.Methods.Powertrain.Converters.Fuel_Cells.Larminie_Model.compute_fuel_cell_performance import *
 from RCAIDE.Library.Methods.Powertrain.Converters.Fuel_Cells.Larminie_Model.append_fuel_cell_conditions   import *
+from RCAIDE.Library.Methods.Powertrain.Converters.Fuel_Cells.Larminie_Model.append_fuel_cell_unknown_and_residual import * 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Generic_Fuel_Cell
@@ -95,7 +96,7 @@ class Generic_Fuel_Cell_Stack(Component):
         self.geometrtic_configuration.parallel_spacing  = 0.02
         
          
-    def energy_calc(self,state,bus,coolant_lines, t_idx, delta_t): 
+    def energy_calc(self,state,bus,coolant_lines): 
         """Computes the state of the NMC battery cell.
            
         Assumptions:
@@ -114,17 +115,21 @@ class Generic_Fuel_Cell_Stack(Component):
             None
         """                  
         
-        stored_results_flag, stored_battery_tag = compute_fuel_cell_performance(self,state,bus,coolant_lines, t_idx,delta_t) 
+        stored_results_flag, stored_battery_tag = compute_fuel_cell_performance(self,state,bus,coolant_lines) 
         
         return stored_results_flag, stored_battery_tag 
 
-    def append_operating_conditions(self,segment,bus):  
-        append_fuel_cell_conditions(self,segment,bus)  
+    def append_operating_conditions(self,segment, bus):  
+        append_fuel_cell_conditions(self,segment, bus)  
         return
     
     def append_fuel_cell_segment_conditions(self,bus, conditions, segment):
         append_fuel_cell_segment_conditions(self,bus, conditions, segment)
-        return 
+        return
+
+    def append_unknowns_and_residuals(self,segment): 
+        append_fuel_cell_unknown_and_residual(self,segment)   
+        return    
 
     def reuse_stored_data(self,state,bus,stored_results_flag, stored_fuel_cell_tag):
         reuse_stored_fuel_cell_data(self,state,bus,stored_results_flag, stored_fuel_cell_tag)
