@@ -766,6 +766,7 @@ def configs_setup(vehicle):
     forward_config                                                    = RCAIDE.Library.Components.Configs.Config(vehicle)
     forward_config.tag                                                = 'forward_flight'  
     forward_config.networks.electric.busses['lift_bus'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_1'].active        = False  
     forward_config.networks.electric.propulsors['lift_propulsor_2'].active        = False  
     forward_config.networks.electric.propulsors['lift_propulsor_3'].active        = False  
     forward_config.networks.electric.propulsors['lift_propulsor_4'].active        = False  
