@@ -14,7 +14,7 @@ from copy import  deepcopy
 # ----------------------------------------------------------------------------------------------------------------------
 # compute_nmc_cell_performance
 # ---------------------------------------------------------------------------------------------------------------------- 
-def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,network_tag):
+def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines):
     """
     Computes the performance of a lithium-nickel-manganese-cobalt-oxide (NMC) battery cell.
 
@@ -96,8 +96,6 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
                 List of battery modules connected to the bus
     coolant_lines : list
         List of coolant lines for thermal management
-    t_idx : int
-        Current time index in the simulation
     delta_t : numpy.ndarray
         Time step size [s]
 
@@ -270,10 +268,11 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     R_0_module  = (R_0_cell / n_parallel) * n_series
     
     if HAS is not None:
-        dT_dt_scaled = HAS.compute_thermal_performance(battery_module, bus, coolant_line, Q_heat_cell,T_cell_bounded,T_scale,state)
+        dT_dt  = HAS.compute_thermal_performance(battery_module, bus, coolant_line, Q_heat_cell,T_cell_bounded,state)
     else:
         # Temperature residual with scaling
-        dT_dt_scaled = Q_heat_cell / (cell_mass * Cp * T_scale)
+        dT_dt  = Q_heat_cell / (cell_mass * Cp)
+    dT_dt_scaled     = dT_dt /  T_scale
     R_temp           = np.dot(D, T_cell_scaled)[:, 0] - dT_dt_scaled[:, 0]
     R_temp[0]        = T_cell_scaled[0] - battery_module_conditions.cell.temperature[0, 0] / T_scale
     state.residuals.network[battery_module.tag+ '_cell_temperature'] = R_temp
@@ -314,9 +313,9 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines,netwo
     
     # Charge throughput
     Q_prior = battery_module_conditions.cell.charge_throughput[0]
-    dt = np.diff(state.numerics.time.control_points[:,0])
-    avg_I = (I_cell[:-1, 0] + I_cell[1:, 0]) / 2
-    Q_Ah = np.atleast_2d(np.concatenate(([0.0], np.cumsum(dt*avg_I)))).T / Units.hr
+    dt      = np.diff(state.numerics.time.control_points[:,0])
+    avg_I   = (I_cell[:-1, 0] + I_cell[1:, 0]) / 2
+    Q_Ah    = np.atleast_2d(np.concatenate(([0.0], np.cumsum(dt*avg_I)))).T / Units.hr
     battery_module_conditions.cell.charge_throughput = Q_prior + Q_Ah
     
     stored_results_flag = True

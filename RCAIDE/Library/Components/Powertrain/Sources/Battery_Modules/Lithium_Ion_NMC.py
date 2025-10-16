@@ -171,7 +171,7 @@ class Lithium_Ion_NMC(Generic_Battery_Module):
 
         return  
     
-    def energy_calc(self,state,bus,coolant_lines,network_tag): 
+    def energy_calc(self,state,bus,coolant_lines): 
         """
         Computes the state of the NMC battery cell
         
@@ -221,7 +221,7 @@ class Lithium_Ion_NMC(Generic_Battery_Module):
         - Thermal distribution with cooling effects
         - State of charge tracking
         """        
-        stored_results_flag, stored_battery_tag =  compute_nmc_cell_performance(self,state,bus,coolant_lines,network_tag) 
+        stored_results_flag, stored_battery_tag =  compute_nmc_cell_performance(self,state,bus,coolant_lines) 
         
         return stored_results_flag, stored_battery_tag
     

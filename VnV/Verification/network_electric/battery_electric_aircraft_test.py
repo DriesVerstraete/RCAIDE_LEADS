@@ -123,6 +123,7 @@ def mission_setup(analyses):
     base_segment = Segments.Segment()
     base_segment.temperature_deviation  = 2.5
     base_segment.state.numerics.number_of_control_points  = 3
+    #base_segment.state.numerics.mission_solver.type =  'root_finder'
     
     # VSTALL Calculation  
     vehicle        = analyses.base.aerodynamics.vehicle

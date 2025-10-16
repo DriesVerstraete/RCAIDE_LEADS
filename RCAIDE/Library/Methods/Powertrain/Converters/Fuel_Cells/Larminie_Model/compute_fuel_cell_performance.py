@@ -104,12 +104,12 @@ def compute_fuel_cell_performance(fuel_cell_stack, state, bus, coolant_lines):
     # Compute fuel cell performance  
     # ---------------------------------------------------------------------------------  
     current_density_ukn         = state.unknowns.network[ fuel_cell_stack.tag + '_current_density'] 
-    P_cell_cal                  = compute_power(current_density_ukn, fuel_cell)       
+    P_cell_cal                  = compute_power(current_density_ukn, fuel_cell_stack)       
     state.residuals.network[ fuel_cell_stack.tag + '_power']  =  P_cell - P_cell_cal 
      
-    V_fuel_cell                 = compute_voltage(fuel_cell,current_density_ukn)    
-    efficiency                  = np.divide(V_fuel_cell, fuel_cell.ideal_voltage)
-    mdot_cell                   = np.divide(P_cell,np.multiply(fuel_cell.propellant.specific_energy,efficiency)) 
+    V_fuel_cell                 = compute_voltage(fuel_cell_stack,current_density_ukn)    
+    efficiency                  = np.divide(V_fuel_cell, fuel_cell_stack.fuel_cell.ideal_voltage)
+    mdot_cell                   = np.divide(P_cell,np.multiply(fuel_cell_stack.fuel_cell.propellant.specific_energy,efficiency)) 
     
     I_cell = P_cell / V_fuel_cell
     I_stack = I_cell * n_parallel

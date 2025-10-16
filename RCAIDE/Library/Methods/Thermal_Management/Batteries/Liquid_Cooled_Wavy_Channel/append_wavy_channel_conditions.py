@@ -39,10 +39,9 @@ def append_wavy_channel_conditions(wavy_channel,segment,coolant_line):
      alt           = -segment.conditions.frames.inertial.position_vector[:,2] 
      if segment.temperature_deviation != None:
           temp_dev = segment.temperature_deviation    
-     atmo_data    = atmosphere.compute_values(altitude = alt,temperature_deviation=temp_dev)
+     atmo_data    = atmosphere.compute_values(altitude = alt,temperature_deviation=temp_dev) 
      
-     
-     ones_row                                                                                        = segment.state.ones_row
+     ones_row                                                                                                     = segment.state.ones_row
      segment.state.conditions.energy.coolant_lines[coolant_line.tag][wavy_channel.tag]                            = Conditions()
      segment.state.conditions.energy.coolant_lines[coolant_line.tag][wavy_channel.tag].heat_removed               = 0 * ones_row(1)
      segment.state.conditions.energy.coolant_lines[coolant_line.tag][wavy_channel.tag].outlet_coolant_temperature = atmo_data.temperature[0,0]  * ones_row(1)

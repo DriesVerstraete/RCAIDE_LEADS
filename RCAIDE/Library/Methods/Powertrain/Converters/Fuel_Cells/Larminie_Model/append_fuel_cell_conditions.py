@@ -49,13 +49,14 @@ def append_fuel_cell_conditions(fuel_cell_stack,segment,bus):
                                              
     bus_conditions                                                                                 = segment.state.conditions.energy.busses[bus.tag]
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag]                                           = Conditions()
-    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell                                 = Conditions()
-    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.inputs                          = Conditions()
-    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.outputs                         = Conditions() 
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].power                                     = 0 * ones_row(1)
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].voltage_under_load                        = 0 * ones_row(1)
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].current                                   = 0 * ones_row(1)  
-    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].voltage_open_circuit                      = 0 * ones_row(1) 
+    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].voltage_open_circuit                      = 0 * ones_row(1)
+    
+    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell                                 = Conditions()
+    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.inputs                          = Conditions() 
+    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.outputs                         = Conditions() 
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.voltage_open_circuit            = 0 * ones_row(1)  
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.voltage_under_load              = 0 * ones_row(1) 
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.power                           = 0 * ones_row(1)  

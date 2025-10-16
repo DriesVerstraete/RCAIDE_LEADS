@@ -708,10 +708,7 @@ def vehicle_setup(new_regression=True) :
         for key,item in lift_propulsor_1.rotor.items():
             lift_propulsor_1.rotor[key] = loaded_lift_propulsor.rotor[key] 
         for key,item in lift_propulsor_1.motor.items():
-            lift_propulsor_1.motor[key] = loaded_lift_propulsor.motor[key]
-            
-    network.propulsors.append(lift_propulsor_1)    
-            
+            lift_propulsor_1.motor[key] = loaded_lift_propulsor.motor[key] 
  
     # Front Rotors Locations 
     origins = [[  -0.073,  1.950, 1.2], [-0.073  , -1.950  , 1.2],[ 4.440 ,  1.950 , 1.2], [ 4.440  , -1.950  , 1.2],
@@ -769,6 +766,13 @@ def configs_setup(vehicle):
     forward_config                                                    = RCAIDE.Library.Components.Configs.Config(vehicle)
     forward_config.tag                                                = 'forward_flight'  
     forward_config.networks.electric.busses['lift_bus'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_2'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_3'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_4'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_5'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_6'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_7'].active        = False  
+    forward_config.networks.electric.propulsors['lift_propulsor_8'].active        = False  
     configs.append(forward_config)  
 
     transition_config                                                 = RCAIDE.Library.Components.Configs.Config(vehicle)
@@ -779,6 +783,8 @@ def configs_setup(vehicle):
     vertical_config                                                   = RCAIDE.Library.Components.Configs.Config(vehicle)
     vertical_config.tag                                               = 'vertical_flight'  
     vertical_config.networks.electric.busses['cruise_bus'].active = False  
+    vertical_config.networks.electric.propulsors['cruise_propulsor_1'].active = False  
+    vertical_config.networks.electric.propulsors['cruise_propulsor_2'].active = False    
     configs.append(vertical_config)   
      
     return configs

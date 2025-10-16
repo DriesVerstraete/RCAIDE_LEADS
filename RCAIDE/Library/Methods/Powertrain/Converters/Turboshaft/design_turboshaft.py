@@ -151,10 +151,9 @@ def design_turboshaft(turboshaft):
         conditions.freestream.speed_of_sound              = np.atleast_1d(a)
         conditions.freestream.velocity                    = np.atleast_1d(a*turboshaft.design_mach_number)
          
-          
-    fuel_line                = RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line()    # may not need
-    
+           
     segment                  = RCAIDE.Framework.Mission.Segments.Segment()  
+    segment.sideslip_angle   = 0
     segment.state.conditions = conditions
     turboshaft.append_operating_conditions(segment)  
             
@@ -289,12 +288,14 @@ def design_turboshaft(turboshaft):
     # Step 25: Size the core of the turboshaft  
     size_core(turboshaft,conditions)
     
-    # Step 26: Static Sea Level Thrust   
-    atmo_data_sea_level                 = atmosphere.compute_values(0.0,0.0)   
-    V                                   = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    segment.state.conditions            = setup_operating_conditions(turboshaft,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
-    orientations(segment) 
-    sls_P,_,_                           = turboshaft.compute_performance(segment.state)  
-    turboshaft.sealevel_static_power    = sls_P[0][0]     
+    # Step 26: Static Sea Level Thrust
+
+    atmo_data_sea_level                          = atmosphere.compute_values(0.0,0.0)   
+    V                                            = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
+    operating_state                              = setup_operating_conditions(turboshaft,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
+    operating_state.conditions.energy.converters[turboshaft.tag].throttle[:,0] = 1.0  
+    sls_P,_,_                                    = turboshaft.compute_performance(operating_state)  
+    turboshaft.sealevel_static_power             = sls_P[0][0]
+      
     return      
   

@@ -16,7 +16,7 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  Wavy Channel Rating Model
 # ----------------------------------------------------------------------------------------------------------------------
-def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,state,delta_t,t_idx):
+def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,state):
     """ Computes the net heat removed by a wavy channel heat acquisition system.
 
     Assumptions:
@@ -52,13 +52,13 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
  
     # Inlet Properties from mission solver.
     for reservoir in  coolant_line.reservoirs:
-        T_inlet = state.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag].coolant_temperature[t_idx, 0]
-    #turndown_ratio           = battery_conditions.thermal_management_system.HAS.percent_operation[t_idx,0] 
-    T_cell                   = state.conditions.energy.busses[bus.tag].battery_modules[battery.tag].cell.temperature[t_idx, 0]
+        T_inlet = state.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag].coolant_temperature
+    #turndown_ratio           = battery_conditions.thermal_management_system.HAS.percent_operation 
+    T_cell                   = state.conditions.energy.busses[bus.tag].battery_modules[battery.tag].cell.temperature 
     heat_transfer_efficiency = HAS.heat_transfer_efficiency   
 
     # Coolant Properties
-    opt_coolant                 = compute_coolant_properties(HAS,T_inlet,state,delta_t,t_idx)
+    opt_coolant                 = compute_coolant_properties(HAS,T_inlet,state)
     m_coolant                   = opt_coolant.flowrate#*turndown_ratio 
     rho                         = opt_coolant.inlet_density    
     mu                          = opt_coolant.inlet_visc       
@@ -127,70 +127,118 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
     # Effectiveness of the Channel 
     eff_HAS = 1 - np.exp(-NTU) 
     
-    if T_inlet  < T_cell:
-    
-        # Calculate Outlet Temparture To ( eq 8)
-        T_o = ((T_cell-T_inlet)*(1-np.exp(-NTU)))+T_inlet   
 
-        # Calculate the Log mean temperature 
-        T_lm = ((T_cell-T_inlet)-(T_cell-T_o))/(np.log((T_cell-T_inlet)/(T_cell-T_o)))
-        
-        # Calculated Heat Convected 
-        Q_convec = U_total*A_chan*T_lm*eff_HAS
-        
-        # check the wavy channel effectiveness
-        heat_transfer_efficiency      = (T_o - T_inlet) / (T_cell - T_inlet)
-        
-        # Calculate the Power consumed
-        Power   = RCAIDE.Library.Components.Thermal_Management.Accessories.Pump.compute_power_consumed(dp, rho, m_coolant, n_pump) 
-        
-        # Update temperature of Battery Pack
-        P_net                   = Q_module - Q_convec 
+    # --------------------------------------------------------------------------------------------------    
+    # compute net power for three possible scenarios
+    # --------------------------------------------------------------------------------------------------
+    # senario 1: T_inlet  < T_cell:
+    # --------------------------------------------------------------------------------------------------
+
+    scenario_1 = T_inlet  < T_cell
     
-    elif T_inlet  > T_cell:
-        # Reverse Heat Transfer
-        
-        # Calculate Outlet Temparture To ( eq 8)
-        T_o =  T_inlet - ((T_inlet - T_cell)*(1-np.exp(-NTU)))   
+    # Calculate Outlet Temparture To ( eq 8)
+    T_o_1 = ((T_cell-T_inlet)*(1-np.exp(-NTU)))+T_inlet   
+
+    # Calculate the Log mean temperature 
+    T_lm = ((T_cell-T_inlet)-(T_cell-T_o_1))/(np.log((T_cell-T_inlet)/(T_cell-T_o_1)))
     
-        # Calculate the Log mean temperature 
-        T_lm = ((T_inlet - T_cell)-(T_o - T_cell))/(np.log((T_inlet - T_cell)/(T_o - T_cell)))
-            
-        # Calculated Heat Convected 
-        Q_convec = U_total*A_chan*T_lm*eff_HAS     
-            
-        # check the wavy channel effectiveness
-        heat_transfer_efficiency      = (T_o - T_inlet) / (T_cell - T_inlet)
-            
-        # Calculate the Power consumed
-        Power   = RCAIDE.Library.Components.Thermal_Management.Accessories.Pump.compute_power_consumed(dp, rho, m_coolant, n_pump) 
-            
-        # Update temperature of Battery Pack
-        P_net                   = Q_convec + Q_module
+    # Calculated Heat Convected 
+    Q_convec_1 = U_total*A_chan*T_lm*eff_HAS
+    
+    # check the wavy channel effectiveness
+    heat_transfer_efficiency_1      = (T_o_1 - T_inlet) / (T_cell - T_inlet)
+    
+    # Calculate the Power consumed
+    P_1     = RCAIDE.Library.Components.Thermal_Management.Accessories.Pump.compute_power_consumed(dp, rho, m_coolant, n_pump) 
+    Power_1 = np.ones_like(Q_module) * P_1
+    
+    # Update temperature of Battery Pack
+    P_net_1  = Q_module - Q_convec_1 
+    
+
+    # --------------------------------------------------------------------------------------------------    
+    # senario 2: T_inlet  < T_cell: 
+    # -------------------------------------------------------------------------------------------------- 
+
+    scenario_2 = T_inlet  > T_cell
+    
+    # Reverse Heat Transfer 
+    # Calculate Outlet Temparture To ( eq 8)
+    T_o_2 =  T_inlet - ((T_inlet - T_cell)*(1-np.exp(-NTU)))   
+
+    # Calculate the Log mean temperature 
+    T_lm = ((T_inlet - T_cell)-(T_o_2 - T_cell))/(np.log((T_inlet - T_cell)/(T_o_2 - T_cell)))
         
-    elif T_inlet  == T_cell:
-        # When battery temperature is equal to the battery temperature 
-        P_net = 0
-        Q_convec = 0
-        T_o = T_inlet
-        Power   = RCAIDE.Library.Components.Thermal_Management.Accessories.Pump.compute_power_consumed(dp, rho, m_coolant, n_pump)         
+    # Calculated Heat Convected 
+    Q_convec_2 = U_total*A_chan*T_lm*eff_HAS     
         
+    # check the wavy channel effectiveness
+    heat_transfer_efficiency_2      = (T_o_2 - T_inlet) / (T_cell - T_inlet)
         
-    dT_dt                   = P_net/(cell_mass*N_cells_geometric_config*Cp_bat)
-    T_cell_new              = T_cell + dT_dt*delta_t 
+    # Calculate the Power consumed
+    P_2   = RCAIDE.Library.Components.Thermal_Management.Accessories.Pump.compute_power_consumed(dp, rho, m_coolant, n_pump) 
+    Power_2   = np.ones_like(Q_module) * P_2
+    
+    # Update temperature of Battery Pack
+    P_net_2  = Q_convec_2 + Q_module 
+
+    # --------------------------------------------------------------------------------------------------
+    # senario 3: T_inlet == T_cell: 
+    # -------------------------------------------------------------------------------------------------- 
+    scenario_3 = T_inlet  == T_cell
+    
+    # When battery temperature is equal to the battery temperature 
+    P_net_3    = np.zeros_like(Q_module)
+    Q_convec_3 = np.zeros_like(Q_module)
+    T_o_3      = T_inlet
+    P_3        = RCAIDE.Library.Components.Thermal_Management.Accessories.Pump.compute_power_consumed(dp, rho, m_coolant, n_pump)         
+    Power_3    = np.ones_like(Q_module) * P_3 
+
+    # --------------------------------------------------------------------------------------------------
+    # asseemble 
+    # --------------------------------------------------------------------------------------------------       
+    Power        = np.zeros_like(Q_module)
+    P_net        = np.zeros_like(Q_module)
+    T_o          = np.zeros_like(Q_module)
+    h_efficiency = np.zeros_like(Q_module)
+    Q_convec     = np.zeros_like(Q_module)
+    
+    
+    Power[scenario_1] = Power_1[scenario_1] 
+    Power[scenario_2] = Power_2[scenario_2] 
+    Power[scenario_3] = Power_3[scenario_3]
+
+    P_net[scenario_1] = P_net_1[scenario_1] 
+    P_net[scenario_2] = P_net_2[scenario_2] 
+    P_net[scenario_3] = P_net_3[scenario_3]  
+
+    T_o[scenario_1] = T_o_1[scenario_1] 
+    T_o[scenario_2] = T_o_2[scenario_2] 
+    T_o[scenario_3] = T_o_3[scenario_3]
+
+    Q_convec[scenario_1] = Q_convec_1[scenario_1] 
+    Q_convec[scenario_2] = Q_convec_2[scenario_2] 
+    Q_convec[scenario_3] = Q_convec_3[scenario_3]   
+  
+    h_efficiency[scenario_1] = heat_transfer_efficiency_1[scenario_1] 
+    h_efficiency[scenario_2] = heat_transfer_efficiency_2[scenario_2]  
+    h_efficiency[scenario_3] = 0  
+        
+    # compute dT_dt
+    dT_dt                   = P_net/(cell_mass*N_cells_geometric_config*Cp_bat) 
    
-    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].heat_removed[t_idx+1]               = Q_convec
-    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].outlet_coolant_temperature[t_idx+1] = T_o
-    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].coolant_mass_flow_rate[t_idx+1]     = m_coolant
-    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].effectiveness[t_idx+1]              = heat_transfer_efficiency
-    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].power[t_idx+1]                      = Power
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].heat_removed               = Q_convec
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].outlet_coolant_temperature = T_o
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].coolant_mass_flow_rate     = m_coolant
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].effectiveness              = h_efficiency
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].power                      = Power
     
     if not state.conditions.energy.recharging:
-        state.conditions.energy.busses[bus.tag].power_draw[t_idx+1]                                  += Power
+        state.conditions.energy.busses[bus.tag].power_draw   += Power
  
-    return T_cell_new
+    return dT_dt
 
-def compute_coolant_properties(HAS,T_inlet,state,delta_t,t_idx):
+def compute_coolant_properties(HAS,T_inlet,state):
     
     coolant    = HAS.coolant  
     m_coolant  = HAS.coolant_flow_rate 
@@ -207,6 +255,5 @@ def compute_coolant_properties(HAS,T_inlet,state,delta_t,t_idx):
                                   inlet_Cp             =cp,
                                   inlet_Pr             =Pr,
                                   inlet_thermal_cond   =k)
-
 
     return opt_coolant_properties

@@ -121,7 +121,7 @@ class Reservoir(Component):
         append_reservoir_segment_conditions(self, segment, coolant_line)
         return    
 
-    def compute_reservior_coolant_temperature(self, state, coolant_line, delta_t, t_idx):
+    def compute_reservior_coolant_temperature(self, state, coolant_line):
         """
         Calculates the mixed coolant temperature in the reservoir.
 
@@ -136,7 +136,7 @@ class Reservoir(Component):
         t_idx : int
             Time index in the simulation
         """
-        compute_mixing_temperature(self, state, coolant_line, delta_t, t_idx)
+        compute_mixing_temperature(self, state, coolant_line)
         return
     
     def plot_operating_conditions(self, results, coolant_line, save_filename, save_figure, 

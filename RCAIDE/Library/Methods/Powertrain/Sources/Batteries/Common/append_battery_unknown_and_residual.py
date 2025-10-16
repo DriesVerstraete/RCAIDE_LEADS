@@ -28,9 +28,9 @@ def append_battery_unknown_and_residual(battery_module,segment):
     segment.state.number_of_network_residuals += 2 
 
     if segment.initial_battery_conditions.cell_temperature is not None:
-        cell_temperature  = segment.battery_cell_temperature  
+        cell_temperature  = segment.cell_temperature  
     else:
-        cell_temperature                                                     = atmo_data.temperature[0,0] 
+        cell_temperature = atmo_data.temperature[0,0] 
     segment.state.unknowns.network[battery_module.tag+ '_cell_temperature']  = ones_row(1) * cell_temperature
     segment.state.residuals.network[battery_module.tag+ '_cell_temperature'] = ones_row(1)* 0
 

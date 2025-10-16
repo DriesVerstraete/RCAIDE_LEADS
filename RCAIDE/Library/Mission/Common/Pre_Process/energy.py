@@ -72,15 +72,15 @@ def energy(mission):
                         
             # Coolant Line 
             for coolant_line in network.coolant_lines:
-                coolant_line.append_operating_conditions(segment,network)       
+                coolant_line.append_operating_conditions(segment)       
         
                 for battery_module in coolant_line.battery_modules: 
                     for btms in battery_module:
-                        btms.append_operating_conditions(segment,coolant_line,network)
+                        btms.append_operating_conditions(segment,coolant_line)
         
                 for heat_exchanger in coolant_line.heat_exchangers: 
-                    heat_exchanger.append_operating_conditions(segment,coolant_line,network)
+                    heat_exchanger.append_operating_conditions(segment,coolant_line)
         
                 for reservoir in coolant_line.reservoirs: 
-                    reservoir.append_operating_conditions(segment,coolant_line,network)
+                    reservoir.append_operating_conditions(segment,coolant_line)
                      

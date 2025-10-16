@@ -44,8 +44,7 @@ def append_fuel_cell_conditions(fuel_cell_stack,segment,bus):
     ones_row                                                                                       = segment.state.ones_row    
                                              
     bus_conditions                                                                                 = segment.state.conditions.energy.busses[bus.tag]
-    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag]                                           = Conditions()
-
+    bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag]                                           = Conditions() 
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].power                                     = 0 * ones_row(1)
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].current                                   = 0 * ones_row(1)      
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].voltage_open_circuit                      = 0 * ones_row(1) 
@@ -90,11 +89,13 @@ def append_fuel_cell_conditions(fuel_cell_stack,segment,bus):
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.compressor_expander_module      = Conditions
     bus_conditions.fuel_cell_stacks[fuel_cell_stack.tag].fuel_cell.compressor_expander_module_power= 0 * ones_row(1)
 
-    # Conditions for recharging fuel_cell         
-    if type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Battery_Discharge:
-        segment.state.conditions.energy.recharging  = False      
+    # Conditions for recharging fuel_cell      
+    if isinstance(segment,RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge):
+        segment.state.conditions.energy.recharging  = True  
+    elif type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Battery_Discharge:
+        segment.state.conditions.energy.recharging   = False  
     else:
-        segment.state.conditions.energy.recharging  = False            
+        segment.state.conditions.energy.recharging   = False            
     
     return
 

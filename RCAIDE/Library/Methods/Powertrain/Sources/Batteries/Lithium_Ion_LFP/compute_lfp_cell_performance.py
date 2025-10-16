@@ -13,7 +13,7 @@ from copy import deepcopy
 # ----------------------------------------------------------------------------------------------------------------------
 # compute_lfp_cell_performance
 # ----------------------------------------------------------------------------------------------------------------------  
-def compute_lfp_cell_performance(battery_module, state, bus, coolant_lines,network_tag):
+def compute_lfp_cell_performance(battery_module, state, bus, coolant_lines):
     """
     Computes the performance of lithium iron phosphate (LFP) battery cells.
     
@@ -40,9 +40,7 @@ def compute_lfp_cell_performance(battery_module, state, bus, coolant_lines,netwo
     bus : ElectricalBus
         The electrical bus connected to the battery module
     coolant_lines : list
-        List of coolant lines that may be connected to the battery module
-    t_idx : int
-        Current time index in the simulation
+        List of coolant lines that may be connected to the battery module 
     delta_t : numpy.ndarray
         Time step array [s]
     

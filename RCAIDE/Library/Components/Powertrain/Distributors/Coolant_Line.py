@@ -7,7 +7,8 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 # RCAIDE imports  
 from RCAIDE.Library.Components                                import Component
-from RCAIDE.Library.Components.Component                      import Container    
+from RCAIDE.Library.Components.Component                      import Container
+from RCAIDE.Library.Methods.Powertrain.Distributors.Coolant_Line.append_coolant_line_conditions import  append_coolant_line_conditions
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Coolant Line
@@ -107,7 +108,7 @@ class Coolant_Line(Component):
                         self.battery_modules[battery.tag] = Container()
                         
              
-    def append_operating_conditions(self, segment,network):
+    def append_operating_conditions(self, segment):
         """
         Append operating conditions for a flight segment
         
@@ -115,7 +116,8 @@ class Coolant_Line(Component):
         ----------
         segment : Segment
             Flight segment containing operating conditions
-        """ 
+        """
+        append_coolant_line_conditions(self,segment)
         return
                         
 

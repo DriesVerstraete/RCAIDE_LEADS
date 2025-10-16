@@ -165,8 +165,8 @@ class Proton_Exchange_Membrane_Fuel_Cell(Generic_Fuel_Cell_Stack):
         
         return stored_results_flag, stored_battery_tag
 
-    def append_unknowns_and_residuals(self,segment, bus): 
-        append_fuel_cell_unknown_and_residual(self,segment, bus)   
+    def append_unknowns_and_residuals(self,segment): 
+        append_fuel_cell_unknown_and_residual(self,segment)   
         return
     
     def append_operating_conditions(self,segment,bus):  

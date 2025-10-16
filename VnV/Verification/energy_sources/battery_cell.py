@@ -34,13 +34,13 @@ def main():
     Preq                           = 2000.  
 
     # Lithium Air Battery Test 
-    # lithium_air_battery_test(Ereq,Preq)
+    lithium_air_battery_test(Ereq,Preq)
     
-    # # Aluminum Air Battery Test 
-    # aluminum_air_battery_test(Ereq,Preq)
+    # Aluminum Air Battery Test 
+    aluminum_air_battery_test(Ereq,Preq)
     
-    # # Lithium Sulfur Test 
-    # lithium_sulphur_battery_test(Ereq,Preq)
+    # Lithium Sulfur Test 
+    lithium_sulphur_battery_test(Ereq,Preq)
         
     # # Lithium-Ion Test
     lithium_ion_battery_test()
@@ -93,7 +93,7 @@ def lithium_ion_battery_test():
     axes5  = fig1.add_subplot(3,2,5) 
     axes6  = fig1.add_subplot(3,2,6)  
 
-    battery_chemistry     = ['lithium_ion_nmc'] # ,'lithium_ion_lfp']    
+    battery_chemistry     = ['lithium_ion_nmc' ,'lithium_ion_lfp']    
     electrical_config     = ['Series' ,'Parallel'] 
     for j in range(len(curr)):      
         for i in range(len(battery_chemistry)):

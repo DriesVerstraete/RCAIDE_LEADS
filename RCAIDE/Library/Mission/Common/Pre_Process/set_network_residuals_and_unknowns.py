@@ -18,7 +18,7 @@ def set_network_residuals_and_unknowns(mission):
             # Propulsors 
             # ---------------------------------------------------------------------------------------------
             for p_i,propulsor in  enumerate(network.propulsors):  
-                if network.identical_propulsors == True and p_i ==0:
+                if propulsor.active and (network.identical_propulsors == False or p_i == 0): 
                     propulsor.append_unknowns_and_residuals(segment)
                     
             # ---------------------------------------------------------------------------------------------            
@@ -35,12 +35,12 @@ def set_network_residuals_and_unknowns(mission):
             for bus in network.busses:    
                 bus.append_unknowns_and_residuals(segment,network)                  
 
-                for bat_i,battery_module in  enumerate(bus.battery_modules):  
-                    if bus.identical_battery_modules == True and bat_i ==0:
+                for bat_i,battery_module in  enumerate(bus.battery_modules):
+                    if bus.identical_battery_modules == False or bat_i == 0: 
                         battery_module.append_unknowns_and_residuals(segment) 
         
-                for fc_i,fuel_cell_stack in  enumerate(bus.fuel_cell_stacks):    
-                    if bus.identical_fuel_cell_stacks == True and fc_i ==0:
+                for fc_i,fuel_cell_stack in  enumerate(bus.fuel_cell_stacks):
+                    if bus.identical_fuel_cell_stacks == False or fc_i == 0: 
                         fuel_cell_stack.append_unknowns_and_residuals(segment)    
     
             # # Ensure the mission knows how to pack and unpack the unknowns and residuals

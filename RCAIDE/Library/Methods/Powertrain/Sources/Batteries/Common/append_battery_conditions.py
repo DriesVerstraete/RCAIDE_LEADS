@@ -198,8 +198,8 @@ def append_battery_segment_conditions(battery_module, segment, bus):
         module_conditions.cell.state_of_charge[:,0]       = battery_initials.cell.state_of_charge[-1,0]
         module_conditions.cell.energy[:,0]                = battery_initials.cell.energy[-1,0]
 
-    if 'battery_cell_temperature' in segment:       
-        module_conditions.temperature[:,0]          = segment.battery_cell_temperature 
-        module_conditions.cell.temperature[:,0]     = segment.battery_cell_temperature     
+    if 'cell_temperature' in segment:       
+        module_conditions.temperature[:,0]          = segment.cell_temperature 
+        module_conditions.cell.temperature[:,0]     = segment.cell_temperature     
 
     return    

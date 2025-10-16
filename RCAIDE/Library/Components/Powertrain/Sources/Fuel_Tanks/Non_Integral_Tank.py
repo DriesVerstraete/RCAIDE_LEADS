@@ -46,10 +46,7 @@ class Non_Integral_Tank(Fuel_Tank):
         Tag of wing segment where aft tank ends (default: None)
         
     wing_root_tag : str, optional
-        Tag of the root wing for BWB configurations (default: None)
-        
-    radial_offset : float
-        Radial offset from attachment surface [m] (default: 0.0)
+        Tag of the root wing for BWB configurations (default: None) 
         
     wing_tag : str, optional
         Tag of the wing this tank is attached to (default: None)
@@ -67,10 +64,7 @@ class Non_Integral_Tank(Fuel_Tank):
         Tank height [m] (default: 0.0)
         
     fuel : Component, optional
-        Fuel type stored in tank (default: None)
-
-    radial_offset : float
-        Reduction in radius for a tank (default: None)
+        Fuel type stored in tank (default: None) 
 
     Notes
     -----
@@ -109,9 +103,9 @@ class Non_Integral_Tank(Fuel_Tank):
         self.bwb_aft_tank                = False
         self.aft_tank_start_root_chord   = None
         self.aft_tank_end_rood_chord     = None
-        self.aft_tank_end_segment_tag    = None 
+        self.aft_tank_end_segment_tag    = None
+        self.wing_root_twist             =  0
         self.wing_root_tag               = None 
-        self.radial_offset               = None
         self.aspect_ratio                = None # Defined as the ratio of total length of the tank to the diameter of the tank.
 
 
