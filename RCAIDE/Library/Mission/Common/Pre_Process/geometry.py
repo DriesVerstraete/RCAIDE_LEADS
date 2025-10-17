@@ -69,7 +69,7 @@ def geometry(mission):
     
             for network in segment.analyses.geometry.vehicle.networks:
                 for propulsor in network.propulsors: 
-                    propulsor.active = vehicle_0.networks[network.tag].propulsorsp[propulsor.tag].active            
+                    propulsor.active = vehicle_0.networks[network.tag].propulsors[propulsor.tag].active            
                                   
     return 
         
