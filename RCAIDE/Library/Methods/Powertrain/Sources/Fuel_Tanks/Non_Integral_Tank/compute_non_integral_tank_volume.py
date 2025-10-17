@@ -215,7 +215,7 @@ def compute_bwb_aft_tank_volume(fuel_tank, wing):
             raise ValueError('Specified fuel mass greater than mass of fuel capable of being stored in fuel tank') 
         fuel_tank.fuel.volume_properties.net_volume = tank_volume_i
     else:
-        fuel_tank.fuel.mass_properties.mass = float(tank_volume_i *  fuel_tank.fuel.density)
+        fuel_tank.fuel.mass_properties.mass = tank_volume_i *  fuel_tank.fuel.density
         fuel_tank.fuel.volume_properties.net_volume = tank_volume_i
  
     # fuel tank origin 

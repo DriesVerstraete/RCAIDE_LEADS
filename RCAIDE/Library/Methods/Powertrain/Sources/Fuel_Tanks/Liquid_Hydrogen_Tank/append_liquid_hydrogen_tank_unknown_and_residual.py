@@ -20,8 +20,8 @@ def append_liquid_hydrogen_tank_unknown_and_residual(fuel_tank, segment):
     segment.state.unknowns.network[fuel_tank.tag + '_ullage_mass']                      = ones_row(1) * fuel_tank.ullage.mass_properties.mass 
     segment.state.unknowns.network[fuel_tank.tag + '_liquid_mass']                      = ones_row(1) * fuel_tank.fuel.mass_properties.mass 
     segment.state.unknowns.network[fuel_tank.tag + '_ullage_temperature']               = ones_row(1) * fuel_tank.ullage.temperature
-    segment.state.unknowns.network[fuel_tank.tag + '_liquid_temperature']               = ones_row(1) * fuel_tank.fuel.temperature 
-    segment.state.unknowns.network[fuel_tank.tag + '_ullage_volume']                    = ones_row(1) * (fuel_tank.fuel.volume_properties.gross_volume -  fuel_tank.fuel.volume_properties.net_volume)
+    segment.state.unknowns.network[fuel_tank.tag + '_liquid_temperature']               = ones_row(1) * 20 # fuel_tank.fuel.temperature The defaulted value is not read here, I dont know why
+    segment.state.unknowns.network[fuel_tank.tag + '_ullage_volume']                    = ones_row(1) * (fuel_tank.volume_properties.net_volume   -  fuel_tank.fuel.volume_properties.net_volume)
     segment.state.unknowns.network[fuel_tank.tag + '_liquid_volume']                    = ones_row(1) * fuel_tank.fuel.volume_properties.net_volume
                
            
