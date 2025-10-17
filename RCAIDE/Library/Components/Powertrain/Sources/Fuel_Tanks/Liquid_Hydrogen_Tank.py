@@ -103,8 +103,7 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         self.design_isa_deviation      = 0
         self.design_external_pressure  = 0 
         self.vent_rate                 = 0
-        self.fuel                      = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen() 
-        self.fuel.temperature          = 20 # Kelvin
+        self.fuel                      = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()  
         self.ullage                    = RCAIDE.Library.Attributes.Gases.Liquid_Hydrogen_Ullage()
         self.ullage.density            = 2.5 
         self.ullage.temperature        = 25 # Kelvin

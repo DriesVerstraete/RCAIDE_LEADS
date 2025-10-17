@@ -12,7 +12,6 @@ from RCAIDE.Library.Components.Mass_Properties      import Mass_Properties
 # ----------------------------------------------------------------------------------------------------------------------  
 # Liquid_Hydrogen_Ullage Class
 # ----------------------------------------------------------------------------------------------------------------------   
-
 class Liquid_Hydrogen_Ullage(Gas):
     """
     A class representing carbon dioxide gas and its thermodynamic properties.
