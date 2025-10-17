@@ -1,9 +1,9 @@
-# RCAIDE/Methods/Energy/Distributors/Fuel_Line/__init__.py
+# RCAIDE/Methods/Energy/Distributors/Coolant_Line/__init__.py
 # 
 
 """
-This module provides functionality for modeling fuel lines in powertrain distribution systems. It includes methods for 
-initializing fuel line properties and appending fuel line conditions to simulation results.
+This module provides functionality for modeling coolant lines in powertrain distribution systems. It includes methods for 
+initializing fuel line properties and appending coolant line conditions to simulation results.
 
 See Also
 --------
@@ -13,4 +13,4 @@ RCAIDE.Library.Methods.Powertrain.Distributors
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-from .append_fuel_line_conditions     import * 
+from .append_coolant_line_conditions     import * 

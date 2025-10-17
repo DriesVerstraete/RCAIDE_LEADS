@@ -114,7 +114,7 @@ def append_battery_conditions(battery_module,segment,bus):
     if isinstance(segment,RCAIDE.Framework.Mission.Segments.Ground.Battery_Recharge):
         segment.state.conditions.energy.recharging  = True  
     elif type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Battery_Discharge:
-        segment.state.conditions.energy.recharging   = False  
+        segment.state.conditions.energy.recharging  = False  
     else:
         segment.state.conditions.energy.recharging  = False 
      
@@ -132,7 +132,7 @@ def append_battery_conditions(battery_module,segment,bus):
         bus_results.battery_modules[battery_module.tag].cell.energy              = initial_battery_energy / n_total* ones_row(1) 
         bus_results.battery_modules[battery_module.tag].state_of_charge          = segment.initial_battery_conditions.state_of_charge* ones_row(1)  
         bus_results.battery_modules[battery_module.tag].cell.state_of_charge     = segment.initial_battery_conditions.state_of_charge* ones_row(1) 
-        bus_results.battery_modules[battery_module.tag].cell.depth_of_discharge  = 1 - segment.initial_battery_conditions.state_of_charge* ones_row(1)
+        bus_results.battery_modules[battery_module.tag].cell.depth_of_discharge  = 1 - segment.initial_battery_conditions.state_of_charge* ones_row(1)   
     else:  
         bus_results.battery_modules[battery_module.tag].energy                    = 0 * ones_row(1)
         bus_results.battery_modules[battery_module.tag].state_of_charge           = 0 * ones_row(1)
@@ -198,8 +198,8 @@ def append_battery_segment_conditions(battery_module, segment, bus):
         module_conditions.cell.state_of_charge[:,0]       = battery_initials.cell.state_of_charge[-1,0]
         module_conditions.cell.energy[:,0]                = battery_initials.cell.energy[-1,0]
 
-    if 'battery_cell_temperature' in segment:       
-        module_conditions.temperature[:,0]          = segment.battery_cell_temperature 
-        module_conditions.cell.temperature[:,0]     = segment.battery_cell_temperature     
+    if 'cell_temperature' in segment:       
+        module_conditions.temperature[:,0]          = segment.cell_temperature 
+        module_conditions.cell.temperature[:,0]     = segment.cell_temperature     
 
     return    

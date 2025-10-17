@@ -487,8 +487,7 @@ def vehicle_setup():
      #Propeller Design              
     propeller                                        = RCAIDE.Library.Components.Powertrain.Converters.Propeller()   
     propeller.tag                                    = 'starboard_propulsor_propeller' 
-    propeller.origin                                 = [[9.1,4.219315295, 1.616135105 ]]
-    propeller.active                                 = True          
+    propeller.origin                                 = [[9.1,4.219315295, 1.616135105 ]]  
     propeller.tip_radius                             = 2.8/2
     propeller.hub_radius                             = 0.1 
     propeller.number_of_blades                       = 3   

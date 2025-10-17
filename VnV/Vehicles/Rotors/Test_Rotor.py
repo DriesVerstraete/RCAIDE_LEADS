@@ -22,7 +22,6 @@ def Test_Rotor(new_regression=True):
     lift_rotor                                             = RCAIDE.Library.Components.Powertrain.Converters.Lift_Rotor()   
     lift_rotor.tag                                         = 'lift_rotor_1'   
     lift_rotor.origin                                      = [[-0.073 ,  1.950 , 1.2]] 
-    lift_rotor.active                                      = True          
     lift_rotor.tip_radius                                  = 2.8/2
     lift_rotor.hub_radius                                  = 0.1 
     lift_rotor.number_of_blades                            = 3     

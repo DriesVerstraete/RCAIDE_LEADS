@@ -84,7 +84,6 @@ class Network(Component):
         """ Computes the performance of the network
         """  
         # unpack   
-        network_tag          = network.tag
         conditions           = state.conditions 
         busses               = network.busses 
         fuel_lines           = network.fuel_lines 
@@ -108,18 +107,14 @@ class Network(Component):
                 stored_propulsor_tag = None 
                 conditions.energy.fuel_lines[fuel_line.tag].fuel_flow_rate = 0
                 for propulsor_tag in propulsor_group:
-                    propulsor            = network.propulsors[propulsor_tag]
+                    propulsor = network.propulsors[propulsor_tag]
                     if propulsor.active and fuel_line.active:   
-                        if network.identical_propulsors == False:
+                        if network.identical_propulsors == False or stored_results_flag == False:
                             # run analysis  
                             T,M,P,P_elec,stored_results_flag,stored_propulsor_tag = propulsor.compute_performance(state, center_of_gravity= center_of_gravity)
-                        else:             
-                            if stored_results_flag == False: 
-                                # run propulsor analysis 
-                                T,M,P,P_elec,stored_results_flag,stored_propulsor_tag = propulsor.compute_performance(state,center_of_gravity= center_of_gravity)
-                            else:
-                                # use previous propulsor results 
-                                T,M,P,P_elec = propulsor.reuse_stored_data(state,network,stored_propulsor_tag=stored_propulsor_tag,center_of_gravity= center_of_gravity)
+                        else:              
+                            # use previous propulsor results 
+                            T,M,P,P_elec = propulsor.reuse_stored_data(state,network,stored_propulsor_tag=stored_propulsor_tag,center_of_gravity= center_of_gravity)
         
                         total_thrust      += T   
                         total_moment      += M   
@@ -148,21 +143,15 @@ class Network(Component):
     
             else:
                 for propulsor_group in bus.assigned_propulsors:
-                    stored_results_flag  = False
-                    stored_propulsor_tag = None   
+                    stored_results_flag  = False  
                     for propulsor_tag in propulsor_group:
                         propulsor =  network.propulsors[propulsor_tag]
-                        if propulsor.active and bus.active:       
-                            if network.identical_propulsors == False:
+                        if propulsor.active and bus.active:      
+                            if network.identical_propulsors == False or stored_results_flag == False: 
                                 # run analysis  
                                 T,M,P_mech,P_elec,stored_results_flag,stored_propulsor_tag = propulsor.compute_performance(state,center_of_gravity= center_of_gravity)
-                            else:             
-                                if stored_results_flag == False: 
-                                    # run propulsor analysis 
-                                    T,M,P_mech,P_elec, stored_results_flag,stored_propulsor_tag = propulsor.compute_performance(state,center_of_gravity= center_of_gravity)
-                                else:
-                                    # use previous propulsor results 
-                                    T,M,P_mech,P_elec  = propulsor.reuse_stored_data(state,network,stored_propulsor_tag=stored_propulsor_tag,center_of_gravity=center_of_gravity)
+                            else:    
+                                T,M,P_mech,P_elec  = propulsor.reuse_stored_data(state,network,stored_propulsor_tag=stored_propulsor_tag,center_of_gravity=center_of_gravity)
     
                             total_thrust      += T   
                             total_moment      += M   
@@ -178,49 +167,47 @@ class Network(Component):
         # -------------------------------------------------------------------------------------------------------------------  
         # 2.1 Fuel Converters         
         for fuel_line in fuel_lines: 
-            if fuel_line.active: 
-                for converter_group in fuel_line.assigned_converters:
-                    stored_conveter_tag = False
-                    for converter_tag in converter_group:
-                        converter =  converters[converter_tag]
-                        if converter.active:
-                            converter.inverse_calculation = True 
-                            if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.Turboelectric_Generator): 
-                                if stored_conveter_tag is False:
-                                    generator             = converter.generator   
-                                    state.conditions.energy.converters[generator.tag].outputs.power  =  total_elec_power*(1 - state.conditions.energy.hybrid_power_split_ratio ) 
-                                    P_mech, P_elec, stored_results_flag,stored_conveter_tag          = converter.compute_performance(state,fuel_line,bus)  
-                                    conditions.energy.busses[bus.tag].power_draw                    -= P_elec/bus.efficiency
-                                    conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate += conditions.energy.converters[converter.tag].fuel_mass_flow_rate   
-                                else:
-                                    generator             = converter.generator   
-                                    state.conditions.energy.converters[generator.tag].outputs.power  =  total_elec_power*(1 - state.conditions.energy.hybrid_power_split_ratio ) 
-                                    P_mech, P_elec                                                   = converter.reuse_stored_data(state,network,stored_conveter_tag,fuel_line,bus)  
-                                    conditions.energy.busses[bus.tag].power_draw                     -= P_elec/bus.efficiency
-                                    conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate  += conditions.energy.converters[converter.tag].fuel_mass_flow_rate   
+            for converter_group in fuel_line.assigned_converters:
+                stored_conveter_tag = False
+                for converter_tag in converter_group:
+                    converter =  converters[converter_tag]
+                    if converter.active and fuel_line.active: 
+                        converter.inverse_calculation = True 
+                        if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.Turboelectric_Generator): 
+                            if stored_conveter_tag is False:
+                                generator             = converter.generator   
+                                state.conditions.energy.converters[generator.tag].outputs.power  =  total_elec_power*(1 - state.conditions.energy.hybrid_power_split_ratio ) 
+                                P_mech, P_elec, stored_results_flag,stored_conveter_tag          = converter.compute_performance(state,fuel_line,bus)  
+                                conditions.energy.busses[bus.tag].power_draw                    -= P_elec/bus.efficiency
+                                conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate += conditions.energy.converters[converter.tag].fuel_mass_flow_rate   
+                            else:
+                                generator             = converter.generator   
+                                state.conditions.energy.converters[generator.tag].outputs.power  =  total_elec_power*(1 - state.conditions.energy.hybrid_power_split_ratio ) 
+                                P_mech, P_elec                                                   = converter.reuse_stored_data(state,network,stored_conveter_tag,fuel_line,bus)  
+                                conditions.energy.busses[bus.tag].power_draw                     -= P_elec/bus.efficiency
+                                conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate  += conditions.energy.converters[converter.tag].fuel_mass_flow_rate   
 
-                            if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.Turboshaft):   
-                                state.conditions.energy.converters[converter.tag].power     = total_mech_power*(1 - state.conditions.energy.hybrid_power_split_ratio )   
-                                P_mech, P_elec,stored_results_flag,stored_propulsor_tag     = converter.compute_performance(state)   
-                                conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate  += conditions.energy.converters[converter.tag].fuel_mass_flow_rate  
+                        if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.Turboshaft):   
+                            state.conditions.energy.converters[converter.tag].power     = total_mech_power*(1 - state.conditions.energy.hybrid_power_split_ratio )   
+                            P_mech, P_elec,stored_results_flag,stored_propulsor_tag     = converter.compute_performance(state)   
+                            conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate  += conditions.energy.converters[converter.tag].fuel_mass_flow_rate  
                     
         # 2.1 Electric Converters                            
-        for bus in busses: 
-            if bus.active == True:         
-                for converter_group in bus.assigned_converters:
-                    for converter_tag in converter_group:
-                        converter =  converters[converter_tag]
-                        if converter.active: 
-                            converter.inverse_calculation = True
-                            if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.DC_Motor) or isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.PMSM_Motor):  
-                                compute_motor_performance(converter,conditions)
-                                conditions.energy.busses[bus.tag].power_draw   += conditions.energy.converters[converter.tag].inputs.power/bus.efficiency
-                                conditions.energy.busses[bus.tag].current_draw  = conditions.energy.busses[bus.tag].power_draw/bus.voltage                            
-                                
-                            if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.DC_Generator) or isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.PMSM_Generator):                              
-                                compute_generator_performance(converter,conditions) 
-                                conditions.energy.busses[bus.tag].power_draw   -= conditions.energy.converters[converter.tag].outputs.power/bus.efficiency
-                                conditions.energy.busses[bus.tag].current_draw  = conditions.energy.busses[bus.tag].power_draw/bus.voltage                            
+        for bus in busses:         
+            for converter_group in bus.assigned_converters:
+                for converter_tag in converter_group:
+                    converter =  converters[converter_tag]
+                    if converter.active: 
+                        converter.inverse_calculation = True
+                        if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.DC_Motor) or isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.PMSM_Motor):  
+                            compute_motor_performance(converter,conditions)
+                            conditions.energy.busses[bus.tag].power_draw   += conditions.energy.converters[converter.tag].inputs.power/bus.efficiency
+                            conditions.energy.busses[bus.tag].current_draw  = conditions.energy.busses[bus.tag].power_draw/bus.voltage                            
+                            
+                        if isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.DC_Generator) or isinstance(converter,RCAIDE.Library.Components.Powertrain.Converters.PMSM_Generator):                              
+                            compute_generator_performance(converter,conditions) 
+                            conditions.energy.busses[bus.tag].power_draw   -= conditions.energy.converters[converter.tag].outputs.power/bus.efficiency
+                            conditions.energy.busses[bus.tag].current_draw  = conditions.energy.busses[bus.tag].power_draw/bus.voltage                            
                         
         # ----------------------------------------------------------        
         # Section 3.0 Sources
@@ -240,44 +227,33 @@ class Network(Component):
         # 3.2 Electric Sources 
         for bus in  busses:
             if bus.active: 
-                    
-                stored_results_flag       = False
-                stored_battery_cell_tag   = None
-                
                 # ------------------------------------------------------------------------------------------------------------------- 
                 # 3.1 Batteries
-                # -------------------------------------------------------------------------------------------------------------------                
+                # -------------------------------------------------------------------------------------------------------------------       
+                stored_results_flag       = False    
                 for battery_module in  bus.battery_modules:                   
-                    if bus.identical_battery_modules == False:
+                    if bus.identical_battery_modules == False or stored_results_flag == False:
                         # run analysis  
                         stored_results_flag, stored_battery_cell_tag =  battery_module.energy_calc(state,bus,coolant_lines)
-                    else:             
-                        if stored_results_flag == False: 
-                            # run battery analysis 
-                            stored_results_flag, stored_battery_cell_tag  =  battery_module.energy_calc(state,bus,coolant_lines,network_tag)
-                        else:
-                            # use previous battery results 
-                            battery_module.reuse_stored_data(state,bus,stored_results_flag, stored_battery_cell_tag)
+                    else:              
+                        # use previous battery results 
+                        battery_module.reuse_stored_data(state,bus,stored_results_flag, stored_battery_cell_tag)
                     
-                    # # ------------------------------------------------------------------------------------------------------------------- 
-                    # # 3.2 Fuel Cell Stacks
-                    # # ------------------------------------------------------------------------------------------------------------------- 
-                    # stored_results_flag       = False   
-                    # stored_fuel_cell_tag      = None                  
-                    # for fuel_cell_stack in  bus.fuel_cell_stacks:                   
-                    #     if bus.identical_fuel_cell_stacks == False:
-                    #         # run analysis  
-                    #         stored_results_flag, stored_fuel_cell_tag =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                    #     else:             
-                    #         if stored_results_flag == False: 
-                    #             # run battery analysis 
-                    #             stored_results_flag, stored_fuel_cell_tag  =  fuel_cell_stack.energy_calc(state,bus,coolant_lines, t_idx, delta_t)
-                    #         else:
-                    #             # use previous battery results 
-                    #             fuel_cell_stack.reuse_stored_data(state,bus,stored_results_flag, stored_fuel_cell_tag)
-                             
-                    #     # compute mass flow rate                    
-                    #     conditions.energy.busses[bus.tag].fuel_mass_flow_rate[t_idx]  = state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag].H2_mass_flow_rate[t_idx]      
+                # ------------------------------------------------------------------------------------------------------------------- 
+                # 3.2 Fuel Cell Stacks
+                # ------------------------------------------------------------------------------------------------------------------- 
+                stored_results_flag       = False   
+                stored_fuel_cell_tag      = None                  
+                for fuel_cell_stack in  bus.fuel_cell_stacks:                   
+                    if bus.identical_fuel_cell_stacks == False or stored_results_flag == False:
+                        # run analysis  
+                        stored_results_flag, stored_fuel_cell_tag =  fuel_cell_stack.energy_calc(state,bus,coolant_lines)
+                    else:              
+                        # use previous battery results 
+                        fuel_cell_stack.reuse_stored_data(state,bus,stored_results_flag, stored_fuel_cell_tag)
+                         
+                    # compute mass flow rate                    
+                    conditions.energy.busses[bus.tag].fuel_mass_flow_rate = state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag].H2_mass_flow_rate    
                           
                        
                     # Step 3: Compute bus properties          
@@ -291,12 +267,7 @@ class Network(Component):
                             reservoir.compute_reservior_coolant_temperature(state,coolant_line)
                                 
                 # Update total mass flow of system   
-                total_mdot   += conditions.energy.busses[bus.tag].fuel_mass_flow_rate
-                               
-                # Determine mass flow from each tank
-
-                # for tank in bus.fuel_tanks:   
-                #     tank.compute_tank_properties(state,bus) 
+                total_mdot   += conditions.energy.busses[bus.tag].fuel_mass_flow_rate 
                                  
         if reverse_thrust ==  True:
             total_thrust =  total_thrust * -1    
@@ -330,16 +301,16 @@ class Network(Component):
         for network in segment.analyses.energy.vehicle.networks:
             # Fuel unknowns 
             for fuel_line_i, fuel_line in enumerate(network.fuel_lines):    
-                if fuel_line.active:
-                    for propulsor_group in  fuel_line.assigned_propulsors:
-                        propulsor = network.propulsors[propulsor_group[0]]
+                for propulsor_group in  fuel_line.assigned_propulsors:
+                    propulsor = network.propulsors[propulsor_group[0]]
+                    if propulsor.active: 
                         propulsor.unpack_propulsor_unknowns(segment)
                         
             # electric unknowns 
-            for bus_i, bus in enumerate(network.busses):    
-                if bus.active:
-                    for propulsor_group in  bus.assigned_propulsors:
-                        propulsor = network.propulsors[propulsor_group[0]]
+            for bus_i, bus in enumerate(network.busses):     
+                for propulsor_group in  bus.assigned_propulsors:
+                    propulsor = network.propulsors[propulsor_group[0]]
+                    if propulsor.active: 
                         propulsor.unpack_propulsor_unknowns(segment) 
         return    
      
@@ -365,15 +336,15 @@ class Network(Component):
            N/A
        """         
         for network in segment.analyses.energy.vehicle.networks:
-            for fuel_line_i, fuel_line in enumerate(network.fuel_lines):    
-                if fuel_line.active:
-                    for propulsor_group in  fuel_line.assigned_propulsors:
-                        propulsor =  network.propulsors[propulsor_group[0]]
+            for fuel_line_i, fuel_line in enumerate(network.fuel_lines):     
+                for propulsor_group in  fuel_line.assigned_propulsors:
+                    propulsor =  network.propulsors[propulsor_group[0]]
+                    if propulsor.active: 
                         propulsor.pack_propulsor_residuals(segment) 
-            for bus_i, bus in enumerate(network.busses):    
-                if bus.active:
-                    for propulsor_group in  bus.assigned_propulsors:
-                        propulsor =  network.propulsors[propulsor_group[0]]
+            for bus_i, bus in enumerate(network.busses):     
+                for propulsor_group in  bus.assigned_propulsors:
+                    propulsor =  network.propulsors[propulsor_group[0]]
+                    if propulsor.active: 
                         propulsor.pack_propulsor_residuals(segment)   
         return      
      

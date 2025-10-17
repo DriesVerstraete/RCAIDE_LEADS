@@ -7,11 +7,11 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports  
 import RCAIDE
-from RCAIDE.Framework.Mission.Common     import   Conditions, Residuals, Unknowns
+from RCAIDE.Framework.Mission.Common     import   Conditions 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHODS
 # ---------------------------------------------------------------------------------------------------------------------- 
-def append_bus_conditions(bus,segment,network): 
+def append_bus_conditions(bus,segment): 
     """
     Appends conditions for the electrical bus to the segment's energy conditions dictionary.
 
@@ -50,7 +50,7 @@ def append_bus_conditions(bus,segment,network):
     --------
     RCAIDE.Library.Methods.Powertrain.Distributors.Electrical_Bus.compute_bus_conditions
     """
-    ones_row                                                                     = segment.state.ones_row
+    ones_row                                                                      = segment.state.ones_row
                
     segment.state.conditions.energy.busses[bus.tag]                                     = Conditions()
     segment.state.conditions.energy.busses[bus.tag].battery_modules                     = Conditions()
@@ -71,14 +71,6 @@ def append_bus_conditions(bus,segment,network):
     segment.state.conditions.energy.busses[bus.tag].energy                              = 0 * ones_row(1)
     segment.state.conditions.energy.busses[bus.tag].regenerative_power                  = 0 * ones_row(1) 
     segment.state.conditions.energy.busses[bus.tag].fuel_mass_flow_rate                 = 0 * ones_row(1) 
-
-     # first segment  
-    if segment.initial_battery_conditions.state_of_charge !=  None:
-        initial_battery_energy                                                    = segment.initial_battery_conditions.state_of_charge*bus.maximum_energy   
-        segment.state.conditions.energy.busses[bus.tag].maximum_initial_energy    = initial_battery_energy
-        segment.state.conditions.energy.busses[bus.tag].energy                    = initial_battery_energy* ones_row(1)
-        segment.state.conditions.energy.busses[bus.tag].state_of_charge           = segment.initial_battery_conditions.state_of_charge* ones_row(1) 
-        segment.state.conditions.energy.busses[bus.tag].depth_of_discharge        = 1 - segment.initial_battery_conditions.state_of_charge* ones_row(1)
         
     return
 

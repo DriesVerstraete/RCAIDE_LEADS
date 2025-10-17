@@ -11,6 +11,7 @@ from RCAIDE.Framework.Core            import Data, Units
 from RCAIDE.Library.Methods.Aerodynamics.Common.Drag import * 
 from RCAIDE.Library.Methods.Aerodynamics.Common.Lift import *
 from RCAIDE.Library.Mission.Common.Pre_Process.energy import energy
+from RCAIDE.Library.Mission.Common.Pre_Process.set_network_residuals_and_unknowns import set_network_residuals_and_unknowns
 from RCAIDE.Library.Methods.Geometry.Planform import wing_planform
 
 # package imports
@@ -189,7 +190,8 @@ def estimate_take_off_field_length(vehicle,analyses,altitude = 0, delta_isa = 0,
     segment.state.conditions  = conditions    
     
     # initalize mission
-    energy(mission)      
+    energy(mission)
+    set_network_residuals_and_unknowns(mission) 
 
     thrust =  np.array([[0.0, 0.0, 0.0]]) 
     for network in vehicle.networks:   

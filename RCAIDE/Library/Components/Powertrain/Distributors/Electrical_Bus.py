@@ -107,7 +107,7 @@ class Electrical_Bus(Component):
         self.battery_module_electric_configuration  = "Series"
         self.fuel_cell_stack_electric_configuration = "Series"
         
-    def append_operating_conditions(self, segment, network):
+    def append_operating_conditions(self, segment):
         """
         Append operating conditions for a flight segment
         
@@ -116,7 +116,7 @@ class Electrical_Bus(Component):
         segment : Segment
             Flight segment containing operating conditions
         """
-        append_bus_conditions(self, segment,network)
+        append_bus_conditions(self, segment)
         return
         
     def append_segment_conditions(self, segment):

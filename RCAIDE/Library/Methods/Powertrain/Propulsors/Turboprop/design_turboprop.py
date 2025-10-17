@@ -254,13 +254,16 @@ def design_turboprop(turboprop):
     # Step 25: Size the core of the turboprop  
     size_core(turboprop,conditions)
     
-    # Step 26: Static Sea Level Thrust   
-    atmo_data_sea_level                = atmosphere.compute_values(0.0,0.0)   
-    V                                  = atmo_data_sea_level.speed_of_sound[0][0]*0.01    
-    segment.state.conditions           = setup_operating_conditions(turboprop,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
-    sls_T,_,sls_P,_,_,_                = turboprop.compute_performance(segment.state) 
-    turboprop.sealevel_static_thrust   = sls_T[0][0]
-    turboprop.sealevel_static_power    = sls_P[0][0]    
+    # Step 26: Static Sea Level Thrust
+
+    # Step 23: Static Sea Level Thrust  
+    atmo_data_sea_level                          = atmosphere.compute_values(0.0,0.0)   
+    V                                            = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
+    operating_state                              = setup_operating_conditions(turboprop,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
+    operating_state.conditions.energy.propulsors[turboprop.tag].throttle[:,0] = 1.0  
+    sls_T,_,sls_P,_,_,_                          = turboprop.compute_performance(operating_state) 
+    turboprop.sealevel_static_thrust             = sls_T[0][0]
+    turboprop.sealevel_static_power              = sls_P[0][0] 
     
     turboprop.design_thrust_specific_fuel_consumption = turboprop_conditions.thrust_specific_fuel_consumption  
     turboprop.design_non_dimensional_thrust           = turboprop_conditions.non_dimensional_thrust            

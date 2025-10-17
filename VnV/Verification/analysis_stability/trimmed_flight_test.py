@@ -179,7 +179,7 @@ def mission_setup(analyses):
                 
     # define flight controls               
     segment.assigned_control_variables.throttle.active                          = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller','ice_propeller_2', 'ice_propeller_3', 'ice_propeller_4']]
+    segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]
     segment.assigned_control_variables.body_angle.active                        = True
     
     # Longidinal Flight Mechanics

@@ -14,7 +14,7 @@ import numpy   as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  Vortex_Lattice
 # ---------------------------------------------------------------------------------------------------------------------- 
-def evaluate(state,settings,vehicle):
+def evaluate(segment,settings,vehicle):
     """Evaluates static margin and neutral point using built surrogates 
     
     Assumptions: 
@@ -35,11 +35,11 @@ def evaluate(state,settings,vehicle):
     # --------------------------------------------------------------------------
     # unpack 
     # --------------------------------------------------------------------------
-    conditions    = state.conditions 
+    conditions    = segment.state.conditions 
     AoA           = conditions.aerodynamics.angles.alpha  
     
     if settings.update_center_of_gravity:
-        CG = update_center_of_gravity(vehicle, conditions)
+        CG = update_center_of_gravity(vehicle, segment)
     else:
         CG = np.ones_like(AoA) * vehicle.mass_properties.center_of_gravity[0][0] 
  

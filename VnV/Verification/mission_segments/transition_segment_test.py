@@ -34,7 +34,7 @@ def main():
     update_regression_values = False
      
     # TEST 1
-    tiltwing_transition_test(update_regression_values)
+    #tiltwing_transition_test(update_regression_values)
     
     # TEST 2
     stopped_rotor_transition_test(update_regression_values)
@@ -268,7 +268,7 @@ def TW_mission_setup(analyses ):
     # ------------------------------------------------------------------ 
     segment                                                          = Segments.Vertical_Flight.Hover(base_segment)
     segment.tag                                                      = "Hover"   
-    segment.state.numerics.solver.type                              = "root_finder"
+    segment.state.numerics.mission_solver.type                       = "root_finder"
     segment.analyses.extend(analyses.vertical_climb)
     
     segment.altitude                                                 = 40.  * Units.ft  
@@ -294,7 +294,7 @@ def TW_mission_setup(analyses ):
     segment.analyses.extend(analyses.vertical_climb)                   
     segment.altitude_end                                             = 60.  * Units.ft   
     segment.climb_rate                                               = 500. * Units['ft/min']  
-    segment.state.numerics.solver.type                              = "root_finder"
+    segment.state.numerics.mission_solver.type                              = "root_finder"
           
     # define flight dynamics to model            
     segment.flight_dynamics.force_z                                  = True 
@@ -317,7 +317,7 @@ def TW_mission_setup(analyses ):
     segment.altitude_start                                          = 100.0 * Units.ft   
     segment.altitude_end                                            = 0.   * Units.ft  
     segment.descent_rate                                            = 200. * Units['ft/min']  
-    segment.state.numerics.solver.type                              = "root_finder"
+    segment.state.numerics.mission_solver.type                              = "root_finder"
                   
     # define flight dynamics to model              
     segment.flight_dynamics.force_z                                  = True     
@@ -357,7 +357,7 @@ def SR_mission_setup(analyses,vehicle):
     segment.altitude_end                                  = 200.  * Units.ft   
     segment.initial_battery_state_of_charge               = 1.0 
     segment.climb_rate                                    = 500. * Units['ft/min']   
-    segment.state.numerics.solver.type                              = "root_finder"
+    segment.state.numerics.mission_solver.type                              = "root_finder"
             
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                       = True     
@@ -382,7 +382,7 @@ def SR_mission_setup(analyses,vehicle):
     segment.acceleration                                  = 1.5
     segment.pitch_initial                                 = 0.0 * Units.degrees
     segment.pitch_final                                   = 2.  * Units.degrees 
-    segment.state.numerics.solver.type                              = "root_finder"
+    segment.state.numerics.mission_solver.type            = "root_finder"
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  

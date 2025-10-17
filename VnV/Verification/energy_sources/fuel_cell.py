@@ -32,14 +32,14 @@ def main():
     
     # Operating conditions for battery p 
     marker_size           = 5   
-    mdot_H2_true          = [3.1979336247376623e-07,6.498654180730008e-07]
+    mdot_H2_true          = [3.1979336247343954e-07,6.498654179853494e-07]
 
     # PLot parameters 
     marker                = ['s' ,'o' ,'P']
     linestyles            = ['-','--',':']
     linecolors            = cm.inferno(np.linspace(0.2,0.8,3))     
 
-    fuel_cell_tpye     =  ['Larminie', 'PEM']
+    fuel_cell_tpye     =   ['Larminie', 'PEM']
     
 
     fig1 = plt.figure('Fuel Cell Test') 
@@ -70,7 +70,7 @@ def main():
         mdot_H2       = results.segments[0].conditions.energy.busses['bus'].fuel_cell_stacks[fuel_cell_tag].H2_mass_flow_rate
         print('Mass Flow Rate: ' + str(mdot_H2[0,0]))
         mdot_H2_diff   = np.abs(mdot_H2[0,0] - mdot_H2_true[i]) 
-        print(mdot_H2_diff) 
+        print('Mass Flow Rate: ' + str(mdot_H2_diff))
         assert np.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6  
 
         time     = results.segments[0].conditions.frames.inertial.time[:,0] 
@@ -128,7 +128,7 @@ def mission_setup(analyses):
     mission            = RCAIDE.Framework.Mission.Sequential_Segments()
     mission.tag        = 'cell_cycle_test'   
     Segments           = RCAIDE.Framework.Mission.Segments 
-    base_segment       = Segments.Segment()    
+    base_segment       = Segments.Segment()
   
     segment                                 = Segments.Ground.Battery_Discharge(base_segment) 
     segment.analyses.extend(analyses.discharge)  

@@ -81,9 +81,9 @@ class Liquid_Cooled_Wavy_Channel(Component):
         append_wavy_channel_segment_conditions(self, segment,coolant_line)
         return
     
-    def compute_thermal_performance(self,battery,bus,coolant_line,Q_heat_gen,T_cell,state,delta_t,t_idx):
-        T_battery_current =  wavy_channel_rating_model(self, battery,bus,coolant_line, Q_heat_gen, T_cell, state, delta_t, t_idx)
-        return  T_battery_current
+    def compute_thermal_performance(self,battery,bus,coolant_line,Q_heat_gen,T_cell,state):
+        dT_dt =  wavy_channel_rating_model(self, battery,bus,coolant_line, Q_heat_gen, T_cell, state)
+        return  dT_dt
     
     def plot_operating_conditions(self, results, coolant_line,save_filename, save_figure,show_legend,file_type , width, height):
         plot_wavy_channel_conditions(self, results, coolant_line,save_filename,save_figure,show_legend,file_type , width, height)

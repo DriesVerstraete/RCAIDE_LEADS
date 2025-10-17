@@ -16,15 +16,10 @@ import numpy as np
 def compute_fuel_tank_properties(tank,state,distributor):
     '''
     UPDATE HEADER 
-    ''' 
-    
-    if type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Electrical_Bus:
-        distributor_conditions = state.conditions.energy.busses[distributor.tag] 
-    elif  type(distributor) == RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line: 
-        distributor_conditions = state.conditions.energy.fuel_lines[distributor.tag]         
-    
-    tank_conditions = distributor_conditions.fuel_tanks[tank.tag]   
-    mass_unknowns   = state.unknowns.network[tank.tag + '_mass'] 
+    '''    
+    distributor_conditions = state.conditions.energy.fuel_lines[distributor.tag]     
+    tank_conditions        = distributor_conditions.fuel_tanks[tank.tag]   
+    mass_unknowns          = state.unknowns.network[tank.tag + '_mass'] 
      
     D   = state.numerics.time.differentiate      
     if len(D) > 0:
