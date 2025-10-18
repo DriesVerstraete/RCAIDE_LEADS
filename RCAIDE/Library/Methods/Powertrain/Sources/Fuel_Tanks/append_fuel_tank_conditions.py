@@ -6,11 +6,8 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-# RCAIDE imports
-import  RCAIDE
-from RCAIDE.Framework.Mission.Common     import   Conditions 
-
-import numpy as np
+# RCAIDE imports 
+from RCAIDE.Framework.Mission.Common     import   Conditions  
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
@@ -53,8 +50,8 @@ def append_fuel_tank_conditions(tank, segment, distributor):
     ones_row    = segment.state.ones_row  
     distributor_conditions = segment.state.conditions.energy.fuel_lines[distributor.tag] 
     distributor_conditions.fuel_tanks[tank.tag]                           = Conditions()  
-    distributor_conditions.fuel_tanks[tank.tag].mass                      = tank.fuel.mass_properties.mass * ones_row(1) 
-    distributor_conditions.fuel_tanks[tank.tag].mass_flow_rate            = 0 * ones_row(1)  
+    distributor_conditions.fuel_tanks[tank.tag].fuel_mass                 = tank.fuel.mass_properties.mass * ones_row(1) 
+    distributor_conditions.fuel_tanks[tank.tag].fuel_mass_flow_rate       = 0 * ones_row(1)  
     distributor_conditions.fuel_tanks[tank.tag].surface_temperature       = 0 * ones_row(1) 
     distributor_conditions.fuel_tanks[tank.tag].secondary_mass_flow_rate  = tank.secondary_mass_flow_rate * ones_row(1)
     
@@ -66,5 +63,5 @@ def append_fuel_tank_segment_conditions(fuel_tank, segment, distributor):
 
     if segment.state.initials:     
         distributor_initials = segment.state.initials.conditions.energy.fuel_lines[distributor.tag] 
-        distributor_conditions.fuel_tanks[fuel_tank.tag].mass[:,0]  = distributor_initials.fuel_tanks[fuel_tank.tag].mass[-1,0]
+        distributor_conditions.fuel_tanks[fuel_tank.tag].fuel_mass[:,0]  = distributor_initials.fuel_tanks[fuel_tank.tag].fuel_mass[-1,0]
     return

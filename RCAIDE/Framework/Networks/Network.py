@@ -222,7 +222,7 @@ class Network(Component):
                 # Determine mass flow from each tank
                 for tank in fuel_line.fuel_tanks:
                     tank.compute_tank_properties(state,fuel_line)  
-                    state.conditions.energy.cumulative_fuel_consumption[1:,0] += np.cumsum(-np.diff(state.conditions.energy.fuel_lines.fuel_line.fuel_tanks[tank.tag].mass[:,0]))
+                    state.conditions.energy.cumulative_fuel_consumption[1:,0] += np.cumsum(-np.diff(state.conditions.energy.fuel_lines.fuel_line.fuel_tanks[tank.tag].fuel_mass[:,0]))
                     
         # 3.2 Electric Sources 
         for bus in  busses:

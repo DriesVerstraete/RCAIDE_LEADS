@@ -37,21 +37,21 @@ def append_liquid_hydrogen_tank_conditions(tank, segment, distributor):
     
     distributor_conditions = segment.state.conditions.energy.fuel_lines[distributor.tag] 
     distributor_conditions.fuel_tanks[tank.tag]                           = Conditions()  
-    distributor_conditions.fuel_tanks[tank.tag].mass_flow_rate            = ones_row(1) * 0
+    distributor_conditions.fuel_tanks[tank.tag].fuel_mass_flow_rate       = ones_row(1) * 0
     distributor_conditions.fuel_tanks[tank.tag].boil_off_rate             = ones_row(1) * 0
     distributor_conditions.fuel_tanks[tank.tag].vent_rate                 = ones_row(1) * tank.vent_rate 
     distributor_conditions.fuel_tanks[tank.tag].ullage_mass               = ones_row(1) * tank.ullage.mass_properties.mass/ div
-    distributor_conditions.fuel_tanks[tank.tag].mass                      = ones_row(1) * tank.fuel.mass_properties.mass/ div
+    distributor_conditions.fuel_tanks[tank.tag].fuel_mass                 = ones_row(1) * tank.fuel.mass_properties.mass/ div
     distributor_conditions.fuel_tanks[tank.tag].ullage_temperature        = ones_row(1) * tank.ullage.temperature
-    distributor_conditions.fuel_tanks[tank.tag].liquid_temperature        = ones_row(1) * tank.fuel.temperature
-    distributor_conditions.fuel_tanks[tank.tag].ullage_volume             = ones_row(1) * (tank.fuel.volume_properties.gross_volume -  tank.fuel.volume_properties.net_volume)/ div
-    distributor_conditions.fuel_tanks[tank.tag].liquid_volume             = ones_row(1) * tank.fuel.volume_properties.net_volume/ div
+    distributor_conditions.fuel_tanks[tank.tag].fuel_temperature          = ones_row(1) * tank.fuel.temperature
+    distributor_conditions.fuel_tanks[tank.tag].ullage_volume             = ones_row(1) * (tank.volume_properties.net_volume   -  tank.fuel.volume_properties.net_volume) / div
+    distributor_conditions.fuel_tanks[tank.tag].fuel_volume               = ones_row(1) * tank.fuel.volume_properties.net_volume/ div
     distributor_conditions.fuel_tanks[tank.tag].pressure                  = ones_row(1) * 0
     distributor_conditions.fuel_tanks[tank.tag].secondary_mass_flow_rate  = tank.secondary_mass_flow_rate * ones_row(1) 
      
-    #if tank.xz_plane_symmetric:
-        #next_tag = tank.tag + "_symmetric"
-        #distributor_conditions.fuel_tanks[next_tag] = deepcopy(distributor_conditions.fuel_tanks[tank.tag])
+    if tank.xz_plane_symmetric:
+        next_tag = tank.tag + "_symmetric"
+        distributor_conditions.fuel_tanks[next_tag] = deepcopy(distributor_conditions.fuel_tanks[tank.tag])
 
     return 
 
@@ -65,11 +65,11 @@ def append_hydrogen_fuel_tank_segment_conditions(fuel_tank, segment, distributor
             distributor_initials = segment.state.initials.conditions.energy.fuel_lines[distributor.tag]
             
         distributor_conditions.fuel_tanks[fuel_tank.tag].ullage_mass[:,0]        = distributor_initials.fuel_tanks[fuel_tank.tag].ullage_mass[-1,0]
-        distributor_conditions.fuel_tanks[fuel_tank.tag].liquid_mass[:,0]        = distributor_initials.fuel_tanks[fuel_tank.tag].liquid_mass[-1,0]
+        distributor_conditions.fuel_tanks[fuel_tank.tag].fuel_mass[:,0]          = distributor_initials.fuel_tanks[fuel_tank.tag].fuel_mass[-1,0]
         distributor_conditions.fuel_tanks[fuel_tank.tag].ullage_temperature[:,0] = distributor_initials.fuel_tanks[fuel_tank.tag].ullage_temperature[-1,0]
-        distributor_conditions.fuel_tanks[fuel_tank.tag].liquid_temperature[:,0] = distributor_initials.fuel_tanks[fuel_tank.tag].liquid_temperature[-1,0]
+        distributor_conditions.fuel_tanks[fuel_tank.tag].fuel_temperature[:,0]   = distributor_initials.fuel_tanks[fuel_tank.tag].fuel_temperature[-1,0]
         distributor_conditions.fuel_tanks[fuel_tank.tag].ullage_volume[:,0]      = distributor_initials.fuel_tanks[fuel_tank.tag].ullage_volume[-1,0]
-        distributor_conditions.fuel_tanks[fuel_tank.tag].liquid_volume[:,0]      = distributor_initials.fuel_tanks[fuel_tank.tag].liquid_volume[-1,0]
+        distributor_conditions.fuel_tanks[fuel_tank.tag].fuel_volume[:,0]        = distributor_initials.fuel_tanks[fuel_tank.tag].fuel_volume[-1,0]
         distributor_conditions.fuel_tanks[fuel_tank.tag].pressure[:,0]           = distributor_initials.fuel_tanks[fuel_tank.tag].pressure[-1,0]
 
     return 

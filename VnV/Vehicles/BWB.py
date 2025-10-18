@@ -504,23 +504,23 @@ def vehicle_setup():
     net.propulsors.append(turbofan3)     
 
   
-    # #------------------------------------------------------------------------------------------------------------------------- 
-    # #  Energy Source: Fuel Tank
-    # #------------------------------------------------------------------------------------------------------------------------- 
-    fuel_tank_1                                        = RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank(vehicle.wings.main_wing)
-    fuel_tank_1.tag                                    = 'H2_Fuel_Tank_1'  
-    fuel_tank_1.material                               = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_1.insulation_material                    = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
-    fuel_tank_1.fuel.gravimetric_efficiency            = 0.5 
-    # fuel_tank_1.wall_thickness                         = 2*Units.inches
-    fuel_line.fuel_tanks.append(fuel_tank_1)
+    ## #------------------------------------------------------------------------------------------------------------------------- 
+    ## #  Energy Source: Fuel Tank
+    ## #------------------------------------------------------------------------------------------------------------------------- 
+    #fuel_tank_1                                        = RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank(vehicle.wings.main_wing)
+    #fuel_tank_1.tag                                    = 'H2_Fuel_Tank_1'  
+    #fuel_tank_1.material                               = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
+    #fuel_tank_1.insulation_material                    = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
+    #fuel_tank_1.fuel.gravimetric_efficiency            = 0.5 
+    ## fuel_tank_1.wall_thickness                         = 2*Units.inches
+    #fuel_line.fuel_tanks.append(fuel_tank_1)
 
-    fuel_tank_2                                        = RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank(vehicle.wings.main_wing)
-    fuel_tank_2.tag                                    = 'H2_Fuel_Tank_2'  
-    fuel_tank_2.material                               = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
-    fuel_tank_2.insulation_material                    = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation() 
-    fuel_tank_2.fuel.gravimetric_efficiency            = 0.5  
-    fuel_line.fuel_tanks.append(fuel_tank_2)
+    #fuel_tank_2                                        = RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank(vehicle.wings.main_wing)
+    #fuel_tank_2.tag                                    = 'H2_Fuel_Tank_2'  
+    #fuel_tank_2.material                               = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
+    #fuel_tank_2.insulation_material                    = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation() 
+    #fuel_tank_2.fuel.gravimetric_efficiency            = 0.5  
+    #fuel_line.fuel_tanks.append(fuel_tank_2)
  
 
     fuel_tank_4                                        = RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank()

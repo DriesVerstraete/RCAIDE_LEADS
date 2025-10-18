@@ -104,7 +104,7 @@ def plot_altitude_sfc_weight(results,
             for _, fuel_line in enumerate(fuel_lines):
                 for fuel_tank_i, fuel_tank in enumerate(fuel_line.fuel_tanks):
                     line_color     = cm.Dark2(np.linspace(0,0.9,len(fuel_line.fuel_tanks)))
-                    tank_mass = results.segments[i].conditions.energy.fuel_lines.fuel_line.fuel_tanks[fuel_tank.tag].mass[:, 0]#/ Units.lb
+                    tank_mass = results.segments[i].conditions.energy.fuel_lines.fuel_line.fuel_tanks[fuel_tank.tag].fuel_mass[:, 0]#/ Units.lb
                     if fuel_tank_i == 0 and i ==0:                    
                         axis_2.plot(time, tank_mass, color = line_color[fuel_tank_i], marker = ps.markers[fuel_tank_i], linewidth = ps.line_width, label = fuel_tank.tag)
                     else:

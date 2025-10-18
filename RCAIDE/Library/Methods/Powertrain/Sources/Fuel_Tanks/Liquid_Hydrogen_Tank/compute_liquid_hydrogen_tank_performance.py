@@ -18,22 +18,22 @@ from scipy.optimize import brentq
 def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
 
     distributor_conditions = state.conditions.energy.fuel_lines[distributor.tag]          
-    tank_conditions       = distributor_conditions.fuel_tanks[fuel_tank.tag]   
+    tank_conditions        = distributor_conditions.fuel_tanks[fuel_tank.tag]   
     
     m_g = state.unknowns.network[fuel_tank.tag + '_ullage_mass']
-    m_l = state.unknowns.network[fuel_tank.tag + '_liquid_mass']
+    m_l = state.unknowns.network[fuel_tank.tag + '_fuel_mass']
     T_g = state.unknowns.network[fuel_tank.tag + '_ullage_temperature']
-    T_l = state.unknowns.network[fuel_tank.tag + '_liquid_temperature']
+    T_l = state.unknowns.network[fuel_tank.tag + '_fuel_temperature']
     V_g = state.unknowns.network[fuel_tank.tag + '_ullage_volume']
-    V_l = state.unknowns.network[fuel_tank.tag + '_liquid_volume'] 
+    V_l = state.unknowns.network[fuel_tank.tag + '_fuel_volume'] 
 
     fuel_flow_split_ratio  = fuel_tank.fuel_selector_valve.fuel_flow_split_ratio 
     if fuel_tank.xz_plane_symmetric:
         fuel_flow_split_ratio  /=2
 
-    tank_conditions.mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * fuel_flow_split_ratio    
+    tank_conditions.fuel_mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * fuel_flow_split_ratio    
     
-    m_dot_l_out =  tank_conditions.mass_flow_rate  
+    m_dot_l_out =  tank_conditions.fuel_mass_flow_rate  
     m_dot_g_out =  tank_conditions.vent_rate
 
     # --- Interface saturation Pressure ---
@@ -59,23 +59,16 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
     rho_g = PropsSI("D", "T", T_g, "Q", 1, "Hydrogen")   # density [kg/m³]
 
     # --- Heat fluxes interface exchange ---
-    Q_l_i = Q_liq_to_int(
-        T_l, T_int, A_int, L_int,
-        rho_l, cp_liq, mu_liq, k_liq
-    )
-    
-    Q_g_i = Q_gas_to_int(
-        T_g, T_int, A_int, L_int,
-        rho_g, cp_g, mu_g, k_g
-    )
+    Q_l_i = Q_liq_to_int(  T_l, T_int, A_int, L_int,  rho_l, cp_liq, mu_liq, k_liq ) 
+    Q_g_i = Q_gas_to_int( T_g, T_int, A_int, L_int,  rho_g, cp_g, mu_g, k_g )
 
     # --- Heat fluxes environment exchange ---
+    T_h = state.conditions.freestream.temperature
     # Q_e_g = Q_env_to_hydrogen(A_wet_ullage, T_h, T_g, N_layers=30)
-    # Q_e_l = Q_env_to_hydrogen(A_wet_liquid, T_h, T_l, N_layers=30)
-    
+    # Q_e_l = Q_env_to_hydrogen(A_wet_liquid, T_h, T_l, N_layers=30) 
     # --- Heat fluxes environment exchange assume constant for testing code ---
-    Q_e_g = 200*np.ones_like(Q_l_i)
-    Q_e_l = 200*np.ones_like(Q_l_i)
+    Q_e_g = 200*np.ones_like(Q_l_i) # TO REMOVE 
+    Q_e_l = 200*np.ones_like(Q_l_i) # TO REMOVE 
 
     # --- Enthalpies ---
     h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
@@ -107,30 +100,30 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
  
     D = state.numerics.time.differentiate
 
-    state.residuals.network[fuel_tank.tag + '_ullage_mass'][:, 0]           = np.dot(D, m_g)[:, 0] - dm_g
-    state.residuals.network[fuel_tank.tag + '_ullage_mass'][0,0]        = m_g[0] -  tank_conditions.ullage_mass[0] 
+    state.residuals.network[fuel_tank.tag + '_ullage_mass'][:, 0]         = np.dot(D, m_g)[:, 0] - dm_g
+    state.residuals.network[fuel_tank.tag + '_ullage_mass'][0,0]          = m_g[0] -  tank_conditions.ullage_mass[0] 
 
-    state.residuals.network[fuel_tank.tag + '_liquid_mass'][:, 0]           = np.dot(D, m_l)[:, 0] - dm_l
-    state.residuals.network[fuel_tank.tag + '_liquid_mass'][0,0]        = m_l[0] - tank_conditions.mass[0] 
+    state.residuals.network[fuel_tank.tag + '_fuel_mass'][:, 0]           = np.dot(D, m_l)[:, 0] - dm_l
+    state.residuals.network[fuel_tank.tag + '_fuel_mass'][0,0]            = m_l[0] - tank_conditions.fuel_mass[0] 
 
-    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][:, 0]    = np.dot(D, T_g)[:, 0] - dT_g
-    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][0,0] = T_g[0] - tank_conditions.ullage_temperature[0,0] 
+    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][:,0]   = np.dot(D, T_g)[:, 0] - dT_g
+    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][0,0]   = T_g[0] - tank_conditions.ullage_temperature[0,0] 
 
-    state.residuals.network[fuel_tank.tag + '_liquid_temperature'][:, 0]    = np.dot(D, T_l)[:, 0] - dT_l
-    state.residuals.network[fuel_tank.tag + '_liquid_temperature'][0,0] = T_l[0] - tank_conditions.liquid_temperature[0,0] 
+    state.residuals.network[fuel_tank.tag + '_fuel_temperature'][:, 0]    = np.dot(D, T_l)[:, 0] - dT_l
+    state.residuals.network[fuel_tank.tag + '_fuel_temperature'][0,0]     = T_l[0] - tank_conditions.fuel_temperature[0,0] 
 
-    state.residuals.network[fuel_tank.tag + '_ullage_volume'][:, 0]         = np.dot(D, V_g)[:, 0] - dV_g
-    state.residuals.network[fuel_tank.tag + '_ullage_volume'][0,0]     = V_g[0] - tank_conditions.ullage_volume[0,0] 
+    state.residuals.network[fuel_tank.tag + '_ullage_volume'][:, 0]       = np.dot(D, V_g)[:, 0] - dV_g
+    state.residuals.network[fuel_tank.tag + '_ullage_volume'][0,0]        = V_g[0] - tank_conditions.ullage_volume[0,0] 
     
-    state.residuals.network[fuel_tank.tag + '_liquid_volume'][:, 0]         = np.dot(D, V_l)[:, 0] - dV_l
-    state.residuals.network[fuel_tank.tag + '_liquid_volume'][0,0]      = V_l[0] - tank_conditions.liquid_volume[0,0] 
+    state.residuals.network[fuel_tank.tag + '_fuel_volume'][:, 0]         = np.dot(D, V_l)[:, 0] - dV_l
+    state.residuals.network[fuel_tank.tag + '_fuel_volume'][0,0]          = V_l[0] - tank_conditions.fuel_volume[0,0] 
 
     tank_conditions.ullage_mass[1:,0]        = state.unknowns.network[fuel_tank.tag + '_ullage_mass'][1:,0]
-    tank_conditions.mass[1:,0]               = state.unknowns.network[fuel_tank.tag + '_liquid_mass'][1:,0]
+    tank_conditions.fuel_mass[1:,0]          = state.unknowns.network[fuel_tank.tag + '_fuel_mass'][1:,0]
     tank_conditions.ullage_temperature[1:,0] = state.unknowns.network[fuel_tank.tag + '_ullage_temperature'][1:,0]
-    tank_conditions.liquid_temperature[1:,0] = state.unknowns.network[fuel_tank.tag + '_liquid_temperature'][1:,0]
+    tank_conditions.fuel_temperature[1:,0]   = state.unknowns.network[fuel_tank.tag + '_fuel_temperature'][1:,0]
     tank_conditions.ullage_volume[1:,0]      = state.unknowns.network[fuel_tank.tag + '_ullage_volume'][1:,0]
-    tank_conditions.liquid_volume[1:,0]      = state.unknowns.network[fuel_tank.tag + '_liquid_volume'][1:,0]
+    tank_conditions.fuel_volume[1:,0]        = state.unknowns.network[fuel_tank.tag + '_fuel_volume'][1:,0]
     tank_conditions.vent_rate                = m_dot_g_out
     tank_conditions.boil_off_rate[:,0]       = m_dot_bo
     
@@ -146,13 +139,14 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
 def Q_env_to_hydrogen(A_wet, T_h, T_c, N_layers=30):
 
     # Default constants from Keller et al.
-    C_r = 5.39e-10             # Radiation constant
-    emittance = 0.031          # Effective emittance
-    C_s = 8.95e-8              # Solid conduction constant
-    layer_density = 30 * 100   # 30 layers/cm → 3000 layers/m
-    C_g = 1.46e4               # Gas conduction constant
+    C_r       = 5.39e-10             # Radiation constant
+    emittance = 0.031                # Effective emittance
+    C_s       = 8.95e-8              # Solid conduction constant
+    layer_density = 30 * 100         # 30 layers/cm → 3000 layers/m
+    C_g          = 1.46e4            # Gas conduction constant
+    
     # Convert 1 torr = 133.322 Pa
-    P = 1e-6 * 133.322         # Vacuum pressure [Pa]
+    P = 1e-6 * 133.322  # Vacuum pressure [Pa]
 
     # Heat flux due to radiation
     q_rad = C_r * emittance / N_layers * (T_h**4.67 - T_c**4.67)
@@ -173,8 +167,7 @@ def Q_env_to_hydrogen(A_wet, T_h, T_c, N_layers=30):
     return Q_dot
 
 # ==================== Heat transfer between interface and liquid ====================
-def Q_liq_to_int(T_liq, T_int, A_int, L_int, rho_l, cp_l, mu_l, k_l,
-                 C=0.27, n=0.25):
+def Q_liq_to_int(T_liq, T_int, A_int, L_int, rho_l, cp_l, mu_l, k_l, C=0.27, n=0.25):
     """
     Heat transfer from liquid to interface using Grashof–Prandtl natural convection.
     """
@@ -194,8 +187,7 @@ def Q_liq_to_int(T_liq, T_int, A_int, L_int, rho_l, cp_l, mu_l, k_l,
     return Q
 
 # ==================== Heat transfer between interface and gas ====================
-def Q_gas_to_int(T_g, T_int, A_int, L_int, rho_g, cp_g, mu_g, k_g,
-                 C=0.27, n=0.25):
+def Q_gas_to_int(T_g, T_int, A_int, L_int, rho_g, cp_g, mu_g, k_g, C=0.27, n=0.25):
     """
     Heat transfer from ullage to interface using Grashof Prandtl natural convection.
     """
