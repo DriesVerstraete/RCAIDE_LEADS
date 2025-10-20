@@ -19,7 +19,7 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
 
     distributor_conditions = state.conditions.energy.fuel_lines[distributor.tag]          
     tank_conditions        = distributor_conditions.fuel_tanks[fuel_tank.tag]   
-    
+        
     m_g = state.unknowns.network[fuel_tank.tag + '_ullage_mass']
     m_l = state.unknowns.network[fuel_tank.tag + '_fuel_mass']
     T_g = state.unknowns.network[fuel_tank.tag + '_ullage_temperature']
@@ -33,34 +33,32 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
 
     tank_conditions.fuel_mass_flow_rate  =  distributor_conditions.fuel_mass_flow_rate * fuel_flow_split_ratio    
     
-    m_dot_l_out =  tank_conditions.fuel_mass_flow_rate  
-    m_dot_g_out =  tank_conditions.vent_rate
+    m_dot_l_engine   =  tank_conditions.fuel_mass_flow_rate[:,0]   
 
     # --- Interface saturation Pressure ---
     P = PropsSI("P", "T", T_g[:,0], "D", m_g[:,0] / V_g[:,0], "Hydrogen")
-
 
     # --- Interface saturation temperature ---
     T_int = PropsSI("T", "P", P, "Q", 1, "Hydrogen")  # [K]  
     
     # --- Geometry placeholders ---
-    L_int,A_int= compute_interface_geometric_properties(fuel_tank, V_l[:,0]) 
+    L_int,A_int= compute_interface_geometric_properties(fuel_tank, V_l) 
 
     # Liquid properties
-    k_liq = PropsSI("L", "T", T_l, "Q", 0, "Hydrogen")   # thermal conductivity [W/m-K]
-    mu_liq = PropsSI("V", "T", T_l, "Q", 0, "Hydrogen")  # viscosity [Pa·s]
-    cp_liq = PropsSI("C", "T", T_l, "Q", 0, "Hydrogen")  # Cp [J/kg-K]
-    rho_l  = PropsSI("D", "T", T_l, "Q", 0, "Hydrogen")  # density [kg/m³]
+    k_liq = PropsSI("L", "T", T_l[:,0], "Q", 0, "Hydrogen")   # thermal conductivity [W/m-K]
+    mu_liq = PropsSI("V", "T", T_l[:,0], "Q", 0, "Hydrogen")  # viscosity [Pa·s]
+    cp_liq = PropsSI("C", "T", T_l[:,0], "Q", 0, "Hydrogen")  # Cp [J/kg-K]
+    rho_l  = PropsSI("D", "T", T_l[:,0], "Q", 0, "Hydrogen")  # density [kg/m³]
 
     # Gas (ullage vapor) properties
-    k_g   = PropsSI("L", "T", T_g, "Q", 1, "Hydrogen")   # thermal conductivity [W/m-K]
-    mu_g  = PropsSI("V", "T", T_g, "Q", 1, "Hydrogen")   # viscosity [Pa·s]
-    cp_g  = PropsSI("Cpmass", "T", T_g, "Q", 1, "Hydrogen")   # Cp [J/kg-K] # maybe wrong check thisn later
-    rho_g = PropsSI("D", "T", T_g, "Q", 1, "Hydrogen")   # density [kg/m³]
+    k_g   = PropsSI("L", "T", T_g[:,0], "Q", 1, "Hydrogen")   # thermal conductivity [W/m-K]
+    mu_g  = PropsSI("V", "T", T_g[:,0], "Q", 1, "Hydrogen")   # viscosity [Pa·s]
+    cp_g  = PropsSI("Cpmass", "T", T_g[:,0], "Q", 1, "Hydrogen")   # Cp [J/kg-K] # maybe wrong check thisn later
+    rho_g = PropsSI("D", "T", T_g[:,0], "Q", 1, "Hydrogen")   # density [kg/m³]
 
     # --- Heat fluxes interface exchange ---
-    Q_l_i = Q_liq_to_int(  T_l, T_int, A_int, L_int,  rho_l, cp_liq, mu_liq, k_liq ) 
-    Q_g_i = Q_gas_to_int( T_g, T_int, A_int, L_int,  rho_g, cp_g, mu_g, k_g )
+    Q_l_i = Q_liq_to_int(  T_l[:,0] , T_int, A_int[:,0], L_int[:,0],  rho_l, cp_liq, mu_liq, k_liq )
+    Q_g_i = Q_gas_to_int( T_g[:,0], T_int, A_int[:,0], L_int[:,0],  rho_g, cp_g, mu_g, k_g )
 
     # --- Heat fluxes environment exchange ---
     T_h = state.conditions.freestream.temperature
@@ -71,61 +69,63 @@ def compute_liquid_hydrogen_tank_performance(fuel_tank,state,distributor):
     Q_e_l = 200*np.ones_like(Q_l_i) # TO REMOVE 
 
     # --- Enthalpies ---
-    h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
-    h_l = PropsSI("H", "T", T_int, "Q", 0, "Hydrogen")  # J/kg
-    u_g = PropsSI("U", "T", T_int, "Q", 1, "Hydrogen")  # J/kg
-    u_l = PropsSI("U", "T", T_int, "Q", 0, "Hydrogen")  # J/kg
+    h_g = PropsSI("H", "T", T_int, "Q", 1, "Hydrogen") # J/kg
+    h_l = PropsSI("H", "T", T_int, "Q", 0, "Hydrogen") # J/kg
+    u_g = PropsSI("U", "T", T_int, "Q", 1, "Hydrogen") # J/kg
+    u_l = PropsSI("U", "T", T_int, "Q", 0, "Hydrogen") # J/kg
     
     # --- Natural Boil-off mass flow ---
-    m_dot_bo = (Q_l_i + Q_g_i) / (h_g - h_l + 1e-9)
+    m_dot_bo = (Q_l_i + Q_g_i) / (h_g - h_l)
 
     # ---Vent(-) or boiled (+) mass flow rate ---
-    m_dot_extra = m_g[:,0]/(V_g[:,0]*rho_l)*(m_dot_bo+ m_dot_l_out[:,0]) + m_dot_bo
-
+    m_dot_extra     = m_g[:,0]/(V_g[:,0]*rho_l)*(m_dot_bo+ m_dot_l_engine) + m_dot_bo 
     m_dot_extra_boi = np.where(m_dot_extra > 0, m_dot_extra, 0)
     m_dot_vent      = np.where(m_dot_extra < 0, -m_dot_extra, 0)
 
-    m_dot_bo         += m_dot_extra_boi
-    m_dot_g_out[:,0] += m_dot_vent
+    # update total boil off 
+    m_dot_bo_final  = m_dot_bo +  m_dot_extra_boi 
     
     # --- Mass balances ---
-    dm_g = m_dot_bo - m_dot_g_out[:,0]
-    dm_l = -m_dot_bo - m_dot_l_out[:,0]
+    dm_g =  m_dot_bo_final - m_dot_vent 
+    dm_l = -m_dot_bo_final - m_dot_l_engine 
     dV_g = -dm_l / rho_l
     dV_l = dm_l / rho_l
     
     # --- Energy balances ---
-    dT_g = (-Q_g_i + Q_e_g - P*dV_g + dm_g*(h_g - u_g)) / (m_g[:,0]*cp_g + 1e-9)
-    dT_l = (-Q_l_i + Q_e_l- P*(dV_l) + dm_l*(h_l - u_l)) / (m_l[:,0]*cp_liq + 1e-9)
+    dT_g = (-Q_g_i + Q_e_g - P*dV_g + dm_g*(h_g - u_g)) / (m_g[:,0]*cp_g)
+    dT_l = (-Q_l_i + Q_e_l- P*(dV_l) + dm_l*(h_l - u_l)) / (m_l[:,0]*cp_liq)
  
-    D = state.numerics.time.differentiate
+    D = state.numerics.time.differentiate 
 
-    state.residuals.network[fuel_tank.tag + '_ullage_mass'][:, 0]         = np.dot(D, m_g)[:, 0] - dm_g
-    state.residuals.network[fuel_tank.tag + '_ullage_mass'][0,0]          = m_g[0] -  tank_conditions.ullage_mass[0] 
+    state.residuals.network[fuel_tank.tag + '_ullage_mass'][:, 0]         = np.dot(D, m_g)[:, 0] - dm_g 
+    state.residuals.network[fuel_tank.tag + '_ullage_mass'][0,0]          = m_g[0] -  tank_conditions.ullage_mass[0]   
 
-    state.residuals.network[fuel_tank.tag + '_fuel_mass'][:, 0]           = np.dot(D, m_l)[:, 0] - dm_l
-    state.residuals.network[fuel_tank.tag + '_fuel_mass'][0,0]            = m_l[0] - tank_conditions.fuel_mass[0] 
+    state.residuals.network[fuel_tank.tag + '_fuel_mass'][:, 0]           = np.dot(D, m_l)[:, 0] - dm_l 
+    state.residuals.network[fuel_tank.tag + '_fuel_mass'][0,0]            = m_l[0] - tank_conditions.fuel_mass[0]
 
-    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][:,0]   = np.dot(D, T_g)[:, 0] - dT_g
-    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][0,0]   = T_g[0] - tank_conditions.ullage_temperature[0,0] 
-
-    state.residuals.network[fuel_tank.tag + '_fuel_temperature'][:, 0]    = np.dot(D, T_l)[:, 0] - dT_l
-    state.residuals.network[fuel_tank.tag + '_fuel_temperature'][0,0]     = T_l[0] - tank_conditions.fuel_temperature[0,0] 
-
-    state.residuals.network[fuel_tank.tag + '_ullage_volume'][:, 0]       = np.dot(D, V_g)[:, 0] - dV_g
-    state.residuals.network[fuel_tank.tag + '_ullage_volume'][0,0]        = V_g[0] - tank_conditions.ullage_volume[0,0] 
+    state.residuals.network[fuel_tank.tag + '_ullage_volume'][:, 0]       = np.dot(D, V_g)[:, 0] - dV_g  
+    state.residuals.network[fuel_tank.tag + '_ullage_volume'][0,0]        = V_g[0] - tank_conditions.ullage_volume[0,0]  
     
-    state.residuals.network[fuel_tank.tag + '_fuel_volume'][:, 0]         = np.dot(D, V_l)[:, 0] - dV_l
+    state.residuals.network[fuel_tank.tag + '_fuel_volume'][:, 0]         = np.dot(D, V_l)[:, 0] - dV_l  
     state.residuals.network[fuel_tank.tag + '_fuel_volume'][0,0]          = V_l[0] - tank_conditions.fuel_volume[0,0] 
+
+    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][:,0]   = np.dot(D, T_g)[:, 0] - dT_g 
+    state.residuals.network[fuel_tank.tag + '_ullage_temperature'][0,0]   = T_g[0] - tank_conditions.ullage_temperature[0,0] 
+    
+    state.residuals.network[fuel_tank.tag + '_fuel_temperature'][:, 0]    = np.dot(D, T_l)[:, 0] - dT_l 
+    state.residuals.network[fuel_tank.tag + '_fuel_temperature'][0,0]     = T_l[0] - tank_conditions.fuel_temperature[0,0] 
+    
 
     tank_conditions.ullage_mass[1:,0]        = state.unknowns.network[fuel_tank.tag + '_ullage_mass'][1:,0]
     tank_conditions.fuel_mass[1:,0]          = state.unknowns.network[fuel_tank.tag + '_fuel_mass'][1:,0]
-    tank_conditions.ullage_temperature[1:,0] = state.unknowns.network[fuel_tank.tag + '_ullage_temperature'][1:,0]
-    tank_conditions.fuel_temperature[1:,0]   = state.unknowns.network[fuel_tank.tag + '_fuel_temperature'][1:,0]
     tank_conditions.ullage_volume[1:,0]      = state.unknowns.network[fuel_tank.tag + '_ullage_volume'][1:,0]
     tank_conditions.fuel_volume[1:,0]        = state.unknowns.network[fuel_tank.tag + '_fuel_volume'][1:,0]
-    tank_conditions.vent_rate                = m_dot_g_out
-    tank_conditions.boil_off_rate[:,0]       = m_dot_bo
+    tank_conditions.ullage_temperature[1:,0] = state.unknowns.network[fuel_tank.tag + '_ullage_temperature'][1:,0]
+    tank_conditions.fuel_temperature[1:,0]   = state.unknowns.network[fuel_tank.tag + '_fuel_temperature'][1:,0]
+    tank_conditions.pressure[:,0]            = P 
+    tank_conditions.vent_rate[:,0]           = m_dot_vent
+    tank_conditions.boil_off_rate[:,0]       = m_dot_bo_final 
+
     
     if fuel_tank.xz_plane_symmetric:
         symmetric_tag = fuel_tank.tag  + "_symmetric"
@@ -175,14 +175,14 @@ def Q_liq_to_int(T_liq, T_int, A_int, L_int, rho_l, cp_l, mu_l, k_l, C=0.27, n=0
     beta_l = 1.0 / T_liq
     
     # Grashof-Prandtl product
-    GrPr = (L_int**3 * rho_l**2 * 9.81 * beta_l[:,0] *
-            abs(T_liq[:,0] - T_int) * cp_l) / (mu_l * k_l + 1e-12)
+    GrPr = (L_int**3 * rho_l**2 * 9.81 * beta_l *
+            abs(T_liq - T_int) * cp_l) / (mu_l * k_l + 1e-12)
     
     # Heat transfer coefficient
     alpha = C * (k_l / L_int) * (GrPr**n)
     
     # Heat flux
-    Q = alpha * A_int * (T_liq[:,0] - T_int)
+    Q = alpha * A_int * (T_liq - T_int)
     
     return Q
 
@@ -194,12 +194,12 @@ def Q_gas_to_int(T_g, T_int, A_int, L_int, rho_g, cp_g, mu_g, k_g, C=0.27, n=0.2
 
     beta_g = 1.0 / T_g
     
-    GrPr = (L_int**3 * rho_g**2 * 9.81 * beta_g[:,0] *
-            abs(T_g[:,0] - T_int) * cp_g) / (mu_g * k_g + 1e-12)
+    GrPr = (L_int**3 * rho_g**2 * 9.81 * beta_g *
+            abs(T_g - T_int) * cp_g) / (mu_g * k_g + 1e-12)
     
     alpha = C * (k_g / L_int) * (GrPr**n)
     
-    Q = alpha * A_int * (T_g[:,0] - T_int)
+    Q = alpha * A_int * (T_g - T_int)
     
     return Q
 

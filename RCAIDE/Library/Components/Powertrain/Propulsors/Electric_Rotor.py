@@ -95,7 +95,7 @@ class Electric_Rotor(Propulsor):
             append_electric_rotor_residual_and_unknown(self,segment)
         return
 
-    def unpack_propulsor_unknowns(self,segment):  
+    def unpack_unknowns(self,segment):  
         """
         Unpacks propulsor unknowns from the segment.
         """ 

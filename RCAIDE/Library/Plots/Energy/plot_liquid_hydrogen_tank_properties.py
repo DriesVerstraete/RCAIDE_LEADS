@@ -68,7 +68,7 @@ def plot_liquid_hydrogen_tank_properties(results,
                     ullage_volume      = tank_conditions.ullage_volume[:, 0]/Units.gallons
                     pressure           = tank_conditions.pressure[:, 0]
                     vent_rate          = tank_conditions.vent_rate[:, 0]
-                    boil_off_rate = tank_conditions.boil_off_rate[:,0]
+                    boil_off_rate      = tank_conditions.boil_off_rate[:,0]
             
                     segment_tag  =  results.segments[i].tag
                     segment_name = segment_tag.replace('_', ' ')
@@ -112,6 +112,7 @@ def plot_liquid_hydrogen_tank_properties(results,
         
     # Adjust layout
     fig.tight_layout() 
+    fig.subplots_adjust(top=0.9)
 
     # Title
     fig.suptitle("Liquid Hydrogen Tank Properties")

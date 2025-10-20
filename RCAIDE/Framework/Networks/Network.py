@@ -304,14 +304,16 @@ class Network(Component):
                 for propulsor_group in  fuel_line.assigned_propulsors:
                     propulsor = network.propulsors[propulsor_group[0]]
                     if propulsor.active: 
-                        propulsor.unpack_propulsor_unknowns(segment)
+                        propulsor.unpack_unknowns(segment)
+                #for fuel_tank in  fuel_line.fuel_tanks:
+                    #fuel_tank.unpack_unknowns(fuel_line,segment)
                         
             # electric unknowns 
             for bus_i, bus in enumerate(network.busses):     
                 for propulsor_group in  bus.assigned_propulsors:
                     propulsor = network.propulsors[propulsor_group[0]]
                     if propulsor.active: 
-                        propulsor.unpack_propulsor_unknowns(segment) 
+                        propulsor.unpack_unknowns(segment) 
         return    
      
     def residuals(self,segment): # these arenotusedin the mission solver per  seand needto berenamed

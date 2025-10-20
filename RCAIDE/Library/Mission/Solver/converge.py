@@ -47,9 +47,11 @@ def converge(segment):
     if numerics.mission_solver.type  == "optimize": 
         problem  = add_mission_variables(segment) 
        
-        # Commense suppression of console window output  
-        devnull = open(os.devnull,'w')
-        sys.stdout = devnull
+       
+        # Comment suppression of console window output
+        if numerics.mission_solver.verbose == False:
+            devnull = open(os.devnull,'w')
+            sys.stdout = devnull
          
         outputs  = scipy_setup.SciPy_Solve(problem,
                                            solver     = numerics.mission_solver.method,
@@ -57,8 +59,9 @@ def converge(segment):
                                            iter       = numerics.mission_solver.max_evaluations,
                                            tolerance  = numerics.mission_solver.tolerance)
     
-        # Terminate suppression of console window output   
-        sys.stdout = sys.__stdout__  
+        # Terminate suppression of console window output
+        if numerics.network_solver.verbose == False:
+            sys.stdout = sys.__stdout__  
          
         if outputs[3] != 0:
             mission_converge = False        

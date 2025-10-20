@@ -62,7 +62,7 @@ class Constant_Speed_Internal_Combustion_Engine(Propulsor):
         append_constant_speed_internal_combustion_engine_conditions(self,segment)
         return
 
-    def unpack_propulsor_unknowns(self,segment):   
+    def unpack_unknowns(self,segment):   
         return 
 
     def pack_propulsor_residuals(self,segment): 

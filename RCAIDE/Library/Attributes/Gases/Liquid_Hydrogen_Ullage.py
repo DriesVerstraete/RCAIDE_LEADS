@@ -53,4 +53,5 @@ class Liquid_Hydrogen_Ullage(Gas):
         """            
         self.tag                   ='Liquid_Hydrogen_Ullage'
         self.density               = 2.5 
+        self.temperature           = 25
         self.mass_properties       = Mass_Properties()

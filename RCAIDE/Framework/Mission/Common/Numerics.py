@@ -57,6 +57,7 @@ class Numerics(Conditions):
         self.mission_solver.print_output        = True
         self.mission_solver.max_evaluations     = 200
         self.mission_solver.step_size           = 1E-8  
+        self.mission_solver.verbose             = False
            
         # network solver    
         self.network_solver                     = Conditions()
@@ -66,6 +67,7 @@ class Numerics(Conditions):
         self.network_solver.print_output        = True
         self.network_solver.max_evaluations     = 200
         self.network_solver.step_size           = 1E-8   
+        self.network_solver.verbose             = False
            
         self.dimensionless                      = Conditions()
         self.dimensionless.control_points       = np.empty([0,0])

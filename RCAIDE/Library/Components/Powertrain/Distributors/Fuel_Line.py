@@ -80,7 +80,7 @@ class Fuel_Line(Component):
         append_fuel_line_conditions(self, segment,network)
         return
     
-    def unpack_propulsor_unknowns(self,segment):   
+    def unpack_unknowns(self,segment):   
         return 
 
     def pack_propulsor_residuals(self,segment): 

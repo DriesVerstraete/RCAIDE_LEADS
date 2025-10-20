@@ -18,6 +18,7 @@ from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.c
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_structural_performance              import compute_structural_performance
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.compute_thermal_performance                 import compute_thermal_performance
 from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.append_liquid_hydrogen_tank_unknown_and_residual import append_liquid_hydrogen_tank_unknown_and_residual
+from RCAIDE.Library.Methods.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank.unpack_liquid_hydrogen_tank_unknowns        import unpack_liquid_hydrogen_tank_unknowns
 # ----------------------------------------------------------------------------------------------------------------------
 #  Liquid Hydrogen Tank
 # ---------------------------------------------------------------------------------------------------------------------    
@@ -105,8 +106,6 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         self.vent_rate                 = 0
         self.fuel                      = RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen()  
         self.ullage                    = RCAIDE.Library.Attributes.Gases.Liquid_Hydrogen_Ullage()
-        self.ullage.density            = 2.5 
-        self.ullage.temperature        = 25 # Kelvin
         self.ullage.volume_fraction    = 0.07
         
 
@@ -170,6 +169,13 @@ class Liquid_Hydrogen_Tank(Non_Integral_Tank):
         Connected fuel line component
         """ 
         append_liquid_hydrogen_tank_conditions(self,segment, fuel_line)   
+        return
+
+    def unpack_unknowns(self,fuel_line,segment):  
+        """
+        Unpacks propulsor unknowns from the segment.
+        """ 
+        #unpack_liquid_hydrogen_tank_unknowns(self,fuel_line, segment)
         return
     
     def compute_tank_properties(self,state,fuel_line):

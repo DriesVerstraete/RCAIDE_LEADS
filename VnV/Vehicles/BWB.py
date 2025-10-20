@@ -524,7 +524,7 @@ def vehicle_setup():
  
 
     fuel_tank_4                                        = RCAIDE.Library.Components.Powertrain.Sources.Fuel_Tanks.Liquid_Hydrogen_Tank()
-    fuel_tank_4.tag                                    = 'H2_Fuel_Tank_4'  
+    fuel_tank_4.tag                                    = 'h2_aft_fuel_tank'  
     fuel_tank_4.material                               = RCAIDE.Library.Attributes.Materials.Aluminum_2219()
     fuel_tank_4.insulation_material                    = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_4.fuel.gravimetric_efficiency            = 0.5

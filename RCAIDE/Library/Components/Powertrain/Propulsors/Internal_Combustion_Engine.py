@@ -83,7 +83,7 @@ class Internal_Combustion_Engine(Propulsor):
         append_internal_combustion_engine_conditions(self,segment)
         return
 
-    def unpack_propulsor_unknowns(self,segment):  
+    def unpack_unknowns(self,segment):  
         """
         Unpacks propulsor unknowns from the segment.
         """

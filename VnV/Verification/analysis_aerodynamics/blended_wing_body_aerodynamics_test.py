@@ -136,8 +136,7 @@ def mission_setup(analyses):
     mission.tag = 'mission'
   
     Segments = RCAIDE.Framework.Mission.Segments 
-    base_segment = Segments.Segment() 
-    #base_segment.state.numerics.mission_solver.type = 'root_finder'
+    base_segment = Segments.Segment()
 
     # ------------------------------------------------------------------    
     #   Cruise Segment: Constant Speed Constant Altitude
@@ -148,8 +147,10 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude                                                 = 40000 * Units['ft']  
     segment.air_speed                                                = 450 * Units['knots']
-    segment.distance                                                 = 500 * Units.nmi 
-            
+    segment.distance                                                 = 2250 * Units.nmi 
+
+    segment.state.numerics.mission_solver.verbose = True   
+    
     # define flight dynamics to model             
     segment.flight_dynamics.force_x                                  = True  
     segment.flight_dynamics.force_z                                  = True     
@@ -157,27 +158,23 @@ def mission_setup(analyses):
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
     segment.assigned_control_variables.throttle.assigned_propulsors  = [['propulsor_1','propulsor_2', 'propulsor_3']] 
-    segment.assigned_control_variables.body_angle.active             = True                
+    segment.assigned_control_variables.body_angle.active             = True 
+
+ 
+    segment.assigned_control_variables.hydrogen_tank_ullage_mass.active                          = True        
+    segment.assigned_control_variables.hydrogen_tank_ullage_mass.assigned_hydrogen_tanks         = [['h2_aft_fuel_tank']]  
+    segment.assigned_control_variables.hydrogen_tank_ullage_volume.active                        = True        
+    segment.assigned_control_variables.hydrogen_tank_ullage_volume.assigned_hydrogen_tanks       = [['h2_aft_fuel_tank']]  
+    segment.assigned_control_variables.hydrogen_tank_ullage_temperature.active                   = True        
+    segment.assigned_control_variables.hydrogen_tank_ullage_temperature.assigned_hydrogen_tanks  = [['h2_aft_fuel_tank']]  
+    segment.assigned_control_variables.hydrogen_tank_fuel_mass.active                            = True        
+    segment.assigned_control_variables.hydrogen_tank_fuel_mass.assigned_hydrogen_tanks           = [['h2_aft_fuel_tank']]  
+    segment.assigned_control_variables.hydrogen_tank_fuel_volume.active                          = True        
+    segment.assigned_control_variables.hydrogen_tank_fuel_volume.assigned_hydrogen_tanks         = [['h2_aft_fuel_tank']]  
+    segment.assigned_control_variables.hydrogen_tank_fuel_temperature.active                     = True        
+    segment.assigned_control_variables.hydrogen_tank_fuel_temperature.assigned_hydrogen_tanks    = [['h2_aft_fuel_tank']]  
 
     mission.append_segment(segment) 
-
-    ## ------------------------------------------------------------------------------------------------------------------------------------ 
-    ##   Landing Roll
-    ## ------------------------------------------------------------------------------------------------------------------------------------ 
-
-    #segment = Segments.Ground.Landing(base_segment)
-    #segment.tag = "Landing"
-
-    #segment.analyses.extend( analyses.reverse_thrust ) 
-    #segment.velocity_start                                                = 160.0 * Units['knots']
-    #segment.velocity_end                                                  = 10 * Units.knots 
-    #segment.friction_coefficient                                          = 0.4
-    #segment.altitude                                                      = 0.0
-    
-    #segment.assigned_control_variables.elapsed_time.active                = True  
-    #segment.assigned_control_variables.elapsed_time.initial_guess_values  = [[30.]]  
-    #segment.assigned_control_variables.elapsed_time.bounds                = [[-10, 100000000]]
-    #mission.append_segment(segment)     
 
     return mission
  

@@ -169,7 +169,7 @@ class Turbojet(Propulsor):
         append_turbojet_conditions(self,segment)
         return
 
-    def unpack_propulsor_unknowns(self,segment):   
+    def unpack_unknowns(self,segment):   
         return 
 
     def pack_propulsor_residuals(self,segment): 
