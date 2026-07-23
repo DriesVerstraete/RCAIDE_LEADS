@@ -87,9 +87,51 @@ def converge(segment):
             mission_converge = False
         else:
             mission_converge = True
-            
-    else: 
-        raise Exception('undefined mission solver type')        
+
+    elif segment.state.numerics.solver.type == "least_squares":
+        # Bounded alternative to "root_finder" for a square system (same "drive residuals to
+        # zero" goal as fsolve above, via the same iterate_root_finder callable) — "root_finder"
+        # has no bounds support at all (fsolve's call has no bounds kwarg), which lets unknowns
+        # wander arbitrarily far from any physically sensible range within a single solve.
+        # scipy.optimize.least_squares supports per-unknown bounds (from
+        # state.numerics.solver.lower_bounds/upper_bounds, populated 1:1 per unknown key by
+        # set_residuals_and_unknowns.py the same way "optimize" above relies on) plus
+        # x_scale='jac' (automatic per-unknown scaling — "optimize"'s own scaling is fixed
+        # order-of-magnitude in add_mission_variables() above, "root_finder" has none at all).
+        if segment.state.number_of_unknowns != segment.state.number_of_residuals:
+            raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_unknowns) + \
+                                 ') is not equal to the number of residuals (equations) (' + str(segment.state.number_of_residuals) + '). Either enforce of unknowns '+\
+                                 ' to be equal to the number of residuals (equations) to use least_squares/fsolve or switch RCAIDE solver type to "optimize" when defining the segment.'+ \
+                                 '\n i.e. segment.state.numerics.solver.type  = "optimize" ')
+
+        unknowns     = segment.state.unknowns.pack_array()
+        lower_bounds = segment.state.numerics.solver.lower_bounds.pack_array()
+        upper_bounds = segment.state.numerics.solver.upper_bounds.pack_array()
+
+        result = scipy.optimize.least_squares(
+            iterate_root_finder, unknowns, args=(segment,),
+            bounds=(lower_bounds, upper_bounds), x_scale='jac',
+            xtol=segment.state.numerics.solver.tolerance_solution,
+            max_nfev=segment.state.numerics.solver.max_evaluations)
+
+        # least_squares (unlike fsolve's iterate_root_finder convention above) does not
+        # guarantee its LAST call to the residual function was made at result.x — trust-region
+        # methods often evaluate a finite-difference Jacobian (perturbing one variable at a
+        # time) as their final steps before checking convergence and returning, so
+        # segment.state.unknowns can be left reflecting a perturbed intermediate point, not the
+        # true converged solution. Explicitly re-evaluate at result.x (not just unpack_array,
+        # which would leave conditions/residuals downstream of whatever perturbed point was
+        # last evaluated) so every downstream read reflects the same, genuine final point.
+        iterate_root_finder(result.x, segment)
+
+        if not result.success:
+            mission_converge = False
+            error_message = result.message
+        else:
+            mission_converge = True
+
+    else:
+        raise Exception('undefined mission solver type')
         
     if mission_converge == False:
         print("Segment did not converge. Segment Tag: " + segment.tag)
