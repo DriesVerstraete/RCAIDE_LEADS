@@ -16,11 +16,18 @@ def unknowns(segment):
             for propulsor in network.propulsors: 
                 segment.state.conditions.energy.propulsors[propulsor.tag].throttle[:,0] = segment.throttle
             
-        if ACV_T.active: 
-            for i in range(len(ACV_T.assigned_propulsors)): 
+        if ACV_T.active:
+            for i in range(len(ACV_T.assigned_propulsors)):
                 propulsor_group = ACV_T.assigned_propulsors[i]
-                for propulsor_name in propulsor_group:  
-                    segment.state.conditions.energy.propulsors[propulsor_name].throttle = segment.state.unknowns["throttle_" + str(i)]  
+                for propulsor_name in propulsor_group:
+                    # SPL fix (2026-07-23): was a bare reference assignment, which aliases this
+                    # propulsor's condition.throttle array to the SAME object as
+                    # state.unknowns["throttle_i"]. If any OTHER propulsor group in this segment
+                    # is prescribed via segment.throttle (line 17's unconditional loop, which runs
+                    # for every propulsor including this one), that in-place write then corrupts
+                    # this group's solved unknown too, permanently, from the next solver iteration
+                    # onward. .copy() breaks the aliasing.
+                    segment.state.conditions.energy.propulsors[propulsor_name].throttle = segment.state.unknowns["throttle_" + str(i)].copy()
     
        # Thrust Vector Control 
         if ACV_TA.active:                
