@@ -376,8 +376,17 @@ def compute_operating_empty_weight(vehicle,settings = None):
     
         if iterations == 100:
             print('Weight convergence failed!')
-            return output 
-        
+            return output
+
+    # local patch (2026-07-16, successor to master's O27): the converged MTOW never made it
+    # back onto the vehicle otherwise — Weights.evaluate() only stores `output` under
+    # mass_properties.weight_breakdown, and the mission Pre_Process default (iterate_mtow=False)
+    # leaves mass_properties.max_takeoff untouched by design. Needed for AVL mass file, payload-range
+    # diagram, V-n diagram, load/trim diagram, and TOFL-based weight sizing, which all read
+    # mass_properties.max_takeoff directly. See 999-software/rcaide/local-patches.md.
+    vehicle.mass_properties.max_takeoff = output.max_takeoff
+    vehicle.mass_properties.takeoff     = output.max_takeoff
+
     return output
 
 
