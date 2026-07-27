@@ -25,3 +25,4 @@ from .compute_emergency_system_weight import compute_emergency_system_weight
 from .compute_landing_gear_weight import compute_landing_gear_weight
 from .compute_flight_control_system_weight import compute_flight_control_system_weight
 from .compute_rotor_weight import compute_rotor_weight
+from .compute_fuselage_weight import compute_fuselage_weight
