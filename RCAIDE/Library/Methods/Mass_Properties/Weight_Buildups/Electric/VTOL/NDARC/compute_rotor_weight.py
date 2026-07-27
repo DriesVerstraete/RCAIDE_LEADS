@@ -48,6 +48,21 @@ def compute_rotor_weight(aircraft_id, n_blade, n_rotor, radius, chord, tip_speed
         proper `ValueError`, a deliberate deviation from source (bug in source's error handling,
         not core logic).
 
+        **This is a direct, faithful copy of Hydra's implementation — Hydra's coefficients here do
+        NOT match the real NDARC v1.19 Fortran source** (checked 2026-07-27 against
+        `weight_model.f90::GetWeightAFDD_Rotor_hub`, local path:
+        `/Users/dverstraete/Sydney Uni Dropbox/Dries Verstraete/Software/NDARC/1_19/NDARC_v1_19_source/`).
+        The AFDD00 model's default (`aircraft_id != 3`) hub formula below — the one every current
+        test vehicle actually uses, since all our tiltrotors are `aircraft_id==2` — matches neither
+        of NDARC's two real AFDD00 hub sub-formulas (`MODEL_type=0`/`MODEL_type≠0`
+        in the Fortran source — a blade-weight-dependency toggle, unrelated to coaxial
+        configuration despite this file's "coaxial"/Johnson-Moodie-Yeo citation on the
+        `aircraft_id==3` branch below). That `aircraft_id==3` branch's coefficients DO match real
+        NDARC exactly (`MODEL_type≠0`) — it's just unreachable, per the quirk noted above. Flagged,
+        not corrected — see the "Hydra's default rotor hub weight formula does not match real
+        NDARC" entry in `20-rcaide-weight-method-porting-inventory.md` for full detail before
+        trusting this function's hub output against a real NDARC comparison run.
+
         Source:
             Hydra `afdd/rotor_wt.py::rotor_weight`, AFDD82/AFDD00 models,
             NDARC Theory Manual v1.11 Section 29 (rotor group).
@@ -95,6 +110,9 @@ def compute_rotor_weight(aircraft_id, n_blade, n_rotor, radius, chord, tip_speed
                         R**0.60406 * v_tip**0.52803 *
                         nu_hub**1.00218 * (wght_blade/n_rotor)**0.87127)
         else:
+            # Direct copy of Hydra's coefficients — do NOT match the real NDARC v1.19 Fortran
+            # source (weight_model.f90::GetWeightAFDD_Rotor_hub, MODEL_type=0 or ≠0 branches).
+            # This is the hub formula every current test vehicle actually uses. See docstring.
             wght_hub = (0.1837 * n_rotor * n_blade**0.16383 *
                         R**0.19937 * v_tip**0.06171 *
                         nu_hub**0.46203 * (wght_blade/n_rotor)**1.02958)
