@@ -13,7 +13,7 @@ from RCAIDE.Framework.Core import Units
 #  Constants
 # ----------------------------------------------------------------------------------------------------------------------
 # Four independently-sourced motor weight methods, selected by `method`. Three
-# (`ndarc`/`electric_motor_data`/`bird2021`) share the identical functional form —
+# (`ndarc`/`spl`/`bird2021`) share the identical functional form —
 # `coefficient x torque^exponent` — just different calibration constants from different sources;
 # kept as separate `method` values rather than folded into one parameterized branch so the source
 # of each calibration stays explicit rather than blurred together.
@@ -43,17 +43,20 @@ from RCAIDE.Framework.Core import Units
 #     source (0.5269*P^0.8983, 2.2*P^0.661, 0.40199028*P^1.15382503, 0.7907*P^0.8246,
 #     0.07529*P^1.226) — reads as an unfinished calibration exploration, not a formula the
 #     original author settled on and trusted.
-# `method='electric_motor_data'`: `SUAVE/Methods/Weights/Buildups/eVTOL/empty_hydra.py`'s own
-# inline motor formula (local path: `/Users/dverstraete/Sydney Uni Dropbox/Dries
-# Verstraete/SUAVE/`), `motor_coefficient_torque=0.3288`, `motor_exponent_torque=0.7622`, sourced
-# per that file's own comment from "electric_motor_data.xls sheet 2" — a real, independently
-# calibrated empirical database fit, unrelated to NDARC's Theory Manual regression despite the
-# superficially similar coefficients.
+# `method='spl'`: `motor_coefficient_torque=0.3288`, `motor_exponent_torque=0.7622` — a real,
+# independently-calibrated empirical database fit, unrelated to NDARC's Theory Manual regression
+# despite the superficially similar coefficients. Sourced from the lab's own motor database,
+# `electric_motor_data.xlsx` sheet 2 (local copies:
+# `/Users/dverstraete/Sydney Uni Dropbox/Dries Verstraete/SUAVE/electric_motors/electric_motor_data.xlsx`,
+# also `PythonOptimisation/eVTOLAircraftDesign/validation_data/electric_motor_data.xlsx`). These
+# exact coefficients also appear, already fit, inline in `SUAVE/Methods/Weights/Buildups/eVTOL/
+# empty_hydra.py` (local path: `/Users/dverstraete/Sydney Uni Dropbox/Dries Verstraete/SUAVE/`) —
+# that file is where this port's coefficients were taken from directly, since the fit itself isn't
+# re-derived from the raw spreadsheet here.
 #
-# `method='bird2021'`: an alternative calibration commented out immediately next to the
-# `electric_motor_data` one in the same `empty_hydra.py` source,
-# `motor_coefficient_torque=0.4528`, `motor_exponent_torque=0.7224`, citing "Bird2021" (not yet
-# traced to a specific paper/report).
+# `method='bird2021'`: an alternative calibration commented out immediately next to the `spl` one
+# in the same `empty_hydra.py` source, `motor_coefficient_torque=0.4528`,
+# `motor_exponent_torque=0.7224`, citing "Bird2021" (not yet traced to a specific paper/report).
 #
 # The original Hydra function also bundles cable, cooling, battery-approximation, and gearbox
 # weight into the same return value (hybrid-turboshaft-generator-architecture specific) — none of
@@ -77,8 +80,8 @@ _NDARC_COEFF = {
     2: (0.5382, 0.8129, 2.5606),
 }
 
-_ELECTRIC_MOTOR_DATA_COEFF = 0.3288   # electric_motor_data.xls sheet 2, via empty_hydra.py
-_ELECTRIC_MOTOR_DATA_EXP = 0.7622
+_SPL_COEFF = 0.3288   # SPL's electric_motor_data.xlsx sheet 2, via empty_hydra.py
+_SPL_EXP = 0.7622
 
 _BIRD2021_COEFF = 0.4528              # Bird2021, via empty_hydra.py (commented alternative)
 _BIRD2021_EXP = 0.7224
@@ -89,7 +92,7 @@ _HYDRA_EXP = 0.6563
 
 def _torque_power_law(design_torque, coefficient, exponent):
     """ Shared `coefficient x torque^exponent` evaluator for every torque-based method
-        (`ndarc`/`electric_motor_data`/`bird2021`) — same functional form, different calibration
+        (`ndarc`/`spl`/`bird2021`) — same functional form, different calibration
         constants and sources. Torque converted N*m -> lbf*ft internally since all three source
         calibrations are imperial (matches SUAVE's `nasa_motor.py` convention exactly). """
     q = abs(design_torque) * _NM2LBFT
@@ -103,21 +106,21 @@ def compute_motor_weight(design_torque=None, motor_power=None, n_rotor=1, method
         Source:
             method='ndarc': NDARC v1.19 `weight_model.f90::GetWeightNASA_Engine_motor`, W(Q) branch.
                              Independently confirmed against SUAVE's `nasa_motor.py`.
-            method='electric_motor_data': `empty_hydra.py`'s own inline formula, calibrated from
-                             "electric_motor_data.xls sheet 2" — not NDARC-derived.
+            method='spl': SPL's own `electric_motor_data.xlsx` sheet 2 calibration (coefficients
+                             taken from `empty_hydra.py`'s inline copy of the fit) — not NDARC-derived.
             method='bird2021': alternative calibration from the same `empty_hydra.py` source,
                              citing "Bird2021".
             method='hydra': Hydra `afdd/motors.py::weight`'s `wght_motors` term only — see module
                              docstring for why this branch is lower-confidence than the other three.
 
         Inputs:
-            design_torque    motor design torque — required for method='ndarc'/
-                              'electric_motor_data'/'bird2021'                            [N*m]
+            design_torque    motor design torque — required for method='ndarc'/'spl'/
+                              'bird2021'                                                  [N*m]
             motor_power      power per motor — required for method='hydra', UNVERIFIED
                               unit convention, assumed kW                                [kW]
             n_rotor           number of motors (only used by method='hydra' — the torque-based
                               methods are inherently per-motor, sum externally for a group)  [Unitless]
-            method            'ndarc' (default), 'electric_motor_data', 'bird2021', or 'hydra' [str]
+            method            'ndarc' (default), 'spl', 'bird2021', or 'hydra'           [str]
             kind_design       NDARC torque-to-weight design point, method='ndarc' only:
                               0 (default) or 1 = high Q/W, 2 = low Q/W (heavier)          [int]
 
@@ -132,10 +135,10 @@ def compute_motor_weight(design_torque=None, motor_power=None, n_rotor=1, method
         k, x, mult = _NDARC_COEFF[kind_design]
         return _torque_power_law(design_torque, k, x) * mult
 
-    elif method == 'electric_motor_data':
+    elif method == 'spl':
         if design_torque is None:
-            raise ValueError("compute_motor_weight: method='electric_motor_data' requires design_torque")
-        return _torque_power_law(design_torque, _ELECTRIC_MOTOR_DATA_COEFF, _ELECTRIC_MOTOR_DATA_EXP)
+            raise ValueError("compute_motor_weight: method='spl' requires design_torque")
+        return _torque_power_law(design_torque, _SPL_COEFF, _SPL_EXP)
 
     elif method == 'bird2021':
         if design_torque is None:
@@ -151,5 +154,5 @@ def compute_motor_weight(design_torque=None, motor_power=None, n_rotor=1, method
     else:
         raise ValueError(
             f"compute_motor_weight: unrecognized method {method!r} "
-            "(expected 'ndarc', 'electric_motor_data', 'bird2021', or 'hydra')"
+            "(expected 'ndarc', 'spl', 'bird2021', or 'hydra')"
         )
