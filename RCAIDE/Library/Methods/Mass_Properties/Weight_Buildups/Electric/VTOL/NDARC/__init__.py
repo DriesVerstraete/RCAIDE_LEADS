@@ -27,3 +27,4 @@ from .compute_flight_control_system_weight import compute_flight_control_system_
 from .compute_rotor_weight import compute_rotor_weight
 from .compute_fuselage_weight import compute_fuselage_weight
 from .compute_motor_weight import compute_motor_weight
+from .compute_operating_empty_weight import compute_operating_empty_weight
