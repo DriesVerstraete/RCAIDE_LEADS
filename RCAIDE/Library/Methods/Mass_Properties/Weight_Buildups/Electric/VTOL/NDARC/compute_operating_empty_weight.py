@@ -101,6 +101,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
     diff = 100
     iterations = 0
     MTOW = vehicle.mass_properties.max_takeoff
+    tolerance = settings.mtow_convergence_tolerance
 
     v_ndarc = getattr(vehicle, 'NDARC', Data())
     default_aircraft_id = getattr(v_ndarc, 'aircraft_id', 2)
@@ -109,7 +110,10 @@ def compute_operating_empty_weight(vehicle, settings=None):
     lg_retractable = getattr(v_ndarc, 'landing_gear_retractable', False)
     has_cargo_ramp = getattr(v_ndarc, 'has_cargo_ramp', False)
 
-    while abs(diff) > 1:
+    # Relative tolerance (fraction of MTOW), not an absolute mass -- matches Physics_Based's
+    # 2026-07-27 fix. See settings.mtow_convergence_tolerance docstring in
+    # Framework/Analyses/Weights/Weights.py.
+    while abs(diff) > tolerance*MTOW:
         miscelleneous_weight_factor = settings.miscelleneous_weight_factor
 
         weight = Data()

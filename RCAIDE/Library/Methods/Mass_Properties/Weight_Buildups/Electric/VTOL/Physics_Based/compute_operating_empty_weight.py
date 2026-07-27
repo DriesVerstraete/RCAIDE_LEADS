@@ -62,8 +62,13 @@ def compute_operating_empty_weight(vehicle,settings = None):
     diff        = 100
     iterations  = 0
     MTOW        = vehicle.mass_properties.max_takeoff
+    tolerance   = settings.mtow_convergence_tolerance
 
-    while(abs(diff)>1):
+    # Relative tolerance (fraction of MTOW), not an absolute mass -- a fixed kg threshold that's
+    # reasonable for a road-scale eVTOL is far too loose for a small UAV. Changed 2026-07-27 from
+    # a hardcoded abs(diff)>1 (1 kg) check; see settings.mtow_convergence_tolerance docstring in
+    # Framework/Analyses/Weights/Weights.py.
+    while(abs(diff) > tolerance*MTOW):
 
         miscelleneous_weight_factor   = settings.miscelleneous_weight_factor
         safety_factor                 = 1.5   

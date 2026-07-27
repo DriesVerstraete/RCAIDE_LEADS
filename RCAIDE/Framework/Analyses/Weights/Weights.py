@@ -55,6 +55,16 @@ class Weights(Analysis):
             Significantly increases computational cost; leave ``False``
             for most optimizations.
 
+        ``mtow_convergence_tolerance`` (default ``0.001``, i.e. 0.1% of MTOW)
+            Relative convergence tolerance for the internal OEW/MTOW iteration
+            loop each ``compute_operating_empty_weight`` implementation runs
+            (e.g. ``Physics_Based``, ``NDARC``). Expressed as a *fraction of
+            MTOW*, not an absolute mass — an absolute kg threshold that looks
+            reasonable for a road-scale eVTOL is far too loose for a small
+            UAV (or needlessly tight for a very large aircraft). Added
+            2026-07-27 replacing a hardcoded ``abs(diff) > 1`` (1 kg) check
+            that both methods previously used regardless of vehicle scale.
+
         ``run_center_of_gravity_analysis`` (default ``False``)
             Compute and store the vehicle CG after the weight buildup.
 
@@ -87,6 +97,7 @@ class Weights(Analysis):
         self.settings.write_mass_properties                         = False
         self.settings.iterate_mtow                                  = False
         self.settings.mtow_capacity_fraction                        = 0.0
+        self.settings.mtow_convergence_tolerance                    = 0.001
     
         self.settings.weight_correction_factors                     = Data()
         self.settings.weight_correction_factors.empty               = Data()
