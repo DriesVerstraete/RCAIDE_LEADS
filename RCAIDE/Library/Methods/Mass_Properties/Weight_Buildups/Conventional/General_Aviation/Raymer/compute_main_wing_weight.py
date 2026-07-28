@@ -49,8 +49,13 @@ def compute_main_wing_weight(wing, vehicle, m_fuel):
     TOW        = vehicle.mass_properties.max_takeoff
     
     W_0  = TOW / Units.lb # Convert kg to lbs
-    S_w  = S_wing / (Units.ft**2) # Convert from meters squared to ft squared  
+    S_w  = S_wing / (Units.ft**2) # Convert from meters squared to ft squared
     W_fw = m_fuel/Units.lbs #convert from kg to lbs
+    # W_fw^0.0035 tends to 0 (not 1) as W_fw -> 0+, collapsing the entire formula to zero for any
+    # all-electric/no-wing-fuel vehicle -- a real degeneracy in this specific Raymer exponent, not
+    # a physically intended "no fuel relief" result. Floor at 1 lb (negligible mass-in-wing,
+    # standard convention for this equation) rather than passing literal zero through the exponent.
+    W_fw = max(W_fw, 1.0)
     q    = q_c /(Units.lbs/(Units.ft**2.))
 
     # Calculate weight of wing for traditional aircraft vertical tail without rudder
