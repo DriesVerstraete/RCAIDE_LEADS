@@ -19,7 +19,8 @@ import numpy as np
 def compute_fuselage_weight(fuse,maxSpan, MTOW, 
              maximum_g_load = 3.8,
              landing_impact_factor = 3.5,
-             safety_factor = 1.5):
+             safety_factor = 1.5,
+             return_breakdown = False):
     """ Calculates the structural mass of a fuselage for an eVTOL vehicle,
         assuming a structural keel taking bending an torsional loads.
         
@@ -143,5 +144,14 @@ def compute_fuselage_weight(fuse,maxSpan, MTOW,
     # and keel mass. Called weight by RCAIDE convention
 
     weight = skinMass + bulkheadMass + canopyMass + massKeel
+
+    if return_breakdown:
+        return {
+            'skin':     skinMass,
+            'bulkhead': bulkheadMass,
+            'canopy':   canopyMass,
+            'keel':     massKeel,
+            'total':    weight,
+        }
 
     return weight

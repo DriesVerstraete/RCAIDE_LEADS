@@ -28,7 +28,8 @@ def compute_wing_weight(wing,
          forward_web_locations = [0.25, 0.35],
          rear_web_locations = [0.65, 0.75],
          shear_center_location = 0.25,
-         margin_factor = 1.2):
+         margin_factor = 1.2,
+         return_breakdown = False):
     
     """ Calculates the structural mass of a wing for an eVTOL vehicle based on
         assumption of NACA airfoil wing, an assumed L/D, cm/cl, and structural
@@ -210,7 +211,7 @@ def compute_wing_weight(wing,
     My = np.append(np.cumsum(( T[0:-1]*np.diff(x))[::-1])[::-1],0)  # Torsion Moment
     Mz = np.append(np.cumsum((Vx[0:-1]*np.diff(x))[::-1])[::-1],0)  # Drag Moment
     Mt = np.append(np.cumsum((Vt[0:-1]*np.diff(x))[::-1])[::-1],0)  # Thrust Moment
-    Mz = np.max((Mz, Mt))                                           # Worst Case of Drag vs. Thrust Moment
+    Mz = np.maximum(Mz, Mt)                                         # Worst Case of Drag vs. Thrust Moment, per station
 
     #-------------------------------------------------------------------------------
     # General Structural Properties
@@ -310,7 +311,21 @@ def compute_wing_weight(wing,
     # Rib Mass 
     mRib = (A+skinLength*ribWid)*ribMGT*ribDen
 
-    # Total Mass 
+    # Total Mass
     mass = 2*(sum(m[0:-1]*np.diff(x))+nRibs*mRib)*grace
+
+    if return_breakdown:
+        integrate = lambda arr: 2*np.sum(arr[0:-1]*np.diff(x))*grace
+        return {
+            'torsion_skin': integrate(mTorsion),
+            'core':         integrate(mCore),
+            'bending_flap': integrate(mFlap),
+            'drag_flap':    integrate(mDrag),
+            'shear_spar':   integrate(mShear),
+            'glue':         integrate(mGlue),
+            'paint':        integrate(mPaint),
+            'ribs':         2*nRibs*mRib*grace,
+            'total':        mass,
+        }
 
     return mass
