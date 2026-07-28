@@ -36,8 +36,25 @@ _TAU_W  = 0.158   # wing thickness-to-chord ratio
 _TAPER  = 0.8     # taper ratio, ctip/croot
 _NZ     = 3.8     # max design load factor
 _F_MOUNT = 7.0    # motor mount target natural frequency, Hz
-_FN      = 4.5    # wing spar target natural frequency, Hz
 _F_LGLOC = 1.0    # landing-gear-on-wing location factor (1.7247 if LG on wing, 1.0 otherwise)
+
+# Wing spar target natural frequency -- MTOW-scaled, not a flat constant. Source Theory Manual
+# only gives a qualitative reference point ("at least 4 Hz desirable for a take off mass of
+# 2000 kg... larger aircraft feature progressively relaxed natural frequency constraints"), no
+# formula. Calibrated 2026-07-28 (00-decisions/2026-07-28-hydra-wing-method-selected-and-
+# calibrated.md): fn=2.65 Hz at MTOW=2796.9 kg reproduces CADDEE_alpha's nasa_lpc regression
+# (whose own training data -- Ruh et al. 2023, arXiv:2304.14889 -- included boom-mounted rotor
+# loads on the wing) on lift_cruise, more trustworthy for this boom-mounted-rotor architecture
+# than the source manual's own un-derived 2000 kg reference point. Scaled from there using the
+# standard Froude/dynamic-similarity relation, omega ~ mass^(-1/6) (n ~ mass^(1/3) volumetric
+# scaling, omega ~ n^(-1/2)).
+_FN_REF_HZ   = 2.65
+_FN_REF_MTOW = 2796.9  # kg
+
+
+def _target_frequency(vehicle_mtow):
+    """ MTOW-scaled wing spar target natural frequency, Hz. See _FN_REF_HZ/_FN_REF_MTOW above. """
+    return _FN_REF_HZ * (_FN_REF_MTOW / vehicle_mtow) ** (1.0 / 6.0)
 
 # Motor-mount / spar structural sizing constants (`motor_mount_mass.py`)
 _E         = 122.0e9   # Young's modulus, Pa
@@ -278,7 +295,7 @@ def compute_wing_weight_group(vehicle_mtow, n_wings, aspect_ratio, area, lift_fr
     y = np.asarray(rotor_y_positions)
     Mk = np.asarray(rotor_masses) + mount_mass
     T = np.asarray(rotor_thrusts)
-    M_spar = _spar_mass(rroot, _TAPER, L, m_by_a, Mk, y, T, _FN, _TAU_W)
+    M_spar = _spar_mass(rroot, _TAPER, L, m_by_a, Mk, y, T, _target_frequency(vehicle_mtow), _TAU_W)
     # NOTE: `area` (m^2) is used directly here, not converted to ft^2 — matches the original
     # source exactly (`MbyA*self.area`, not `MbyA*Sw`); the trailing *2.2 converts the resulting
     # kg subtotal to lb (a hardcoded approximate kg->lb factor in the source, not the module's own

@@ -42,12 +42,23 @@ import numpy as np
 #   rotor.Hydra.rho_filler       float, default 52.0 kg/m^3 (matches source default).
 #
 #   wing.Hydra.tip_propulsor_tags   list[str], same convention as `NDARC`'s field of the same
-#                                    name — which propulsors are mounted on this wing. Absent/empty
-#                                    means this wing has no rotor-carrying structure and falls back
-#                                    to `Vahana`'s beam-bending method instead (this component's
-#                                    model assumes at least one lumped rotor/motor mass per wing;
-#                                    it is not a general "any wing" method the way `NDARC`'s
-#                                    Chappell-Peyran port at least partially is).
+#                                    name — which propulsors belong to this wing's *tilting* group
+#                                    (whirl-flutter-relevant, per NDARC's own Theory Manual
+#                                    convention). Do NOT use this for boom-mounted, non-tilting
+#                                    rotors that still load the wing structurally — see
+#                                    `load_bearing_stations` below, a deliberately separate field
+#                                    since the two questions ("does this rotor tilt" vs "does this
+#                                    rotor load the wing") are physically different (2026-07-28).
+#   wing.Hydra.load_bearing_stations   list[dict], each {'y': spanwise position [m],
+#                                    'propulsor_tags': [str, ...], 'boom_tag': str or None} — one
+#                                    entry per lumped mass station the wing structurally carries
+#                                    (e.g. one entry per boom for a boom-mounted-rotor vehicle like
+#                                    lift_cruise/tilt_stopped_rotor_v_tail). Real converged
+#                                    rotor+motor mass for the tagged propulsors, plus the tagged
+#                                    boom's own structural mass (if `boom_tag` given), are summed
+#                                    into that station's lumped mass. Takes priority over
+#                                    `tip_propulsor_tags` if both are set (should not normally both
+#                                    be set on the same wing).
 #   wing.Hydra.lift_fraction        float, default 1.0 — fraction of MTOW-derived lift this wing
 #                                    group carries (source: `group.lift_frac/group.nwings`).
 #
@@ -212,11 +223,37 @@ def compute_operating_empty_weight(vehicle, settings=None):
             maxSpan = max(wing.spans.projected, maxSpan)
             w_hydra = getattr(wing, 'Hydra', Data())
             tip_tags = getattr(w_hydra, 'tip_propulsor_tags', [])
+            load_bearing_stations = getattr(w_hydra, 'load_bearing_stations', [])
             lift_fraction = getattr(w_hydra, 'lift_fraction', 1.0)
             wing_lift_fractions.append(lift_fraction)
 
             if wing.symbolic:
                 wing_weight = 0
+            elif load_bearing_stations:
+                y_positions = [station['y'] for station in load_bearing_stations]
+                rotor_masses_arr = []
+                rotor_thrusts_arr = []
+                for station in load_bearing_stations:
+                    station_mass = sum(propulsor_data[tag]['rotor_mass_no_mount'] for tag in station['propulsor_tags'])
+                    station_thrust = sum(propulsor_data[tag]['thrust'] for tag in station['propulsor_tags'])
+                    boom_tag = station.get('boom_tag')
+                    if boom_tag is not None:
+                        boom = next(b for b in vehicle.booms if b.tag == boom_tag)
+                        station_mass += Vahana.compute_boom_weight(boom) * Units.kg
+                    rotor_masses_arr.append(station_mass)
+                    rotor_thrusts_arr.append(station_thrust)
+                ref_tag = load_bearing_stations[0]['propulsor_tags'][0]
+                ref = propulsor_data[ref_tag]
+
+                group = Hydra.compute_wing_weight_group(
+                    vehicle_mtow=MTOW, n_wings=1, aspect_ratio=wing.aspect_ratio,
+                    area=wing.areas.reference, lift_fraction=lift_fraction,
+                    rotor_radius=ref['radius'], rotor_mass_assembly=ref['rotor_mass_no_mount'],
+                    rotor_y_positions=y_positions, rotor_masses=rotor_masses_arr,
+                    rotor_thrusts=rotor_thrusts_arr, tech_factor_wing=1.0,
+                    tech_factor_flight_control=1.0,
+                )
+                wing_weight = group['structure'] + group['actuators'] + group['tilters'] + group['mounts']
             elif tip_tags:
                 y_positions = [propulsor_data[tag]['y'] for tag in tip_tags]
                 rotor_masses_arr = [propulsor_data[tag]['rotor_mass_no_mount'] for tag in tip_tags]
