@@ -167,7 +167,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
                 n_blade = rotor.number_of_blades
                 radius = rotor.tip_radius
                 chord = np.mean(rotor.chord_distribution)
-                omega = rotor.hover.design_angular_velocity
+                omega = EVTOL_Common.max_design_field(rotor, 'design_angular_velocity')
                 tip_speed = omega * radius
 
                 blade_hub, mass_per_unit = NDARC.compute_rotor_weight(
@@ -277,7 +277,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
                 group = NDARC.compute_wing_weight_group(
                     span=wing.spans.projected, area=wing.areas.reference,
                     chord=wing.areas.reference / wing.spans.projected,
-                    rotor_angular_velocity=ref_rotor.hover.design_angular_velocity,
+                    rotor_angular_velocity=EVTOL_Common.max_design_field(ref_rotor, 'design_angular_velocity'),
                     rotor_radius=ref_rotor.tip_radius, wing_tip_mass=tip_mass,
                     vehicle_mtow=MTOW, tilt_wing=tilt_wing, tech_factor=1.0, n_wings=1,
                 )

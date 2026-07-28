@@ -212,10 +212,10 @@ def compute_operating_empty_weight(vehicle, settings=None):
                     number_of_lift_rotors += 1
                     rTip_ref = rotor.tip_radius
                     bladeSol_ref = rotor.blade_solidity
-                    maxVTip = rotor.hover.design_angular_velocity * rotor.tip_radius
+                    maxVTip = EVTOL_Common.max_design_field(rotor, 'design_angular_velocity') * rotor.tip_radius
                     lift_rotor_servo_weight = 0.65 * Units.kg
                     if rotor.oei.design_thrust is None:
-                        design_thrust = rotor.hover.design_thrust
+                        design_thrust = EVTOL_Common.max_design_field(rotor, 'design_thrust')
                     else:
                         design_thrust = rotor.oei.design_thrust
                     lift_rotor_mass = EVTOL_Common.compute_rotor_weight(rotor, design_thrust)

@@ -137,8 +137,8 @@ def compute_operating_empty_weight(vehicle, settings=None):
                 n_blade = rotor.number_of_blades
                 radius = rotor.tip_radius
                 chord = np.mean(rotor.chord_distribution)
-                omega = rotor.hover.design_angular_velocity
-                thrust = rotor.hover.design_thrust
+                omega = EVTOL_Common.max_design_field(rotor, 'design_angular_velocity')
+                thrust = EVTOL_Common.max_design_field(rotor, 'design_thrust')
 
                 blade_hub, rotor_total = Hydra.compute_rotor_weight(
                     radius=radius, chord=chord, omega=omega, thrust=thrust, n_blade=n_blade,
