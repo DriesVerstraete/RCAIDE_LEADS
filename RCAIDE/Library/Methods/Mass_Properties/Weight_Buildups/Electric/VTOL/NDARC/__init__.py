@@ -20,7 +20,7 @@ RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.VTOL.Physics_Bas
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 
-from .compute_wing_weight import compute_wing_weight_group, compute_wing_tip_mass
+from .compute_wing_weight import compute_wing_weight_group, compute_wing_tip_mass, compute_fixed_wing_weight
 from .compute_emergency_system_weight import compute_emergency_system_weight
 from .compute_landing_gear_weight import compute_landing_gear_weight
 from .compute_flight_control_system_weight import compute_flight_control_system_weight

@@ -72,10 +72,22 @@ def compute_systems_weight(vehicle, V_fuel, V_int, N_tank, N_eng):
     W_fuel_system = 2.49*(Q_tot**.726)*((Q_tot/(Q_tot+Q_int))**.363)*(N_tank**.242)*(N_eng**.157)*Units.lb
 
     # Flight controls
-    W_flight_controls = .053*(l_fus**1.536)*(b_wing**.371)*((Nult*W_0**(10.**(-4.)))**.8)*Units.lb
-    
+    # Source: Raymer eq. 15.50 -- Wfc = 0.053*L^1.536*B^0.371*(Nz*Wdg*1e-4)^0.80. Confirmed
+    # 2026-07-28 against the real Raymer textbook text: the (Nult*W_0) product must be scaled by
+    # 1e-4 *before* the 0.8 exponent, not W_0 alone raised to 1e-4 -- the previous
+    # `(Nult*W_0**(10.**(-4.)))**.8` bound the exponent only to W_0 (Python operator precedence),
+    # a real transcription bug, not a Chakraborty2022-era change.
+    W_flight_controls = .053*(l_fus**1.536)*(b_wing**.371)*(((Nult*W_0)*(10.**(-4.)))**.8)*Units.lb
+
     # Hydraulics & Pneumatics Group Wt
-    hyd_pnu_wt = (.001*W_0) * Units.lb
+    # Source: Raymer eq. 15.52 -- Whyd = Kh*Wdg^0.8*M^0.5. Confirmed 2026-07-28 against the real
+    # Raymer textbook text: the previous `0.001*W_0` had no Mach dependence and a different
+    # functional form entirely -- not a simplification of this formula, a different one. Kh=0.05
+    # is Raymer's own "low subsonic, hydraulics for brakes and retracts only" case (his table
+    # also lists 0.11/0.12/0.013 for other hydraulics scopes) -- matches Chakraborty2022's choice
+    # for the same GA aircraft class this method targets.
+    K_h = 0.05
+    hyd_pnu_wt = (K_h * (W_0**.8) * (mach_number**.5)) * Units.lb
 
     # Avionics weight
     W_uav        = 0. 

@@ -16,3 +16,4 @@ from .compute_propulsion_system_weight import compute_propulsion_system_weight
 from .compute_fuselage_weight          import compute_fuselage_weight
 from .compute_landing_gear_weight      import compute_landing_gear_weight
 from .compute_payload_weight           import compute_payload_weight
+from .compute_electrical_weight        import compute_electrical_weight

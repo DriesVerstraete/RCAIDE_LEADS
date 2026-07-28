@@ -195,6 +195,101 @@ def compute_wing_weight_group(span, area, chord, rotor_angular_velocity, rotor_r
     }
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+#  Constants — AFDD93 "parametric method" (real NDARC `MODEL_wing=2`), fixed (non-tip-mass) wings
+# ----------------------------------------------------------------------------------------------------------------------
+# For wings with no tip-mounted tilting mass (e.g. lift+cruise main wings) — `compute_wing_weight_
+# group` above (Chappell-Peyran) is tip-mass-driven and silently zeroes primary structure without
+# one (see the porting inventory doc). This is NDARC's own alternative for that case, confirmed
+# directly against the real Fortran source (`weight_model.f90`, `MODEL_wing.eq.2` branch,
+# 2026-07-28) — coefficient (5.66411) and every exponent match exactly. Real NDARC also has several
+# other fixed-wing methods gated on `MODEL_wing`/`MODEL_other` (area method, Boeing, GARTEUR,
+# Torenbeek light/transport, Raymer transport/GA) — evaluated numerically as a one-off comparison
+# (not ported) against the real `lift_cruise` vehicle; see the porting inventory doc for the full
+# comparison table. This one was picked because it's the only one both confirmed source-exact and
+# already effectively ported (as dead/broken code) in Hydra's own `afdd/fixed_wing.py::
+# fixed_wing_wt` — that source function itself is unusable as-is (references `vehicle_parameters`/
+# `motor` names never passed as parameters, confirmed never called anywhere in the Hydra repo), but
+# its isolated formula (independent of the broken surrounding plumbing) is exactly this method.
+
+_FWFAIR = 0.10   # fairing weight fraction of total wing weight (NDARC default, paramdefault.f90)
+_FWFLAP = 0.10   # control-surface weight fraction of total wing weight (NDARC default)
+_FWFIT  = 0.12   # fittings weight fraction of total wing weight (NDARC default)
+_F_LGLOC_ON_WING = 1.7247   # landing-gear-on-wing structural premium (real NDARC value)
+
+
+def compute_fixed_wing_weight(vehicle_mtow, area, aspect_ratio, taper, thickness_to_chord,
+                               lift_fraction=1.0, sweep=0.0, load_factor=3.8,
+                               landing_gear_on_wing=False, fold_fraction=0.0, tech_factor=1.0):
+    """ Calculates the structural mass of a fixed (non-tip-mass, non-tilting) wing using NDARC's
+        AFDD93 "parametric method" (real NDARC `MODEL_wing=2` — confirmed directly against
+        `weight_model.f90`, not just Hydra's Python port).
+
+        Unlike `compute_wing_weight_group` (Chappell-Peyran), this does not need a tip mass, tilt
+        angular velocity, or rotor radius at all — appropriate for a wing with no tip-mounted
+        tilting propulsor (e.g. lift+cruise main wings, where lift rotors are boom-mounted and the
+        cruise propulsor is tail-mounted). The output is the wing's total weight, split into
+        primary/fairing/flap/fitting fractions using NDARC's own fixed default fractions (a
+        book-keeping split, not an independently-computed structural breakdown the way
+        Chappell-Peyran's is).
+
+        Source:
+            Real NDARC v1.19 Fortran source, `weight_model.f90`, `MODEL_wing.eq.2` branch
+            ("parametric method"). Confirmed coefficient/exponent match, 2026-07-28.
+
+        Inputs:
+            vehicle_mtow            vehicle max takeoff weight                             [kg]
+            area                    wing reference area                                    [m^2]
+            aspect_ratio             wing aspect ratio                                       [Unitless]
+            taper                    taper ratio, tip chord / root chord                     [Unitless]
+            thickness_to_chord       wing thickness-to-chord ratio                           [Unitless]
+            lift_fraction            fraction of MTOW-derived lift this wing carries, 0-1
+                                      (default 1.0 — single main-wing vehicle)                [Unitless]
+            sweep                    quarter-chord sweep angle                               [rad]
+            load_factor              design ultimate load factor (NDARC default 3.8)         [Unitless]
+            landing_gear_on_wing     True if landing gear is wing-mounted (activates the
+                                      1.7247 structural premium; NDARC default False)         [bool]
+            fold_fraction            fraction of span that folds, 0 = no folding (NDARC
+                                      default 0.0 — no fold mechanism modelled)                [Unitless]
+            tech_factor              technology weight-scaling factor                        [Unitless]
+
+        Outputs:
+            weight:   dict with 'primary', 'fairing', 'flaps', 'fitting', 'total', all         [kg]
+    """
+    gw = vehicle_mtow * _KG2LB * lift_fraction / 1000.0   # klb
+    a = area * _M2F * _M2F                                # ft^2
+    cs = np.cos(sweep) if sweep != 0.0 else 1.0
+    gw = gw / cs
+
+    f_lgloc = _F_LGLOC_ON_WING if landing_gear_on_wing else 1.0
+    if 0.0 < fold_fraction < 1.0:
+        f_bfold = (1.0 - fold_fraction)**(-0.14356)
+    else:
+        f_bfold = 1.0
+
+    wt_wing = (5.66411 * f_lgloc * (gw**0.847) * (load_factor**0.39579) * (a**0.21754) *
+               (aspect_ratio**0.50016) * (((1.0 + taper) / thickness_to_chord)**0.09359) * f_bfold)
+
+    # Note: real NDARC's fWprim fraction-of-total split subtracts a separate `fWfold` book-keeping
+    # fraction when folding is active — distinct from `bFold`/`fold_fraction` above (which only
+    # feeds the `f_bfold` structural-weight multiplier on `wt_wing`). No confirmed default for
+    # `fWfold` itself was found in `paramdefault.f90`, and no current vehicle folds, so the
+    # primary/fairing/flap/fitting split below always assumes no folding — the `f_bfold` weight
+    # increase is still applied correctly above regardless.
+    f_wprim = 1.0 - _FWFAIR - _FWFLAP - _FWFIT
+
+    wt_wing = wt_wing / _KG2LB   # lb -> kg
+    wt_wing = wt_wing * tech_factor
+
+    return {
+        'primary': f_wprim * wt_wing,
+        'fairing': _FWFAIR * wt_wing,
+        'flaps': _FWFLAP * wt_wing,
+        'fitting': _FWFIT * wt_wing,
+        'total': wt_wing,
+    }
+
+
 def compute_wing_tip_mass(wing, vehicle):
     """ Sums the NDARC `Wtip` component group for one wing (NDARC Theory Manual v1.11, pg. 264,
         eq. following 12852): rotor group + engine/nacelle group + drive system + conversion

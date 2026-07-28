@@ -246,9 +246,12 @@ def compute_operating_empty_weight(vehicle, settings=None):
                     weight.fuel_cell += fuel_cell.mass_properties.mass * Units.kg
 
         # -------------------------------------------------------------------------------
-        # Wings and tails — NDARC Chappell-Peyran if tip-mass-bearing, Vahana beam-bending otherwise
+        # Wings and tails — NDARC Chappell-Peyran if tip-mass-bearing, NDARC AFDD93 "parametric
+        # method" (compute_fixed_wing_weight) otherwise. Both are now genuine NDARC methods, so
+        # nothing here falls back to Vahana any more for wings/tails (see 2026-07-28 decision:
+        # AFDD93 confirmed source-exact against the real Fortran, replacing the previous Vahana
+        # beam-bending fallback for non-tip-mass wings).
         # -------------------------------------------------------------------------------
-        maxLift = MTOW * 1.1 * 9.81
         maxSpan = 0
         for wing in vehicle.wings:
             maxSpan = max(wing.spans.projected, maxSpan)
@@ -280,7 +283,15 @@ def compute_operating_empty_weight(vehicle, settings=None):
                 )
                 wing_weight = group['total']
             else:
-                wing_weight = Vahana.compute_wing_weight(wing, vehicle, maxLift / 5)
+                lift_fraction = getattr(w_ndarc, 'lift_fraction', 1.0)
+                landing_gear_on_wing = getattr(w_ndarc, 'landing_gear_on_wing', False)
+                fixed_wing = NDARC.compute_fixed_wing_weight(
+                    vehicle_mtow=MTOW, area=wing.areas.reference, aspect_ratio=wing.aspect_ratio,
+                    taper=wing.taper, thickness_to_chord=wing.thickness_to_chord,
+                    lift_fraction=lift_fraction, sweep=wing.sweeps.quarter_chord,
+                    landing_gear_on_wing=landing_gear_on_wing, tech_factor=1.0,
+                )
+                wing_weight = fixed_wing['total']
 
             wing_tag = wing.tag
             weight.wings[wing_tag] = wing_weight

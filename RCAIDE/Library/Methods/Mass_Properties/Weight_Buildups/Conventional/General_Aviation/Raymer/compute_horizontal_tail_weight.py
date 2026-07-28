@@ -41,7 +41,7 @@ def compute_horizontal_tail_weight(wing, vehicle):
     S_h                = wing.areas.reference
     b_h                = wing.spans.projected
     AR_h               = (b_h**2.)/S_h
-    taper_h            = wing.spans.projected
+    taper_h            = wing.taper
     sweep_h            = wing.sweeps.quarter_chord 
     t_c_h              = wing.thickness_to_chord
     q_c                = vehicle.flight_envelope.design_dynamic_pressure
