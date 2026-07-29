@@ -179,7 +179,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
 
                 torque = propulsor.motor.design_torque
                 motor_mass = NDARC.compute_motor_weight(
-                    design_torque=torque, method='ndarc', kind_design=motor_kind_design,
+                    design_torque=torque, method='empirical_2026', kind_design=motor_kind_design,
                 )
                 weight.motors += motor_mass
                 propulsor.motor.mass_properties.mass = motor_mass

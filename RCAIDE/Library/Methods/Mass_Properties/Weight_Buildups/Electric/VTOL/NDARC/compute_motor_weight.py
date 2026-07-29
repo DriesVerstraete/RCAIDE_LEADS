@@ -12,13 +12,14 @@ from RCAIDE.Framework.Core import Units
 # ----------------------------------------------------------------------------------------------------------------------
 #  Constants
 # ----------------------------------------------------------------------------------------------------------------------
-# Four independently-sourced motor weight methods, selected by `method`. Three
-# (`ndarc`/`spl`/`bird2021`) share the identical functional form —
+# Five independently-sourced motor weight methods, selected by `method`. Four
+# (`empirical_2026`/`ndarc`/`spl`/`bird2021`) share the identical functional form —
 # `coefficient x torque^exponent` — just different calibration constants from different sources;
 # kept as separate `method` values rather than folded into one parameterized branch so the source
-# of each calibration stays explicit rather than blurred together.
+# of each calibration stays explicit rather than blurred together. `empirical_2026` is the default
+# as of 2026-07-29 (see its own entry below) — `ndarc` remains available and is not deprecated.
 #
-# `method='ndarc'` (default): W(Q), the torque-based branch of real NDARC v1.19's
+# `method='ndarc'`: W(Q), the torque-based branch of real NDARC v1.19's
 # `GetWeightNASA_Engine_motor` (weight_model.f90, local path:
 # `/Users/dverstraete/Sydney Uni Dropbox/Dries Verstraete/Software/NDARC/1_19/NDARC_v1_19_source/`).
 # Genuine calibrated regression, confirmed coefficients. NDARC derives its torque input from
@@ -65,6 +66,28 @@ from RCAIDE.Framework.Core import Units
 #
 # See 01-mission-profiles/01-docs/rcaide/20-rcaide-weight-method-porting-inventory.md ("Open
 # action items (motor weight)") for the full reconciliation status across all four sources.
+#
+# `method='empirical_2026'` (DEFAULT as of 2026-07-29, supersedes `'ndarc'` as default): a fresh
+# log-log power-law regression fit directly against the lab's own `electric_motor_data.xlsx`
+# (`Sydney Uni Dropbox/Dries Verstraete/SUAVE/electric_motors/electric_motor_data.xlsx`, `Sheet1`),
+# the same spreadsheet `'spl'`/`'bird2021'` were originally derived from — but fit fresh this
+# session (2026-07-29) against 30 real motors' CONTINUOUS torque and weight (not max/peak torque,
+# and not the smaller subset `'spl'`/`'bird2021'` used), plus two new real eVTOL propulsion motors
+# not in the spreadsheet (BETA Technologies H500B/V600A, `beta.team/motor`). One outlier excluded
+# (Evo motor AF340 — real motor, genuinely far lighter than its torque class vs. every other motor
+# in the set; flagged not deleted, worth an independent datasheet check). Fit: `mass = 0.2324 *
+# Q^0.8235` (Q already in N*m, mass directly in kg — **no Nm->lbf-ft conversion**, unlike
+# `ndarc`/`spl`/`bird2021` below, since this fit was performed directly in SI units against the
+# spreadsheet's native columns). n=29, R^2=0.9774, mean|error|=19.0% on the fit's own training set
+# — markedly better than `'ndarc'` (mean|err|=33.0%) or `'spl'` (mean|err|=53.1%) checked against
+# the same real dataset. A parallel power-based fit (`mass = 0.3540 * P^0.9559`, continuous power)
+# was also tried and rejected: needed 5 of 29 points excluded (vs. this fit's 1 of 30) to reach
+# comparable R^2, and per-motor errors between the two fits disagree by a mean 38 percentage
+# points even where aggregate errors look similar — torque is the more robust single predictor.
+# Averaging the two fits was also tested and found to be WORSE than this fit alone (contaminated
+# by the power fit's occasional large misses) — do not blend torque- and power-based predictions.
+# Full derivation, outlier list, and the rejected power-based/blended alternatives:
+# 01-mission-profiles/00-decisions/2026-07-29-rotor-motor-weight-formula-comparison.md.
 
 _M2F = 1.0 / Units.ft
 _KG2LB = 1.0 / Units.lb
@@ -89,6 +112,9 @@ _BIRD2021_EXP = 0.7224
 _HYDRA_COEFF = 2.278
 _HYDRA_EXP = 0.6563
 
+_EMPIRICAL_2026_COEFF = 0.2324   # fit directly in SI (Nm -> kg), NOT imperial like the three above
+_EMPIRICAL_2026_EXP = 0.8235
+
 
 def _torque_power_law(design_torque, coefficient, exponent):
     """ Shared `coefficient x torque^exponent` evaluator for every torque-based method
@@ -99,11 +125,15 @@ def _torque_power_law(design_torque, coefficient, exponent):
     return coefficient * (q**exponent) * Units.lb
 
 
-def compute_motor_weight(design_torque=None, motor_power=None, n_rotor=1, method='ndarc',
+def compute_motor_weight(design_torque=None, motor_power=None, n_rotor=1, method='empirical_2026',
                           kind_design=0):
-    """ Calculates motor mass using one of four independently-sourced methods.
+    """ Calculates motor mass using one of five independently-sourced methods.
 
         Source:
+            method='empirical_2026' (DEFAULT): fresh log-log power-law regression fit directly
+                             against the lab's own `electric_motor_data.xlsx` plus two new real
+                             eVTOL motor points (BETA H500B/V600A) — see module docstring for
+                             full derivation, dataset, and why it was chosen over `'ndarc'`.
             method='ndarc': NDARC v1.19 `weight_model.f90::GetWeightNASA_Engine_motor`, W(Q) branch.
                              Independently confirmed against SUAVE's `nasa_motor.py`.
             method='spl': SPL's own `electric_motor_data.xlsx` sheet 2 calibration (coefficients
@@ -114,20 +144,26 @@ def compute_motor_weight(design_torque=None, motor_power=None, n_rotor=1, method
                              docstring for why this branch is lower-confidence than the other three.
 
         Inputs:
-            design_torque    motor design torque — required for method='ndarc'/'spl'/
-                              'bird2021'                                                  [N*m]
+            design_torque    motor design torque — required for method='empirical_2026'/'ndarc'/
+                              'spl'/'bird2021'                                            [N*m]
             motor_power      power per motor — required for method='hydra', UNVERIFIED
                               unit convention, assumed kW                                [kW]
             n_rotor           number of motors (only used by method='hydra' — the torque-based
                               methods are inherently per-motor, sum externally for a group)  [Unitless]
-            method            'ndarc' (default), 'spl', 'bird2021', or 'hydra'           [str]
+            method            'empirical_2026' (default), 'ndarc', 'spl', 'bird2021', or 'hydra' [str]
             kind_design       NDARC torque-to-weight design point, method='ndarc' only:
                               0 (default) or 1 = high Q/W, 2 = low Q/W (heavier)          [int]
 
         Outputs:
             mass:   motor mass                                                            [kg]
     """
-    if method == 'ndarc':
+    if method == 'empirical_2026':
+        if design_torque is None:
+            raise ValueError("compute_motor_weight: method='empirical_2026' requires design_torque")
+        q = abs(design_torque)
+        return _EMPIRICAL_2026_COEFF * (q ** _EMPIRICAL_2026_EXP)
+
+    elif method == 'ndarc':
         if design_torque is None:
             raise ValueError("compute_motor_weight: method='ndarc' requires design_torque")
         if kind_design not in _NDARC_COEFF:
@@ -154,5 +190,5 @@ def compute_motor_weight(design_torque=None, motor_power=None, n_rotor=1, method
     else:
         raise ValueError(
             f"compute_motor_weight: unrecognized method {method!r} "
-            "(expected 'ndarc', 'spl', 'bird2021', or 'hydra')"
+            "(expected 'empirical_2026', 'ndarc', 'spl', 'bird2021', or 'hydra')"
         )
