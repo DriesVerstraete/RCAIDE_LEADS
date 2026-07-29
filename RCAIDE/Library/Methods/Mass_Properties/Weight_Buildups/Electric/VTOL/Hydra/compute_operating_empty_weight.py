@@ -40,6 +40,16 @@ import numpy as np
 #                                 sizing loop.
 #   rotor.Hydra.precone_deg      float, default 3.0 (matches source default).
 #   rotor.Hydra.rho_filler       float, default 52.0 kg/m^3 (matches source default).
+#   rotor.Hydra.tech_factor      float, default 1.0 — uniform scale on blade+hub+actuator mass.
+#                                 Exposed 2026-07-29 after calibrating against two real EASA Type
+#                                 Certificate Data Sheets (Hoffmann HO-V62, E-Props EPGU3/
+#                                 GLORIEUSE-3) implied roughly 0.2-0.8 for blade+hub specifically,
+#                                 while the actuator term alone checked out close to 1.0 already —
+#                                 see 01-mission-profiles/00-decisions/2026-07-29-rotor-motor-
+#                                 weight-formula-comparison.md. Left at the default 1.0 here
+#                                 (unvalidated end-to-end); a single scalar cannot correct
+#                                 blade+hub and actuator independently, so treat any non-default
+#                                 value as a rough interim correction, not a final calibration.
 #
 #   wing.Hydra.tip_propulsor_tags   list[str], same convention as `NDARC`'s field of the same
 #                                    name — which propulsors belong to this wing's *tilting* group
@@ -144,6 +154,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
                     )
                 precone_deg = getattr(r_hydra, 'precone_deg', 3.0)
                 rho_filler = getattr(r_hydra, 'rho_filler', 52.0)
+                tech_factor = getattr(r_hydra, 'tech_factor', 1.0)
 
                 n_blade = rotor.number_of_blades
                 radius = rotor.tip_radius
@@ -154,7 +165,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
                 blade_hub, rotor_total = Hydra.compute_rotor_weight(
                     radius=radius, chord=chord, omega=omega, thrust=thrust, n_blade=n_blade,
                     n_rotor=1, material=material, load_factor=load_factor,
-                    precone_deg=precone_deg, rho_filler=rho_filler, tech_factor=1.0,
+                    precone_deg=precone_deg, rho_filler=rho_filler, tech_factor=tech_factor,
                 )
                 weight.rotors += blade_hub['blades']
                 weight.hubs += blade_hub['hub'] + blade_hub['actuator']
