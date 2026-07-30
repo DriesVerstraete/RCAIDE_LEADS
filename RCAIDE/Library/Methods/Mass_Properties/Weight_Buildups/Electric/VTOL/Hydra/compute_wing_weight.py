@@ -71,7 +71,7 @@ _RHO_SKIN   = 1650.0  # mean skin density, kg/m^3 (folds in foam)
 _F_TILT     = 0.075   # tilt-actuator weight fraction of wing weight
 
 
-def _motor_mount_mass(L, M, r, f):
+def _motor_mount_mass(L, M, r, f, E=None, rho=None):
     """ Mass of a uniform cantilever tube beam with a tip mass, sized to a target natural
         frequency. Direct port of `motor_mount_mass.py::motor_mount_mass`.
 
@@ -80,10 +80,15 @@ def _motor_mount_mass(L, M, r, f):
             M   tip mass                       [kg]
             r   outer radius, circular section  [m]
             f   target natural frequency        [Hz]
+            E   Young's modulus override, optional -- falls back to module default (`_E`) if None
+            rho density override, optional -- falls back to module default (`_RHO`) if None
 
         Outputs:
             mass  beam mass                    [kg]
     """
+    E   = _E   if E   is None else E
+    rho = _RHO if rho is None else rho
+
     wn = f * 2.0 * np.pi
 
     LHS = 1.0
@@ -92,10 +97,10 @@ def _motor_mount_mass(L, M, r, f):
     A = LHS / (3*L4)
 
     dRHS = M / (9.0*L)
-    coeff = A*_E*r*r / (2.0*_RHO*wn*wn) - fcoef
+    coeff = A*E*r*r / (2.0*rho*wn*wn) - fcoef
     mass = dRHS / coeff
 
-    const = 2*np.pi*r*_RHO
+    const = 2*np.pi*r*rho
 
     t = mass / const
     t = max(_TMIN, t)
@@ -160,7 +165,8 @@ def _coefficients_simple(r1, taper, L, masses, xposn, tbyc):
     return LHS, RHS_v3, dRHS
 
 
-def _spar_mass(r1, taper, L, m_by_a, masses, xposn, thrusts, fn=6.0, tbyc=0.168):
+def _spar_mass(r1, taper, L, m_by_a, masses, xposn, thrusts, fn=6.0, tbyc=0.168,
+               E=None, rho=None, sigma_max=None, tau_max=None):
     """ Mass of a tapered cantilever spar sized to a target natural frequency, with distributed
         (skin) and lumped (motor mount/motor/rotor) non-structural mass, checked against static
         stress limits in hover. Direct port of `motor_mount_mass.py::spar_mass`.
@@ -175,14 +181,23 @@ def _spar_mass(r1, taper, L, m_by_a, masses, xposn, thrusts, fn=6.0, tbyc=0.168)
             thrusts   rotor thrust at each lumped mass position  [N]
             fn        target natural frequency, half-wing        [Hz]
             tbyc      wing thickness-to-chord ratio              [-]
+            E         Young's modulus override, optional -- falls back to `_E` if None
+            rho       density override, optional -- falls back to `_RHO` if None
+            sigma_max axial stress allowable override, optional -- falls back to `_SIGMA_MAX`
+            tau_max   shear stress allowable override, optional -- falls back to `_TAU_MAX`
 
         Outputs:
             Mspar     spar mass                                 [kg]
     """
+    E         = _E         if E         is None else E
+    rho       = _RHO       if rho       is None else rho
+    sigma_max = _SIGMA_MAX if sigma_max is None else sigma_max
+    tau_max   = _TAU_MAX   if tau_max   is None else tau_max
+
     LHS, RHS, dRHS = _coefficients_simple(r1, taper, L, masses, xposn, tbyc)
     omegan = fn*2*np.pi
     beta = m_by_a/tbyc
-    coef = _E*np.pi*0.5/(omegan*omegan)*LHS - _RHO*np.pi*RHS
+    coef = E*np.pi*0.5/(omegan*omegan)*LHS - rho*np.pi*RHS
     b = beta*RHS + dRHS
     t = b/coef
     rbar = (1+taper)*0.5*r1
@@ -217,19 +232,19 @@ def _spar_mass(r1, taper, L, m_by_a, masses, xposn, thrusts, fn=6.0, tbyc=0.168)
     radius = r1 + rprime*xpts
 
     sigma = np.divide(BM*_NZ, 8*np.pi*t*np.square(radius))
-    SF = np.amin(_SIGMA_MAX/sigma)
+    SF = np.amin(sigma_max/sigma)
 
     tshear = t
     CSArea = 2*np.pi*radius*tshear
     tau = 2.0*Shear/CSArea*_NZ
-    SF2 = np.amin(_TAU_MAX/tau)
+    SF2 = np.amin(tau_max/tau)
 
     if SF < 1.5:
         t = t*1.5/SF
     if SF2 < 1.5:
         tshear = tshear*1.5/SF2
 
-    mspar = 2*np.pi*rbar*(t+tshear)*_RHO
+    mspar = 2*np.pi*rbar*(t+tshear)*rho
     Mspar = mspar*L
 
     return Mspar
@@ -239,7 +254,7 @@ def compute_wing_weight_group(vehicle_mtow, n_wings, aspect_ratio, area, lift_fr
                                rotor_radius, rotor_mass_assembly, rotor_y_positions,
                                rotor_masses, rotor_thrusts, wing_flap_redundancy=1.0,
                                tilt_actuator_redundancy=1.0, tech_factor_wing=1.0,
-                               tech_factor_flight_control=1.0):
+                               tech_factor_flight_control=1.0, spar_material=None):
     """ Calculates the structural mass of one fixed-wing group using Hydra's target-frequency
         spar-sizing method (the class-based layer `empty_hydra.py` descends from).
 
@@ -266,10 +281,27 @@ def compute_wing_weight_group(vehicle_mtow, n_wings, aspect_ratio, area, lift_fr
             tilt_actuator_redundancy      tilt actuator weight redundancy multiplier     [Unitless]
             tech_factor_wing              technology factor, wing structure              [Unitless]
             tech_factor_flight_control    technology factor, actuators/tilters           [Unitless]
+            spar_material                 optional `Solid` material instance (e.g.
+                                            `AS4_3502_Unidirectional_Carbon_Fiber`) -- 2026-07-30,
+                                            added so a real named/sourced material can drive the
+                                            spar/motor-mount sizing instead of this module's
+                                            hardcoded `_E`/`_RHO`/`_SIGMA_MAX`/`_TAU_MAX` constants.
+                                            None (default) preserves the original hardcoded
+                                            behavior exactly. Reads `.ultimate_tensile_strength`
+                                            (sigma_max), `.ultimate_shear_strength` (tau_max),
+                                            `.density` (rho), and the non-standard
+                                            `.youngs_modulus` attribute if present (falls back to
+                                            the module default `_E` if the material doesn't define
+                                            it -- `Solid`'s base interface has no modulus field).
 
         Outputs:
             weight:   dict with 'structure', 'actuators', 'tilters', 'mounts', all         [kg]
     """
+    mat_E   = getattr(spar_material, 'youngs_modulus',        None) if spar_material is not None else None
+    mat_rho = getattr(spar_material, 'density',                None) if spar_material is not None else None
+    mat_sig = getattr(spar_material, 'ultimate_tensile_strength', None) if spar_material is not None else None
+    mat_tau = getattr(spar_material, 'ultimate_shear_strength',   None) if spar_material is not None else None
+
     span = np.sqrt(aspect_ratio * area)
     chord = area / span
 
@@ -282,7 +314,8 @@ def compute_wing_weight_group(vehicle_mtow, n_wings, aspect_ratio, area, lift_fr
 
     L_mount = rotor_radius + chord*0.3
     r_tube = 0.125*rotor_radius*0.5
-    mount_mass = _motor_mount_mass(L_mount, rotor_mass_assembly, r_tube, _F_MOUNT)
+    mount_mass = _motor_mount_mass(L_mount, rotor_mass_assembly, r_tube, _F_MOUNT,
+                                    E=mat_E, rho=mat_rho)
 
     mounts_wt = _KG2LB * mount_mass * nrotors_half_wing * (2*n_wings)
 
@@ -295,7 +328,8 @@ def compute_wing_weight_group(vehicle_mtow, n_wings, aspect_ratio, area, lift_fr
     y = np.asarray(rotor_y_positions)
     Mk = np.asarray(rotor_masses) + mount_mass
     T = np.asarray(rotor_thrusts)
-    M_spar = _spar_mass(rroot, _TAPER, L, m_by_a, Mk, y, T, _target_frequency(vehicle_mtow), _TAU_W)
+    M_spar = _spar_mass(rroot, _TAPER, L, m_by_a, Mk, y, T, _target_frequency(vehicle_mtow), _TAU_W,
+                         E=mat_E, rho=mat_rho, sigma_max=mat_sig, tau_max=mat_tau)
     # NOTE: `area` (m^2) is used directly here, not converted to ft^2 — matches the original
     # source exactly (`MbyA*self.area`, not `MbyA*Sw`); the trailing *2.2 converts the resulting
     # kg subtotal to lb (a hardcoded approximate kg->lb factor in the source, not the module's own

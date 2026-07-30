@@ -79,7 +79,14 @@ def compute_rotor_weight(radius, chord, omega, thrust, n_blade, n_rotor, materia
             thrust         total rotor thrust for this rotor group                   [N]
             n_blade        number of blades per rotor                                [Unitless]
             n_rotor        number of rotors in this group                            [Unitless]
-            material       spar material name — see `_spar_properties` for valid values [str]
+            material       spar material name (str, existing lookup-table behavior -- see
+                            `_spar_properties`) OR a real `Solid` material instance (e.g.
+                            `AS4_3502_Unidirectional_Carbon_Fiber`), 2026-07-30 -- only `.density`
+                            (rho) and `.ultimate_tensile_strength` (sigma_y) are actually consumed
+                            by this function's own sizing formula (confirmed by direct inspection
+                            -- the `E`/`G`/`tau_y` entries in `_spar_properties`'s dict, and the
+                            `web` variable below, are unused dead values in this specific port,
+                            not just when a `Solid` instance is passed)                [str or Solid]
             load_factor    limit load factor (source applies a fixed 1.5 ultimate
                             factor on top of this internally)                        [Unitless]
             precone_deg    blade precone angle                                       [deg]
@@ -93,8 +100,12 @@ def compute_rotor_weight(radius, chord, omega, thrust, n_blade, n_rotor, materia
                      return value, NOT divided by n_rotor (unlike NDARC's per-unit
                      convention)                                                      [kg]
     """
-    spar = _spar_properties(material.lower())
-    web = _spar_properties('090_carbon')
+    if isinstance(material, str):
+        spar = _spar_properties(material.lower())
+    else:
+        # real `Solid` material instance, 2026-07-30 -- see docstring: only rho/sigma_y consumed
+        spar = {'rho': material.density, 'sigma_y': material.ultimate_tensile_strength}
+    web = _spar_properties('090_carbon')  # unused below -- dead value, kept for source parity
 
     dts = 0.0005      # minimum thickness for manufacturing
     tbyc = 0.12       # blade thickness to chord ratio

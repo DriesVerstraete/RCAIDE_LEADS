@@ -69,7 +69,7 @@ _AREAL_WEIGHT = _BID_MIN_THK * _BID_RHO + _CORE_MIN_THK * _CORE_RHO + _PAINT_THK
 
 
 def compute_fuselage_weight(vehicle_mtow, wing_span, min_wing_lift_fraction, fuselage_length,
-                             tech_factor=1.0):
+                             tech_factor=1.0, keel_materials=None):
     """ Calculates fuselage mass (skin, bulkheads, canopy, keel) using Hydra's "GB/ZL" ellipsoid
         model: an ellipsoid wetted-area skin/bulkhead/canopy sizing, plus a keel beam sized
         against three independent load cases — wing-lift bending, wing-torsion, and side-landing.
@@ -87,10 +87,44 @@ def compute_fuselage_weight(vehicle_mtow, wing_span, min_wing_lift_fraction, fus
             tech_factor              technology weight-scaling factor (source applies an
                                        additional flat +20% fastener allowance on top,
                                        always, not gated by tech_factor)                  [Unitless]
+            keel_materials           optional RCAIDE `Data()` (or None) overriding the keel
+                                       structural material properties below -- 2026-07-30, added
+                                       so a real named/sourced `Solid` material class (e.g.
+                                       `AS4_3502_Unidirectional_Carbon_Fiber`) can drive the keel
+                                       sizing instead of this module's hardcoded constants. Any
+                                       field left unset (or `keel_materials=None` entirely) falls
+                                       back to the original hardcoded default -- this preserves
+                                       bit-for-bit backward compatibility when unset. Recognized
+                                       fields, all optional:
+                                         uni_stress   0-deg bending/tension allowable       [Pa]
+                                         uni_rho      0-deg ply density                     [kg/m^3]
+                                         bid_shear    +-45/bidirectional shear allowable    [Pa]
+                                         bid_bearing  bidirectional bearing allowable       [Pa]
+                                         bid_rho      bidirectional ply density             [kg/m^3]
+                                         steel_shear  bolt shear allowable                  [Pa]
+                                       Only the keel (structural) terms are overridable -- skin/
+                                       bulkhead/canopy sandwich material is a separate, still-
+                                       hardcoded assumption (`_AREAL_WEIGHT`, unchanged, not
+                                       sourced/revisited this session).
 
         Outputs:
             weight:   dict with 'skin', 'keel', 'bulkhead', 'canopy', 'total', all        [kg]
     """
+    km = keel_materials
+    uni_stress  = getattr(km, 'uni_stress',  None) if km is not None else None
+    uni_rho     = getattr(km, 'uni_rho',     None) if km is not None else None
+    bid_shear   = getattr(km, 'bid_shear',   None) if km is not None else None
+    bid_bearing = getattr(km, 'bid_bearing', None) if km is not None else None
+    bid_rho     = getattr(km, 'bid_rho',     None) if km is not None else None
+    steel_shear = getattr(km, 'steel_shear', None) if km is not None else None
+
+    uni_stress  = _UNI_STRESS   if uni_stress  is None else uni_stress
+    uni_rho     = _UNI_RHO      if uni_rho     is None else uni_rho
+    bid_shear   = _BID_SHEAR    if bid_shear   is None else bid_shear
+    bid_bearing = _BID_BEARING  if bid_bearing is None else bid_bearing
+    bid_rho     = _BID_RHO      if bid_rho     is None else bid_rho
+    steel_shear = _STEEL_SHEAR  if steel_shear is None else steel_shear
+
     weight_n = vehicle_mtow * Units.standard_gravity
 
     width = _WIDTH
@@ -113,22 +147,22 @@ def compute_fuselage_weight(vehicle_mtow, wing_span, min_wing_lift_fraction, fus
     m_bend = l_lift * min_lf * length * (2.0 / 3.0)
     beam_width = width
     beam_height = height
-    a_bend = m_bend * beam_height / (4 * _UNI_STRESS * (beam_height * 0.5)**2)
-    mass_keel = a_bend * length * _UNI_RHO
+    a_bend = m_bend * beam_height / (4 * uni_stress * (beam_height * 0.5)**2)
+    mass_keel = a_bend * length * uni_rho
 
     # keel mass due to wing torsion
     m_torsion = min_lf * l_lift * span * 0.75
     a_torsion = beam_height * beam_width
-    t_torsion = 0.5 * m_torsion / (_BID_SHEAR * a_torsion) * (_NG * 0.5)
-    mass_keel = mass_keel + 2 * (beam_height + beam_width) * t_torsion * _BID_RHO
+    t_torsion = 0.5 * m_torsion / (bid_shear * a_torsion) * (_NG * 0.5)
+    mass_keel = mass_keel + 2 * (beam_height + beam_width) * t_torsion * bid_rho
 
     # keel mass due to side landing
     f_landing = _SF * weight_n * _NL * 0.6403
-    a_bolt = f_landing / _STEEL_SHEAR
+    a_bolt = f_landing / steel_shear
     d_bolt = 2 * np.sqrt(a_bolt / np.pi)
-    t_laminate = f_landing / (d_bolt * _BID_BEARING)
+    t_laminate = f_landing / (d_bolt * bid_bearing)
     v_padup = np.pi * (20 * t_laminate)**2 * t_laminate / 3
-    mass_keel = mass_keel + 4 * v_padup * _BID_RHO
+    mass_keel = mass_keel + 4 * v_padup * bid_rho
 
     factor = tech_factor * 1.2   # +20% fastener/misc allowance, always applied (matches source)
 

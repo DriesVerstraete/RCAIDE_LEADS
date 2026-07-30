@@ -23,6 +23,8 @@ RCAIDE.Library.Attributes.Cryogens : Related module for cryogenic material prope
 # ----------------------------------------------------------------------------------------------------------------------
 
 from .Solid                                 import Solid
+from .AS4_3502_Unidirectional_Carbon_Fiber  import AS4_3502_Unidirectional_Carbon_Fiber
+from .S2_449_SP381_Unidirectional_Glass_Fiber import S2_449_SP381_Unidirectional_Glass_Fiber
 from .Acrylic                               import Acrylic
 from .Aluminum                              import Aluminum
 from .Aluminum_Alloy                        import Aluminum_Alloy

@@ -33,7 +33,10 @@ import numpy as np
 #
 #   rotor.Hydra.material         str, REQUIRED — spar material name (see
 #                                 `Hydra/compute_rotor_weight.py::_spar_properties` for valid
-#                                 values). No default assumed — blade mass is highly sensitive to
+#                                 values), OR a real `Solid` material instance (e.g.
+#                                 `AS4_3502_Unidirectional_Carbon_Fiber`), 2026-07-30 — only
+#                                 `.density`/`.ultimate_tensile_strength` are consumed either way.
+#                                 No default assumed — blade mass is highly sensitive to
 #                                 material choice, same reasoning as `NDARC`'s `nu_blade`.
 #   rotor.Hydra.load_factor      float, REQUIRED — limit load factor (nz). No default assumed,
 #                                 same reasoning as material — this drives the entire spanwise spar
@@ -71,6 +74,26 @@ import numpy as np
 #                                    be set on the same wing).
 #   wing.Hydra.lift_fraction        float, default 1.0 — fraction of MTOW-derived lift this wing
 #                                    group carries (source: `group.lift_frac/group.nwings`).
+#   wing.Hydra.spar_material        `Solid` instance, optional -- 2026-07-30. Drives the spar/
+#                                    motor-mount sizing (`compute_wing_weight_group`'s `_E`/`_RHO`/
+#                                    `_SIGMA_MAX`/`_TAU_MAX`) instead of this module's hardcoded
+#                                    122 GPa/1650 kg/m^3/275 MPa/47 MPa constants. Unset (default)
+#                                    preserves the exact original hardcoded values. Only used on
+#                                    load-bearing-station/tip-tag (rotor-carrying) wings -- the
+#                                    Vahana fallback branch (non-rotor-carrying wings/tails) is
+#                                    unaffected, out of scope this session.
+#
+#   fuselage.keel_materials.root_bending_moment_carrier   `Solid` instance, optional -- 2026-07-30.
+#                                    Same field `Vahana`/`Physics_Based` already reads (not a new
+#                                    `.Hydra`-specific namespace) -- drives the keel bending term's
+#                                    allowable stress/density in both methods identically. Unset
+#                                    falls back to Hydra's own hardcoded 450 MPa/1660 kg/m^3.
+#   fuselage.keel_materials.shear_carrier         `Solid` instance, optional -- same convention,
+#                                    drives keel torsion/shear term. Unset falls back to 47 MPa.
+#   fuselage.keel_materials.bearing_carrier       `Solid` instance, optional -- drives keel
+#                                    landing-bearing term. Unset falls back to 400 MPa.
+#   fuselage.materials.bolt_materials.landing_pad_bolt   `Solid` instance, optional -- drives bolt
+#                                    shear sizing. Unset falls back to 500 MPa.
 #
 # Components with no Hydra-specific model (fall back to Vahana/Common, matching the porting
 # inventory's own component matrix): flight control system (confirmed dead in source, see
@@ -236,6 +259,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
             tip_tags = getattr(w_hydra, 'tip_propulsor_tags', [])
             load_bearing_stations = getattr(w_hydra, 'load_bearing_stations', [])
             lift_fraction = getattr(w_hydra, 'lift_fraction', 1.0)
+            spar_material = getattr(w_hydra, 'spar_material', None)
             wing_lift_fractions.append(lift_fraction)
 
             if wing.symbolic:
@@ -262,7 +286,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
                     rotor_radius=ref['radius'], rotor_mass_assembly=ref['rotor_mass_no_mount'],
                     rotor_y_positions=y_positions, rotor_masses=rotor_masses_arr,
                     rotor_thrusts=rotor_thrusts_arr, tech_factor_wing=1.0,
-                    tech_factor_flight_control=1.0,
+                    tech_factor_flight_control=1.0, spar_material=spar_material,
                 )
                 wing_weight = group['structure'] + group['actuators'] + group['tilters'] + group['mounts']
             elif tip_tags:
@@ -277,7 +301,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
                     rotor_radius=ref['radius'], rotor_mass_assembly=ref['rotor_mass_no_mount'],
                     rotor_y_positions=y_positions, rotor_masses=rotor_masses_arr,
                     rotor_thrusts=rotor_thrusts_arr, tech_factor_wing=1.0,
-                    tech_factor_flight_control=1.0,
+                    tech_factor_flight_control=1.0, spar_material=spar_material,
                 )
                 wing_weight = group['structure'] + group['actuators'] + group['tilters'] + group['mounts']
             else:
@@ -307,9 +331,38 @@ def compute_operating_empty_weight(vehicle, settings=None):
         # Fuselage — Hydra "GB/ZL" ellipsoid model
         # -------------------------------------------------------------------------------
         for fuse in vehicle.fuselages:
+            # 2026-07-30: reuse the SAME `fuse.keel_materials`/`fuse.materials.bolt_materials`
+            # real-material-object convention `Vahana` already reads (Physics_Based/
+            # compute_fuselage_weight.py) -- one vehicle-level material input now drives both
+            # methods identically, rather than each method needing its own namespace. Any field
+            # left unset falls back to this module's original hardcoded constants (see
+            # `compute_fuselage_weight`'s `keel_materials` docstring) -- bit-for-bit unchanged
+            # when `fuse.keel_materials` is not set, exactly like every other vehicle here today.
+            keel_mats = getattr(fuse, 'keel_materials', None)
+            bolt_mats = getattr(getattr(fuse, 'materials', None), 'bolt_materials', None)
+            rbm_mat = getattr(keel_mats, 'root_bending_moment_carrier', None) if keel_mats else None
+            shear_mat = getattr(keel_mats, 'shear_carrier', None) if keel_mats else None
+            bearing_mat = getattr(keel_mats, 'bearing_carrier', None) if keel_mats else None
+            bolt_mat = getattr(bolt_mats, 'landing_pad_bolt', None) if bolt_mats else None
+
+            hydra_keel_materials = None
+            if rbm_mat is not None or shear_mat is not None or bearing_mat is not None or bolt_mat is not None:
+                hydra_keel_materials = Data()
+                if rbm_mat is not None:
+                    hydra_keel_materials.uni_stress = rbm_mat.ultimate_tensile_strength
+                    hydra_keel_materials.uni_rho = rbm_mat.density
+                if shear_mat is not None:
+                    hydra_keel_materials.bid_shear = shear_mat.ultimate_shear_strength
+                    hydra_keel_materials.bid_rho = shear_mat.density
+                if bearing_mat is not None:
+                    hydra_keel_materials.bid_bearing = bearing_mat.ultimate_bearing_strength
+                if bolt_mat is not None:
+                    hydra_keel_materials.steel_shear = bolt_mat.ultimate_shear_strength
+
             fus = Hydra.compute_fuselage_weight(
                 vehicle_mtow=MTOW, wing_span=maxSpan, min_wing_lift_fraction=min_wing_lift_fraction,
                 fuselage_length=fuse.lengths.total, tech_factor=1.0,
+                keel_materials=hydra_keel_materials,
             )
             fuse.mass_properties.center_of_gravity[0][0] = .45 * fuse.lengths.total
             fuse.mass_properties.mass = fus['total']
