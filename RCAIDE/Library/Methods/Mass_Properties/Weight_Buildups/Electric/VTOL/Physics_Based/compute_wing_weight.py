@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # RCAIDE 
-from RCAIDE.Library.Attributes.Materials import Bidirectional_Carbon_Fiber, Carbon_Fiber_Honeycomb, Paint, Unidirectional_Carbon_Fiber, Aluminum_Alloy, Epoxy 
+from RCAIDE.Library.Attributes.Materials import Bidirectional_Carbon_Fiber, Carbon_Fiber_Honeycomb, Paint, Unidirectional_Carbon_Fiber, Aluminum_Alloy, Epoxy, AS4_3502_Unidirectional_Carbon_Fiber
 
 # package imports 
 import numpy as np
@@ -116,7 +116,10 @@ def compute_wing_weight(wing,
     try:
         torsMat = wing.materials.skin_materials.torsion_carrier
     except AttributeError:
-        torsMat = Bidirectional_Carbon_Fiber()
+        # Default changed 2026-07-30 -- real, sourced AS4/3502 (real +-45 laminate shear
+        # allowable, 81.4 MPa) replaces the generic MatWeb-median Bidirectional_Carbon_Fiber
+        # (90 MPa). Not backward-compatible by design -- see the 2026-07-30 decision doc.
+        torsMat = AS4_3502_Unidirectional_Carbon_Fiber()
     torsUSS = torsMat.ultimate_shear_strength
     torsDen = torsMat.density
     torsMGT = torsMat.minimum_gage_thickness
@@ -131,7 +134,12 @@ def compute_wing_weight(wing,
     try:
         bendMat = wing.materials.flap_materials.bending_carrier
     except AttributeError:
-        bendMat = Unidirectional_Carbon_Fiber()
+        # Default changed 2026-07-30 -- real, sourced AS4/3502 (notched/open-hole allowable,
+        # 439 MPa) replaces the generic MatWeb-median Unidirectional_Carbon_Fiber (1500 MPa,
+        # unnotched, no environmental knockdown). Not backward-compatible by design -- see the
+        # 2026-07-30 decision doc.
+        bendMat = AS4_3502_Unidirectional_Carbon_Fiber()
+        bendMat.ultimate_tensile_strength = bendMat.OHC_directional_layup_220F_wet
     bendUTS = bendMat.ultimate_tensile_strength
     bendDen = bendMat.density
 
@@ -160,7 +168,8 @@ def compute_wing_weight(wing,
     try:
         shearMat = wing.spar_materials.shear_carrier
     except AttributeError:
-        shearMat = Bidirectional_Carbon_Fiber()
+        # Default changed 2026-07-30 -- same rationale as torsMat above.
+        shearMat = AS4_3502_Unidirectional_Carbon_Fiber()
     shearMGT = shearMat.minimum_gage_thickness
     shearDen = shearMat.density
     shearUSS = shearMat.ultimate_shear_strength

@@ -75,10 +75,12 @@ import numpy as np
 #   wing.Hydra.lift_fraction        float, default 1.0 — fraction of MTOW-derived lift this wing
 #                                    group carries (source: `group.lift_frac/group.nwings`).
 #   wing.Hydra.spar_material        `Solid` instance, optional -- 2026-07-30. Drives the spar/
-#                                    motor-mount sizing (`compute_wing_weight_group`'s `_E`/`_RHO`/
-#                                    `_SIGMA_MAX`/`_TAU_MAX`) instead of this module's hardcoded
-#                                    122 GPa/1650 kg/m^3/275 MPa/47 MPa constants. Unset (default)
-#                                    preserves the exact original hardcoded values. Only used on
+#                                    motor-mount sizing. Unset defaults to a real, sourced
+#                                    AS4_3502_Unidirectional_Carbon_Fiber instance (notched basis,
+#                                    `compute_wing_weight.py::_default_spar_material()`) -- NOT the
+#                                    original hardcoded 122 GPa/1650 kg/m^3/275 MPa/47 MPa
+#                                    constants (a real default-behavior change, not backward-
+#                                    compatible; see the 2026-07-30 decision doc). Only used on
 #                                    load-bearing-station/tip-tag (rotor-carrying) wings -- the
 #                                    Vahana fallback branch (non-rotor-carrying wings/tails) is
 #                                    unaffected, out of scope this session.

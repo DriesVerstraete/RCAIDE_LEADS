@@ -8,6 +8,7 @@
 
 # RCAIDE imports
 from RCAIDE.Framework.Core import Units
+from RCAIDE.Library.Attributes.Materials import AS4_3502_Unidirectional_Carbon_Fiber
 
 # package imports
 import numpy as np
@@ -56,13 +57,32 @@ def _target_frequency(vehicle_mtow):
     """ MTOW-scaled wing spar target natural frequency, Hz. See _FN_REF_HZ/_FN_REF_MTOW above. """
     return _FN_REF_HZ * (_FN_REF_MTOW / vehicle_mtow) ** (1.0 / 6.0)
 
-# Motor-mount / spar structural sizing constants (`motor_mount_mass.py`)
+# Motor-mount / spar structural sizing constants (`motor_mount_mass.py`) -- ORIGINAL Hydra source
+# values, now only a last-resort fallback inside `_motor_mount_mass`/`_spar_mass` themselves.
+# `compute_wing_weight_group`'s own default (when no `spar_material` is passed) is the real,
+# sourced `AS4_3502_Unidirectional_Carbon_Fiber` material below, not these constants -- see
+# `_default_spar_material()`, decided 2026-07-30 (same precedent as NDARC's `empirical_2026`
+# motor-weight default swap). These constants remain reachable only if a caller manages to get
+# `E`/`rho`/`sigma_max`/`tau_max` all the way down to `None` despite `spar_material` never being
+# `None` at the `compute_wing_weight_group` level -- effectively dead in normal use.
 _E         = 122.0e9   # Young's modulus, Pa
 _RHO       = 1650.0    # density, kg/m^3
 _SIGMA_MAX = 275.0e6   # unidirectional axial limiting stress, Pa
 _TAU_MAX   = 47.0e6    # BID ultimate shear stress, Pa
 _G         = 9.81      # m/s^2
 _TMIN      = 10e-4     # minimum gauge, m (2 layers of carbon)
+
+
+def _default_spar_material():
+    """ Real, sourced default spar material -- AS4/3502 unidirectional carbon tape, notched
+        (open-hole, hot/wet) bending allowable. Replaces the original hardcoded `_SIGMA_MAX`/
+        `_E`/`_RHO`/`_TAU_MAX` constants as `compute_wing_weight_group`'s actual default,
+        2026-07-30. See
+        01-mission-profiles/00-decisions/2026-07-30-fuselage-weight-formula-comparison.md for the
+        full sourcing (NASA/TM-2009-215900) and rationale for using the notched value here. """
+    mat = AS4_3502_Unidirectional_Carbon_Fiber()
+    mat.ultimate_tensile_strength = mat.OHC_directional_layup_220F_wet  # notched, 439 MPa
+    return mat
 
 # Wing skin / control-surface constants
 _TSKIN      = 15e-4   # skin thickness, m (3 layers, 0.5mm each)
@@ -282,25 +302,29 @@ def compute_wing_weight_group(vehicle_mtow, n_wings, aspect_ratio, area, lift_fr
             tech_factor_wing              technology factor, wing structure              [Unitless]
             tech_factor_flight_control    technology factor, actuators/tilters           [Unitless]
             spar_material                 optional `Solid` material instance (e.g.
-                                            `AS4_3502_Unidirectional_Carbon_Fiber`) -- 2026-07-30,
-                                            added so a real named/sourced material can drive the
-                                            spar/motor-mount sizing instead of this module's
-                                            hardcoded `_E`/`_RHO`/`_SIGMA_MAX`/`_TAU_MAX` constants.
-                                            None (default) preserves the original hardcoded
-                                            behavior exactly. Reads `.ultimate_tensile_strength`
-                                            (sigma_max), `.ultimate_shear_strength` (tau_max),
-                                            `.density` (rho), and the non-standard
-                                            `.youngs_modulus` attribute if present (falls back to
-                                            the module default `_E` if the material doesn't define
-                                            it -- `Solid`'s base interface has no modulus field).
+                                            `AS4_3502_Unidirectional_Carbon_Fiber`). Defaults
+                                            (2026-07-30) to `_default_spar_material()` -- a real,
+                                            sourced AS4/3502 instance, notched basis -- NOT the
+                                            original hardcoded `_E`/`_RHO`/`_SIGMA_MAX`/`_TAU_MAX`
+                                            constants (this is a real default-behavior change, not
+                                            backward-compatible; those constants are now only a
+                                            last-resort fallback deep inside `_motor_mount_mass`/
+                                            `_spar_mass`, effectively unreachable in normal use).
+                                            Reads `.ultimate_tensile_strength` (sigma_max),
+                                            `.ultimate_shear_strength` (tau_max), `.density` (rho),
+                                            and the non-standard `.youngs_modulus` attribute if
+                                            present (`Solid`'s base interface has no modulus
+                                            field).
 
         Outputs:
             weight:   dict with 'structure', 'actuators', 'tilters', 'mounts', all         [kg]
     """
-    mat_E   = getattr(spar_material, 'youngs_modulus',        None) if spar_material is not None else None
-    mat_rho = getattr(spar_material, 'density',                None) if spar_material is not None else None
-    mat_sig = getattr(spar_material, 'ultimate_tensile_strength', None) if spar_material is not None else None
-    mat_tau = getattr(spar_material, 'ultimate_shear_strength',   None) if spar_material is not None else None
+    if spar_material is None:
+        spar_material = _default_spar_material()
+    mat_E   = getattr(spar_material, 'youngs_modulus',        None)
+    mat_rho = getattr(spar_material, 'density',                None)
+    mat_sig = getattr(spar_material, 'ultimate_tensile_strength', None)
+    mat_tau = getattr(spar_material, 'ultimate_shear_strength',   None)
 
     span = np.sqrt(aspect_ratio * area)
     chord = area / span
