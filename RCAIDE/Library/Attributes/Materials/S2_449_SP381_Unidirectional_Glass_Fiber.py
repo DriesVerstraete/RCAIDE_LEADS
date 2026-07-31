@@ -40,7 +40,9 @@ class S2_449_SP381_Unidirectional_Glass_Fiber(Solid):
 
     Notes
     -----
-    Source: `000-inbox/Glass Fiber Composites_26_07_30_10_51_33.pdf`, Chapter 6, Section 6.2.1,
+    Source: `01-programs/program-evtol-long-range-delivery-drone/03-projects/01-fuel-cell-
+    degradation-modelling/01-mission-profiles/02-references/MIL-HDBK-17-Volume2-Materials-
+    Properties.pdf`, Chapter 6, Section 6.2.1,
     Tables 6.2.1(a) [tension, 1-axis], 6.2.1(d) [compression, 1-axis], 6.2.1(f) [shear, 12-plane,
     +-45 laminate], S2-449 43.5k/SP381 unidirectional tape.
 

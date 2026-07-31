@@ -51,8 +51,9 @@ class AS4_3502_Unidirectional_Carbon_Fiber(Solid):
     -----
     Source: real B-basis test data for AS4 12k/3502 unidirectional tape, MIL-HDBK-17-2E-class
     "Fully Approved" statistical basis (Weibull/ANOVA-derived B-values, 30-40 specimens across
-    5 batches per condition) -- extracted directly from
-    `000-inbox/Carbon Fiber Composites_26_07_30_10_51_09.pdf`, Chapter 4, Section 4.2.8,
+    5 batches per condition) -- extracted directly from `01-programs/program-evtol-long-range-
+    delivery-drone/03-projects/01-fuel-cell-degradation-modelling/01-mission-profiles/
+    02-references/MIL-HDBK-17-Volume2-Materials-Properties.pdf`, Chapter 4, Section 4.2.8,
     Tables 4.2.8(a) [tension, 1-axis], 4.2.8(b) [tension, 1-axis, 250F/wet], 4.2.8(d)
     [compression, 1-axis], 4.2.8(g) [shear, 12-plane, +-45 laminate]. All strength values below
     are the "Normalized" column (specimen thickness + batch fiber volume normalized to 59% Vf).
@@ -64,7 +65,9 @@ class AS4_3502_Unidirectional_Carbon_Fiber(Solid):
 
     These are UNNOTCHED coupon/laminate B-basis allowables -- they do NOT include an open-hole/
     notch knockdown. Real open-hole (notched) B-basis data was searched for directly in both
-    CMH-17-3H Volume 3 and its predecessor MIL-HDBK-17-3F (`000-inbox/MIL-HDBK-17-3F.pdf`,
+    CMH-17-3H Volume 3 and its predecessor MIL-HDBK-17-3F (`01-programs/program-evtol-long-range-
+    delivery-drone/03-projects/01-fuel-cell-degradation-modelling/01-mission-profiles/
+    02-references/MIL-HDBK-17-3F.pdf`,
     Chapter 4 "Building Block Approach") -- neither contains populated notched-strength VALUES for
     any material system; both only show "open hole tension/compression strength" as a row in a
     test-program-planning matrix (number of batches to run), never actual numbers. Real open-hole
