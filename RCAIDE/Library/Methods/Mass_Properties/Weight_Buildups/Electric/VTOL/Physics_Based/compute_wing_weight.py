@@ -134,12 +134,14 @@ def compute_wing_weight(wing,
     try:
         bendMat = wing.materials.flap_materials.bending_carrier
     except AttributeError:
-        # Default changed 2026-07-30 -- real, sourced AS4/3502 (notched/open-hole allowable,
-        # 439 MPa) replaces the generic MatWeb-median Unidirectional_Carbon_Fiber (1500 MPa,
-        # unnotched, no environmental knockdown). Not backward-compatible by design -- see the
-        # 2026-07-30 decision doc.
+        # Default changed 2026-07-30 -- real, sourced AS4/3502, UNNOTCHED B-basis (180F/wet)
+        # replaces the generic MatWeb-median Unidirectional_Carbon_Fiber (1500 MPa, unnotched,
+        # no environmental knockdown either). Deliberately NOT the notched/open-hole value used
+        # for the fuselage's bolted landing-bearing term -- the wing spar/flap here is a
+        # continuous laminate beam, no fastener/hole in this formula, so open-hole test data is
+        # the wrong physical basis (corrected 2026-07-30, same session -- see decision doc). Not
+        # backward-compatible by design.
         bendMat = AS4_3502_Unidirectional_Carbon_Fiber()
-        bendMat.ultimate_tensile_strength = bendMat.OHC_directional_layup_220F_wet
     bendUTS = bendMat.ultimate_tensile_strength
     bendDen = bendMat.density
 

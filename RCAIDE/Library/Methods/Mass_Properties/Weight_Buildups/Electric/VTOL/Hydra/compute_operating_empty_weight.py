@@ -76,7 +76,9 @@ import numpy as np
 #                                    group carries (source: `group.lift_frac/group.nwings`).
 #   wing.Hydra.spar_material        `Solid` instance, optional -- 2026-07-30. Drives the spar/
 #                                    motor-mount sizing. Unset defaults to a real, sourced
-#                                    AS4_3502_Unidirectional_Carbon_Fiber instance (notched basis,
+#                                    AS4_3502_Unidirectional_Carbon_Fiber instance (UNNOTCHED
+#                                    B-basis -- the wing spar is a continuous laminate beam, no
+#                                    fastener modeled, so open-hole data doesn't apply here;
 #                                    `compute_wing_weight.py::_default_spar_material()`) -- NOT the
 #                                    original hardcoded 122 GPa/1650 kg/m^3/275 MPa/47 MPa
 #                                    constants (a real default-behavior change, not backward-

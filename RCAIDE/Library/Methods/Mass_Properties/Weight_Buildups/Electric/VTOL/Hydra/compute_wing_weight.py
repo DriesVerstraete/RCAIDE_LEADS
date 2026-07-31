@@ -74,15 +74,17 @@ _TMIN      = 10e-4     # minimum gauge, m (2 layers of carbon)
 
 
 def _default_spar_material():
-    """ Real, sourced default spar material -- AS4/3502 unidirectional carbon tape, notched
-        (open-hole, hot/wet) bending allowable. Replaces the original hardcoded `_SIGMA_MAX`/
-        `_E`/`_RHO`/`_TAU_MAX` constants as `compute_wing_weight_group`'s actual default,
-        2026-07-30. See
-        01-mission-profiles/00-decisions/2026-07-30-fuselage-weight-formula-comparison.md for the
-        full sourcing (NASA/TM-2009-215900) and rationale for using the notched value here. """
-    mat = AS4_3502_Unidirectional_Carbon_Fiber()
-    mat.ultimate_tensile_strength = mat.OHC_directional_layup_220F_wet  # notched, 439 MPa
-    return mat
+    """ Real, sourced default spar material -- AS4/3502 unidirectional carbon tape, UNNOTCHED
+        B-basis (the class's own default fields, 180F/wet). Replaces the original hardcoded
+        `_SIGMA_MAX`/`_E`/`_RHO`/`_TAU_MAX` constants as `compute_wing_weight_group`'s actual
+        default, 2026-07-30. Deliberately NOT the notched/open-hole value (439 MPa) used
+        elsewhere this session -- corrected 2026-07-30, same session: the wing spar (like a rotor
+        blade) is modeled here as a continuous laminate beam with no fastener/hole anywhere in
+        the sizing formula, unlike the fuselage's landing-bearing bolt-pad term, which is a real
+        bolted joint. Open-hole test data is the wrong physical basis for a continuous member's
+        allowable. See
+        01-mission-profiles/00-decisions/2026-07-30-fuselage-weight-formula-comparison.md. """
+    return AS4_3502_Unidirectional_Carbon_Fiber()
 
 # Wing skin / control-surface constants
 _TSKIN      = 15e-4   # skin thickness, m (3 layers, 0.5mm each)
