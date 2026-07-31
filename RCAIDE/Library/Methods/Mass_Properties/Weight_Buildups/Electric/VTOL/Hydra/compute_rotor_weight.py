@@ -63,7 +63,7 @@ def _spar_properties(material):
 
 
 def compute_rotor_weight(radius, chord, omega, thrust, n_blade, n_rotor, material,
-                          load_factor=1.0, precone_deg=3.0, rho_filler=52.0, tech_factor=1.0):
+                          load_factor=1.0, precone_deg=3.0, rho_filler=52.0, tech_factor=0.5):
     """ Calculates rotor blade, hub, and pitch-actuator mass using Hydra's physics/FEA-style blade
         structural sizing model: an iterative spanwise centrifugal-force/bending-moment/spar-
         thickness sizing loop (5 stations), plus leading-edge protection, skin, filler, paint,
@@ -91,7 +91,9 @@ def compute_rotor_weight(radius, chord, omega, thrust, n_blade, n_rotor, materia
                             factor on top of this internally)                        [Unitless]
             precone_deg    blade precone angle                                       [deg]
             rho_filler     honeycomb/foam filler density                             [kg/m^3]
-            tech_factor    technology weight-scaling factor                          [Unitless]
+            tech_factor    technology weight-scaling factor, BLADE ONLY -- hub/actuator
+                            unaffected (default 0.5, decided 2026-07-30, see Finding T2,
+                            00-decisions/2026-07-29-rotor-motor-weight-formula-comparison.md)   [Unitless]
 
         Outputs:
             weight:  dict with 'blades', 'hub', 'actuator', all summed over the whole
@@ -263,9 +265,15 @@ def compute_rotor_weight(radius, chord, omega, thrust, n_blade, n_rotor, materia
 
     mass_hub = 4.84 * n_rotor * (R / 0.75)**0.5
 
+    # 2026-07-30: tech_factor now scales BLADE ONLY, not hub/actuator. Real EASA TCDS anchors
+    # (2026-07-29, 00-decisions/2026-07-29-rotor-motor-weight-formula-comparison.md, Finding T2)
+    # showed the actuator term already tracks close to 1.0x real hardware, and imply hub is not
+    # the driver of Hydra's heavy-outlier rotor mass either -- a blanket scale factor across all
+    # three terms would incorrectly shrink hub/actuator along with blade. Default changed 1.0 ->
+    # 0.5 at the same time (decided directly, not per-component-validated against real data --
+    # rotor mass is a small fraction of total vehicle weight, so the residual imprecision this
+    # leaves is accepted rather than pursuing a fully rigorous per-component fit).
     mass_blade = mass_blade * tech_factor
-    mass_hub = mass_hub * tech_factor
-    mass_act = mass_act * tech_factor
     total = mass_blade + mass_hub + mass_act
 
     weight = {'blades': mass_blade, 'hub': mass_hub, 'actuator': mass_act}

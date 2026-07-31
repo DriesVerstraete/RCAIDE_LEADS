@@ -10,6 +10,7 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units, Data
 import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.VTOL.Hydra as Hydra
+import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.VTOL.NDARC as NDARC
 import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.VTOL.Physics_Based as Vahana
 import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.Common as EVTOL_Common
 from RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Conventional.Common import compute_payload_weight
@@ -181,7 +182,7 @@ def compute_operating_empty_weight(vehicle, settings=None):
                     )
                 precone_deg = getattr(r_hydra, 'precone_deg', 3.0)
                 rho_filler = getattr(r_hydra, 'rho_filler', 52.0)
-                tech_factor = getattr(r_hydra, 'tech_factor', 1.0)
+                tech_factor = getattr(r_hydra, 'tech_factor', 0.5)
 
                 n_blade = rotor.number_of_blades
                 radius = rotor.tip_radius
@@ -199,8 +200,12 @@ def compute_operating_empty_weight(vehicle, settings=None):
                 rotor.mass_properties.mass = rotor_total
 
                 torque = propulsor.motor.design_torque
-                motor_power_kw = torque * omega / 1000.0
-                motor_mass = Hydra.compute_motor_weight(motor_power=motor_power_kw, tech_factor=1.0, n_rotor=1)
+                # 2026-07-30: ported from Hydra's own DC_motor formula to NDARC's empirical_2026
+                # regression (real 30-motor fit, mean|err|=19.0%) -- motor method decided
+                # independently of the fuselage/wing/rotor chassis choice, see
+                # 00-decisions/2026-07-29-rotor-motor-weight-formula-comparison.md. `Hydra`'s own
+                # `compute_motor_weight` (DC_motor-based) is no longer called here.
+                motor_mass = NDARC.compute_motor_weight(design_torque=torque, method='empirical_2026')
                 weight.motors += motor_mass
                 propulsor.motor.mass_properties.mass = motor_mass
 
