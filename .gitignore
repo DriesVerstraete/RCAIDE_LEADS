@@ -84,3 +84,6 @@ nosetests.xml
 .vscode
 .idea
 *venv*
+
+# Claude Code project notes - personal, never push to fork/upstream
+CLAUDE.md

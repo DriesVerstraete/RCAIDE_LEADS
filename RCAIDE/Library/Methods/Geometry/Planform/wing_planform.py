@@ -11,8 +11,9 @@ from RCAIDE.Library.Methods.Geometry.Planform.convert_sweep import convert_sweep
 from RCAIDE.Library.Methods.Geometry.Airfoil                import  compute_naca_4series, import_airfoil_geometry
 from RCAIDE.Library.Methods.Geometry.Planform.compute_segment_centroid import compute_segment_centroid
 
-# package imports 
+# package imports
 import numpy as np
+import warnings
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Wing Segmented Planform
@@ -233,13 +234,32 @@ def wing_planform(wing):
                 projected_root_chord = segment_root_chord + segnent_start_span * (np.tan(leading_edge_sweep) - np.tan(trailing_edge_sweep))
                 wing.areas.reference = (projected_root_chord + segment_tip_chord)/2 * reference_wing_span        
         
-    else: 
+    else:
+        # NOTE (SPL local patch, 2026-08-01, not a behavior change): this
+        # branch treats areas.reference/taper/sweeps.quarter_chord/
+        # aspect_ratio/dihedral as ground truth and DERIVES chords.root/
+        # chords.tip/spans.projected from them, overwriting whatever values
+        # a caller may have hand-set on those three fields with no error or
+        # indication anything changed. Confirmed directly (eVTOL long-range
+        # delivery drone project, tiltrotor vehicle geometry work) that a
+        # hand-authored wing with these three fields set independently and
+        # inconsistently with area/AR/taper had them silently discarded.
+        # This warning does not change any computed value - it only makes
+        # the overwrite visible. See 999-software/rcaide/local-patches.md,
+        # 2026-08-01 entry, for full context and why the branch itself was
+        # deliberately left otherwise untouched.
+        if wing.chords.root is not None or wing.chords.tip is not None or wing.spans.projected is not None:
+            warnings.warn(
+                f"wing_planform(): wing '{getattr(wing, 'tag', '?')}' has no segments, so "
+                "chords.root/chords.tip/spans.projected are being DERIVED from "
+                "areas.reference+taper+aspect_ratio and any previously-set values on "
+                "those three fields are being silently overwritten.", stacklevel=2)
         # unpack
         sref        = wing.areas.reference
         taper       = wing.taper
         sweep       = wing.sweeps.quarter_chord
         ar          = wing.aspect_ratio
-        dihedral    = wing.dihedral 
+        dihedral    = wing.dihedral
         vertical    = wing.vertical
         symmetric   = wing.xz_plane_symmetric  
         if wing.airfoil != None: 
