@@ -34,10 +34,26 @@ class AS4_3502_Unidirectional_Carbon_Fiber(Solid):
         In-plane shear B-basis allowable at 180F/wet, from a real +-45-degree laminate shear test
         (not a lamina-level estimate), Pa (81.4e6).
     ultimate_bearing_strength : float
-        Not sourced this session -- no bearing table was located in the extracted chapter pages.
-        Left at `Bidirectional_Carbon_Fiber`'s generic MatWeb value (600e6) as an interim
-        placeholder. Needs a CMH-17 Volume 2/3 bearing-strength table (ASTM D5961) lookup,
-        including its e/D and w/D geometry basis, before this is trustworthy.
+        400e6 Pa -- deliberate engineering call (D. Verstraete, 2026-08-10), not a handbook value.
+        MIL-HDBK-17-Volume2-Materials-Properties.pdf was full-text searched (all pages, not just
+        this material's own chapter) and confirmed to have NO bearing-strength table for AS4/3502
+        or any modern carbon/epoxy tape/fabric system -- the only populated bearing data in that
+        document is in Appendix 1, a legacy MIL-HDBK-17A supplementary dataset for old fiberglass/
+        epoxy and boron/epoxy prepreg systems (ASTM D953), not applicable here. Two numbers were
+        in play, both traced to their real origin, neither independently verified against a
+        material-specific test source: RCAIDE's own generic `Bidirectional_Carbon_Fiber` class
+        (600e6, cited only as "median values from manufacturer reported data," no table/document --
+        a 2017 RCAIDE stock class, not sourced by this project) vs. `Hydra`'s internal default
+        (400e6, `bid_bearing` in `fuselage_v2.py`), traced one level further back to the original
+        Project Vahana trade study's own `materials.m` (`bid.bearing = 400e6`, commented only
+        "bearing allowable [Pa]," no test method or material system named -- see
+        `999-software/vahanaTradeStudy/materials.m`). A quick web search for real AS4/3502-class
+        CFRP bearing strength gave a 350-550 MPa range; 400 MPa sits at the conservative
+        (lower/safer) end of that range AND matches Hydra's own long-standing default -- picked
+        deliberately over RCAIDE's uncited 600 MPa for both reasons, not because either number has
+        a real handbook citation. Revisit if a real CMH-17 Volume 2/3 (ASTM D5961) or MMPDS bearing
+        table for this material is ever located -- that table would also need to state its e/D and
+        w/D geometry basis, since bearing strength depends on joint geometry, not just material.
     density : float
         Composite density, kg/m^3 (1570 -- nominal, real range 1560-1590).
     minimum_gage_thickness : float
@@ -120,10 +136,10 @@ class AS4_3502_Unidirectional_Carbon_Fiber(Solid):
 
         self.ultimate_tensile_strength  = 1000e6    * Units.Pa   # 0-deg compression B-basis, 180F/wet (controlling)
         self.ultimate_shear_strength    = 81.4e6    * Units.Pa   # +-45 laminate shear B-basis, 180F/wet
-        self.ultimate_bearing_strength  = 600e6     * Units.Pa   # not sourced this session -- placeholder
+        self.ultimate_bearing_strength  = 400e6     * Units.Pa   # engineering call 2026-08-10, see class docstring -- matches Hydra/Vahana's own default, conservative end of real-world CFRP range
         self.yield_tensile_strength     = 1000e6    * Units.Pa
         self.yield_shear_strength       = 81.4e6    * Units.Pa
-        self.yield_bearing_strength     = 600e6     * Units.Pa
+        self.yield_bearing_strength     = 400e6     * Units.Pa
         self.minimum_gage_thickness     = 1.397e-4  * Units.m
         self.density                    = 1570.     * Units['kg/(m**3)']
 

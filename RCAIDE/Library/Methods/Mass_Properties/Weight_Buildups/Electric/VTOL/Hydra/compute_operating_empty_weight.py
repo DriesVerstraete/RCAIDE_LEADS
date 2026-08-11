@@ -144,18 +144,64 @@ def compute_operating_empty_weight(vehicle, settings=None):
         weight.wiring = 0.0
         weight.wings = Data()
         weight.wings_total = 0.0
-        weight.flight_controls = 0.0
+        # Flight controls, 2026-08-10: was hardcoded 0.0. CORRECTION (same day, after this was
+        # first wired in): the 0.0 was actually a verified-correct fidelity match to Hydra's own
+        # real source, not a gap - the porting inventory doc (01-docs/rcaide/20-...md, based on a
+        # direct 2026-07-28 source read) confirms Hydra's `afdd/flight_controls.py::flightctrl_
+        # weight` is imported but never called anywhere in Hydra's own code; the real
+        # `vehicle_empty_weight()` return dict has no flight-control key at all. So
+        # `WeightSettings.flight_controls_constant=11.5`/`_exponent=0.4` (comment: "from hydra")
+        # is MISLABELED - it is not Hydra's formula (Hydra has none); its real origin looks like
+        # a separate generic GA-style regression already used in AircraftDesign's own legacy
+        # `uav_design.py`/`impulls.py` tools. Deliberately wired in here anyway (user decision,
+        # 2026-08-10) as a practical non-zero estimate, accepting the departure from pure Hydra
+        # fidelity for this one component - zero is obviously wrong for a real vehicle. Cross-
+        # checked against NDARC's own simplest fixed-wing flight-controls fraction model
+        # (0.91*MTOW_lbs^0.6, same MTOW-power-law structure) for these 3 vehicles' real MTOWs -
+        # NDARC's analog came out roughly 7x higher, so this is likely OPTIMISTIC (under-
+        # predicts) - not a final calibration. See 01-mission-profiles/00-decisions/
+        # 2026-08-10-o40-registry-scope-expanded-full-audit-needed.md.
+        #
+        # `settings` here is RCAIDE's own Electric_VTOL().settings (a bare Data() object,
+        # default fields just mtow_convergence_tolerance/miscelleneous_weight_factor) - NOT
+        # AircraftDesign's WeightSettingsRCAIDEHydra, confirmed 2026-08-10 by directly running
+        # the real dispatch path (debug_hydra_orchestrator_test.py), which crashed with
+        # AttributeError on a first cut of this code that assumed the settings values were
+        # already live-wired through. Every field below uses getattr(...) with the
+        # WeightSettingsRCAIDEHydra-confirmed default as a fallback, same idiom this file
+        # already uses for rotor.Hydra.tech_factor etc. - picks up a real WeightSettingsRCAIDEHydra
+        # value if/when one is ever actually attached to weights_analysis.settings (not done
+        # anywhere today - a real, deeper gap than the registry's "already wired" notes assumed),
+        # falls back to the confirmed value otherwise.
+        flight_controls_constant = getattr(settings, 'flight_controls_constant', 11.5)
+        flight_controls_exponent = getattr(settings, 'flight_controls_exponent', 0.4)
+        mass_in_lbs = MTOW / Units.lbs
+        weight.flight_controls = (flight_controls_constant
+                                   * (mass_in_lbs / 1000.) ** flight_controls_exponent
+                                   * Units.lbs)
         weight.thermal_management_system = Data()
 
         # -------------------------------------------------------------------------------
         # Payload
         # -------------------------------------------------------------------------------
-        payload = compute_payload_weight(vehicle, W_passenger=70. * Units.kg, W_baggage=0 * Units.lbs)
-        weight.seats = vehicle.number_of_passengers * 15. * Units.kg
+        # has_pilot, 2026-08-10: pilot is tracked separately from vehicle.number_of_passengers
+        # (confirmed by user 2026-08-10: number_of_passengers is passenger-only, does not
+        # already include a pilot) - adds one pilot's own weight (as flight crew, below) plus
+        # one extra seat and ECS share when a vehicle carries one. No default assumed (getattr
+        # falls back to False) - a vehicle must set this explicitly, same reasoning as
+        # rotor.Hydra.material/load_factor having no silent default.
+        n_pilots = 1 if getattr(vehicle, 'has_pilot', False) else 0
+        passenger_weight = getattr(settings, 'passenger_weight', 100.)
+        seat_weight = getattr(settings, 'seat_weight', 15.)
+        avionics_mass_kg = getattr(settings, 'avionics_mass_kg', 15.)
+        ecs_per_passenger = getattr(settings, 'ecs_per_passenger', 7.)
+        payload = compute_payload_weight(vehicle, W_passenger=passenger_weight * Units.kg,
+                                          W_baggage=0 * Units.lbs)
+        weight.seats = (vehicle.number_of_passengers + n_pilots) * seat_weight * Units.kg
         weight.passengers = payload.passengers
-        weight.avionics = 15. * Units.kg
+        weight.avionics = avionics_mass_kg * Units.kg
         weight.landing_gear = 0.0
-        weight.ECS = vehicle.number_of_passengers * 7. * Units.kg
+        weight.ECS = (vehicle.number_of_passengers + n_pilots) * ecs_per_passenger * Units.kg
 
         # -------------------------------------------------------------------------------
         # Rotors + motors: blade/hub/actuator and motor via Hydra's live DC_motor/blade_wt_modelv2
@@ -221,11 +267,6 @@ def compute_operating_empty_weight(vehicle, settings=None):
 
         lg = Hydra.compute_landing_gear_weight(MTOW, tech_factor=1.0)
         weight.landing_gear = lg['total']
-
-        # -------------------------------------------------------------------------------
-        # Flight control system — confirmed dead in source (see inventory doc), always 0.0
-        # -------------------------------------------------------------------------------
-        weight.flight_controls = 0.0
 
         # -------------------------------------------------------------------------------
         # Thermal management (pass-through, same as Vahana/NDARC — no Hydra model)
@@ -441,13 +482,30 @@ def compute_operating_empty_weight(vehicle, settings=None):
 
         output.operational_items = Data()
         output.operational_items.misc = 0.0
-        output.operational_items.flight_crew = 0.0
+        # 2026-08-10: was hardcoded 0.0 - wired to n_pilots computed in the Payload section above.
+        # getattr fallback: see note by flight_controls_constant above (settings here is
+        # RCAIDE's own bare Data(), not WeightSettingsRCAIDEHydra).
+        pilot_weight = getattr(settings, 'pilot_weight', 70.)
+        output.operational_items.flight_crew = n_pilots * pilot_weight * Units.kg
         output.operational_items.flight_attendants = 0.0
         output.operational_items.passenger_service = 0.0
         output.operational_items.total = (output.operational_items.misc + output.operational_items.flight_crew
                                            + output.operational_items.flight_attendants + output.operational_items.passenger_service)
 
-        output.empty.total = output.empty.systems.total + output.empty.propulsion.total + output.empty.structural.total + output.operational_items.total
+        # Contingency factor, 2026-08-10: applied to structure + systems + everything in
+        # propulsion EXCEPT battery, matching AircraftDesign's own base/weight.py precedent
+        # (AircraftWeight.calculate_weight(): `empty_weight *= contingency_factor` applied
+        # BEFORE `energy_source` (battery) and passengers/pilot are added - user explicit
+        # instruction "be consistent with aircraft design", not the initially-proposed
+        # structure-only scope). operational_items.total (flight_crew/pilot) excluded too,
+        # matching AircraftDesign's `weight.pilot` also being added after contingency.
+        # getattr fallback: see note by flight_controls_constant above (settings here is
+        # RCAIDE's own bare Data(), not WeightSettingsRCAIDEHydra).
+        contingency_factor = getattr(settings, 'contingency_factor', 1.1)
+        non_battery_empty = (output.empty.structural.total + output.empty.systems.total
+                              + output.empty.propulsion.total - output.empty.propulsion.battery)
+        non_battery_empty *= contingency_factor
+        output.empty.total = non_battery_empty + output.empty.propulsion.battery + output.operational_items.total
         output.zero_fuel_weight = output.empty.total + output.payload.total
         output.max_takeoff = output.empty.total + output.payload.total
 
